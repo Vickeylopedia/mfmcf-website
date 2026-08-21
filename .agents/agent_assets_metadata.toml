@@ -1,0 +1,17 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "4hoSXM1Q65cx0lFIkAMJJ"
+uri = "file://.conversation/attached_assets/mfmcf_funaab_logo_no_bg.png"
+type = "image"
+title = "MFMCF FUNAAB transparent logo"
+description = "The fellowship logo with its white background removed, exported as a transparent PNG for the website header and other layouts."
+logical_id = "8b648fa8-a522-4ece-be59-d5ca22543b3c"
+content_hash = "sha256:8682b5ee6a2af5faa310db77d3e6979cfa5ea59ed326b996c09095db1012aeca"
+size = 133032
+mtime_ms = 1787353503917
+storage_uri = "gcs://replit-rams-assets-picard/rams/assets/conversation:46e1a8b5-6265-4ff2-9728-916d2b9cbbf2/8b648fa8-a522-4ece-be59-d5ca22543b3c/c1e575f4-6892-4cd1-b219-6833edc0e9b3"
+storage_version_token = "1787353508410085"
+content_type = "image/png"
+source_uri = "file://attached_assets/mfmcf_funaab_logo_no_bg.png"

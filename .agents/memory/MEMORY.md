@@ -1,0 +1,1 @@
+- [Asset processing](asset-processing.md) — edge-connected flood fill is a reliable local fallback for simple white-background logos.

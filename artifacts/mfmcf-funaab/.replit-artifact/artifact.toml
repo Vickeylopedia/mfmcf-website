@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "MFMCF FUNAAB"
+description = "A beautiful editorial website for MFMCF FUNAAB, helping students discover the fellowship, upcoming gatherings, sermons, gallery stories, and announcements."
+version = "1.0.0"
+id = "artifacts/mfmcf-funaab"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18164
+
+[services.development]
+run = "pnpm --filter @workspace/mfmcf-funaab run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mfmcf-funaab", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mfmcf-funaab/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18164"
+BASE_PATH = "/"
