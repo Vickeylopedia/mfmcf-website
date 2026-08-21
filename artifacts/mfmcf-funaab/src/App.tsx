@@ -37,8 +37,10 @@ function Shell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div className="min-h-[100dvh] overflow-x-hidden">
-      <div className="border-b border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--primary))] px-4 py-2 text-center text-[10px] font-semibold tracking-[.18em] text-white sm:text-xs">
-        SUNDAY GATHERING · 9:00 AM · FUNAAB CAMPUS
+       <div className="announcement-bar border-b border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--primary))] px-4 py-2 text-center text-[10px] font-semibold tracking-[.18em] text-white sm:text-xs">
+         <span className="pulse-dot mr-2 inline-block size-1.5 rounded-full bg-[hsl(var(--accent))] align-middle" aria-hidden="true" />
+         SUNDAY GATHERING · 9:00 AM · FUNAAB CAMPUS
+         <span className="hidden text-white/55 sm:inline"> · FAMILY OF LOVE</span>
       </div>
       <header className="relative z-30 border-b border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--background)/.9)] backdrop-blur-md">
         <div className="mx-auto flex max-w-[1380px] items-center justify-between px-5 py-4 lg:px-10">
