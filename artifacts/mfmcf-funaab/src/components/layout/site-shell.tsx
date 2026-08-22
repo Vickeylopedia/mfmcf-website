@@ -51,7 +51,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] overflow-x-clip">
       <header className="fixed inset-x-0 top-3 z-40 px-3 lg:top-4 lg:px-6">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between rounded-2xl border border-[hsl(var(--foreground)/.1)] bg-gradient-to-b from-[hsl(var(--background)/.95)] via-[hsl(var(--background)/.88)] to-[hsl(var(--background)/.8)] px-4 py-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl sm:px-5 lg:px-6">
+        <div className="mx-auto flex max-w-[1380px] items-center justify-between rounded-xl border border-[hsl(var(--foreground)/.1)] border-t-2 border-t-[hsl(var(--accent))] bg-gradient-to-b from-[hsl(var(--background)/.95)] via-[hsl(var(--background)/.88)] to-[hsl(var(--background)/.8)] px-4 py-3 shadow-md shadow-[hsl(var(--foreground)/.07)] backdrop-blur-md sm:px-5 lg:px-6">
           <Link
             href="/"
             data-testid="link-logo-home"
@@ -83,7 +83,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                className={`relative px-3 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:origin-left after:scale-x-0 after:bg-[hsl(var(--primary))] after:transition-transform hover:text-[hsl(var(--primary))] hover:after:scale-x-100 ${
+                className={`relative px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[.12em] transition-colors after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:origin-left after:scale-x-0 after:bg-[hsl(var(--primary))] after:transition-transform hover:text-[hsl(var(--primary))] hover:after:scale-x-100 ${
                   location === item.href
                     ? "text-[hsl(var(--primary))] after:scale-x-100"
                     : "text-[hsl(var(--foreground)/.72)]"
@@ -119,7 +119,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
         {menuOpen && (
           <nav
-            className="mx-auto mt-2 max-w-[1380px] rounded-xl border border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--background)/.95)] p-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl lg:hidden"
+            className="mx-auto mt-2 max-w-[1380px] rounded-lg border border-[hsl(var(--foreground)/.1)] border-t-2 border-t-[hsl(var(--accent))] bg-[hsl(var(--background)/.95)] p-3 shadow-md shadow-[hsl(var(--foreground)/.07)] backdrop-blur-md lg:hidden"
             aria-label="Mobile navigation"
           >
             {navItems.map((item) => (
