@@ -1,16 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight,
-  Facebook,
-  Instagram,
   Mail,
   MapPin,
   Menu,
   X,
-  Youtube,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { logo, navItems } from "@/lib/site";
+import { logo, navItems, socials } from "@/lib/site";
 
 export function ButtonLink({
   href,
@@ -213,30 +210,20 @@ function Footer() {
         <div className="flex flex-col justify-between gap-4 pt-6 text-xs text-white/45 sm:flex-row">
           <p>© 2026 MFMCF FUNAAB. Family of Love.</p>
           <div className="flex gap-4">
-            <a
-              href="https://instagram.com"
-              aria-label="Instagram"
-              data-testid="link-footer-instagram"
-              className="transition hover:text-white"
-            >
-              <Instagram className="size-4" />
-            </a>
-            <a
-              href="https://youtube.com"
-              aria-label="YouTube"
-              data-testid="link-footer-youtube"
-              className="transition hover:text-white"
-            >
-              <Youtube className="size-4" />
-            </a>
-            <a
-              href="https://facebook.com"
-              aria-label="Facebook"
-              data-testid="link-footer-facebook"
-              className="transition hover:text-white"
-            >
-              <Facebook className="size-4" />
-            </a>
+            {socials.map((social) => {
+              const Icon = social.icon;
+              return (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  data-testid={social.testId}
+                  className="transition hover:text-white"
+                >
+                  <Icon className="size-4" />
+                </a>
+              );
+            })}
           </div>
         </div>
         <div className="mt-12 overflow-hidden" aria-hidden="true">

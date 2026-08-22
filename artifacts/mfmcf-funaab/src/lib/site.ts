@@ -1,3 +1,5 @@
+import { Facebook, Instagram, Youtube } from "lucide-react";
+
 /**
  * Static asset URLs must be prefixed with the deploy base path: Vite only
  * rewrites asset URLs it can see at build time, not runtime string literals.
@@ -26,4 +28,29 @@ export const navItems = [
   { href: "/gallery", label: "Gallery" },
   { href: "/news", label: "News" },
   { href: "/contact", label: "Contact" },
+];
+
+/**
+ * Fellowship social profiles. Replace the placeholder hrefs with the real
+ * account URLs when available — the footer renders whatever lives here.
+ */
+export const socials = [
+  {
+    label: "Instagram",
+    href: "https://instagram.com",
+    testId: "link-footer-instagram",
+    icon: Instagram,
+  },
+  {
+    label: "YouTube",
+    href: "https://youtube.com",
+    testId: "link-footer-youtube",
+    icon: Youtube,
+  },
+  {
+    label: "Facebook",
+    href: "https://facebook.com",
+    testId: "link-footer-facebook",
+    icon: Facebook,
+  },
 ];

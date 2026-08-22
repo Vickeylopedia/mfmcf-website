@@ -1,13 +1,15 @@
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
 import { Reveal } from "@/components/reveal";
+import { AudioPlayer } from "@/components/audio-player";
 import {
   ActionLink,
   Eyebrow,
   PhotoFrame,
 } from "@/components/foundation";
 import { getSermon } from "@/lib/sermons";
+import { withBase } from "@/lib/site";
 import NotFound from "@/pages/not-found";
 
 function SermonDetail() {
@@ -15,6 +17,11 @@ function SermonDetail() {
   const sermon = slug ? getSermon(slug) : undefined;
 
   if (!sermon) return <NotFound />;
+
+  const requestHref = `mailto:mfmcf.funaab@gmail.com?subject=${encodeURIComponent(
+    `Recording request: ${sermon.title}`,
+  )}`;
+  const audioSrc = withBase(`/assets/audio/${sermon.slug}.mp3`);
 
   return (
     <Shell>
@@ -79,44 +86,13 @@ function SermonDetail() {
               together before the message begins.
             </p>
           </div>
-          <div className="border border-[hsl(var(--foreground)/.16)] bg-[hsl(var(--card))] p-6 sm:p-8">
-            <Eyebrow>The recording</Eyebrow>
-            <p className="mt-5 max-w-md text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-              We keep audio from our gatherings in the family archive. Ask for
-              this message and we will send the recording your way, usually
-              within a day.
-            </p>
-            <a
-              href={`mailto:mfmcf.funaab@gmail.com?subject=${encodeURIComponent(
-                `Recording request: ${sermon.title}`,
-              )}`}
-              data-testid="link-sermon-request-recording"
-              className="group mt-7 inline-flex items-center gap-3 border border-[hsl(var(--primary))] bg-[hsl(var(--primary))] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-transparent hover:text-[hsl(var(--primary))]"
-            >
-              <Mail className="size-4" />
-              Request this recording
-            </a>
-          </div>
           </Reveal>
           <Reveal delay={120}>
-            <div className="border border-[hsl(var(--foreground)/.16)] bg-[hsl(var(--card))] p-6 sm:p-8">
-              <Eyebrow>The recording</Eyebrow>
-              <p className="mt-5 max-w-md text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-                We keep audio from our gatherings in the family archive. Ask
-                for this message and we will send the recording your way,
-                usually within a day.
-              </p>
-              <a
-                href={`mailto:mfmcf.funaab@gmail.com?subject=${encodeURIComponent(
-                  `Recording request: ${sermon.title}`,
-                )}`}
-                data-testid="link-sermon-request-recording"
-                className="group mt-7 inline-flex items-center gap-3 border border-[hsl(var(--primary))] bg-[hsl(var(--primary))] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-transparent hover:text-[hsl(var(--primary))]"
-              >
-                <Mail className="size-4" />
-                Request this recording
-              </a>
-            </div>
+            <AudioPlayer
+              src={audioSrc}
+              title={sermon.title}
+              requestHref={requestHref}
+            />
           </Reveal>
         </div>
       </section>
