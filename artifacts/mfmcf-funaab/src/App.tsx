@@ -11,6 +11,7 @@ import Gallery from "@/pages/gallery";
 import Home from "@/pages/home";
 import News from "@/pages/news";
 import NotFound from "@/pages/not-found";
+import SermonDetail from "@/pages/sermon-detail";
 import Sermons from "@/pages/sermons";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/about" component={About} />
         <Route path="/sermons" component={Sermons} />
+        <Route path="/sermons/:slug" component={SermonDetail} />
         <Route path="/gallery" component={Gallery} />
         <Route path="/news" component={News} />
         <Route path="/contact" component={Contact} />
