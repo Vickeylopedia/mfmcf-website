@@ -68,5 +68,9 @@ export default defineConfig({
         useBigInt: true,
       },
     },
+    hooks: {
+      // Runs with cwd = this package (see package.json codegen script).
+      afterAllFilesWrite: ["node ./fix-zod-import.mjs"],
+    },
   },
 });

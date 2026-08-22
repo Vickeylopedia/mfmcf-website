@@ -1,4 +1,9 @@
-import express, { type Express } from "express";
+import express, {
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
@@ -30,5 +35,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+app.use(
+  (
+    error: unknown,
+    _req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    logger.error({ err: error }, "Unhandled API error");
+    if (res.headersSent) {
+      next(error);
+      return;
+    }
+    res.status(500).json({ message: "Internal server error" });
+  },
+);
 
 export default app;
