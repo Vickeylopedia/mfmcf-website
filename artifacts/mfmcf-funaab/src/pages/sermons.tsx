@@ -3,6 +3,7 @@ import { ArrowUpRight, ChevronDown, Play, Search } from "lucide-react";
 import { Link } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
+import { Reveal } from "@/components/reveal";
 import { sermons } from "@/lib/sermons";
 
 function Sermons() {
@@ -63,10 +64,8 @@ function Sermons() {
           {filtered.length ? (
             <div className="grid gap-x-6 gap-y-12 md:grid-cols-2">
               {filtered.map((sermon, i) => (
-                <article
-                  key={sermon.slug}
-                  className="group grid gap-5 sm:grid-cols-[.9fr_1.1fr]"
-                >
+                <Reveal key={sermon.slug} delay={(i % 2) * 120}>
+                  <article className="group grid h-full gap-5 sm:grid-cols-[.9fr_1.1fr]">
                   <div className="relative aspect-[1.18] overflow-hidden">
                     <img
                       src={sermon.image}
@@ -105,7 +104,8 @@ function Sermons() {
                       Listen to message <ArrowUpRight className="size-4" />
                     </Link>
                   </div>
-                </article>
+                  </article>
+                </Reveal>
               ))}
             </div>
           ) : (

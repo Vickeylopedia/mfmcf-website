@@ -52,9 +52,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <div className="min-h-[100dvh] overflow-x-clip pt-3 lg:pt-4">
-      <header className="sticky top-3 z-40 px-3 lg:top-4 lg:px-6">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between rounded-full border border-[hsl(var(--foreground)/.1)] bg-gradient-to-b from-[hsl(var(--background)/.95)] via-[hsl(var(--background)/.88)] to-[hsl(var(--background)/.8)] px-4 py-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl sm:px-5 lg:px-6">
+    <div className="min-h-[100dvh] overflow-x-clip">
+      <header className="fixed inset-x-0 top-3 z-40 px-3 lg:top-4 lg:px-6">
+        <div className="mx-auto flex max-w-[1380px] items-center justify-between rounded-2xl border border-[hsl(var(--foreground)/.1)] bg-gradient-to-b from-[hsl(var(--background)/.95)] via-[hsl(var(--background)/.88)] to-[hsl(var(--background)/.8)] px-4 py-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl sm:px-5 lg:px-6">
           <Link
             href="/"
             data-testid="link-logo-home"
@@ -122,7 +122,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
         {menuOpen && (
           <nav
-            className="mx-auto mt-2 max-w-[1380px] rounded-2xl border border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--background)/.95)] p-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl lg:hidden"
+            className="mx-auto mt-2 max-w-[1380px] rounded-xl border border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--background)/.95)] p-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl lg:hidden"
             aria-label="Mobile navigation"
           >
             {navItems.map((item) => (

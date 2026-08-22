@@ -130,11 +130,16 @@ Behavior rules:
 - Hover: photos scale `1.035` (`.photo-shift`); gallery cards settle to
   `scale(1)` + full saturation from `.96`/`saturate(.82)`; event cards invert
   to primary fill; button arrows nudge `translate-x-0.5 -translate-y-0.5`.
-- Entrances run once on mount (`.reveal`, `hero-*` classes); scroll-jacking
-  and parallax libraries are deliberately avoided.
+- Entrances run once on mount (`.reveal`, `hero-*` classes); scroll
+  reveals use the `Reveal` component (`reveal-item` + variant classes,
+  IntersectionObserver adds `is-visible` once). Variants map to intent:
+  headings rise (`up`), split-grid columns drift in from their side
+  (`left`/`right`), photos settle (`scale`), list items stagger
+  (`delay` ≤ 300ms). Scroll-jacking and parallax libraries are
+  deliberately avoided.
 - `@media (prefers-reduced-motion: reduce)` collapses all durations to
-  `.01ms` and disables hover transforms — keep every new effect inside this
-  contract.
+  `.01ms`, disables hover transforms, and shows `.reveal-item` content
+  immediately — keep every new effect inside this contract.
 
 ---
 
@@ -153,14 +158,15 @@ to screens):
 
 Patterns documented but composed in place (see pages):
 
-- **Header (floating bar)** — detached sticky pill: inset from all edges,
-  `rounded-full`, gradient background
-  (`background/.95 → /.8` top-to-bottom) over `backdrop-blur-xl`, thin
-  foreground/10 border, soft shadow. Logo tile (white frame, hover
-  rotate-3), mono chapter lockup, nav links with scale-x underline, outline
-  CONNECT button. Mobile menu is a matching floating dropdown panel
-  (`rounded-2xl`, same blur treatment) with pill hover rows. The page
-  wrapper uses `overflow-x-clip` (not `hidden`, which breaks sticky).
+- **Header (floating glass bar)** — fixed overlay, inset from all edges,
+  `rounded-2xl`, gradient background (`background/.95 → /.8` top-to-bottom)
+  over `backdrop-blur-xl`, thin foreground/10 border, soft shadow. Floats
+  over the hero (page content starts at y=0; page tops carry clearance
+  padding). Logo tile (white frame, hover rotate-3), mono chapter lockup,
+  nav links with scale-x underline, outline CONNECT button. Mobile menu is
+  a matching floating dropdown panel (`rounded-xl`, same blur treatment)
+  with pill hover rows. The page wrapper uses `overflow-x-clip` (not
+  `hidden`, which breaks sticky).
 - **Hero collage** — main + secondary framed photos, floating info card
   (foreground fill), accent spark badge, two orbit rings, radial atmosphere.
 - **EventCard** — day tag + calendar icon, display title, hairline footer

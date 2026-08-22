@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
+import { Reveal } from "@/components/reveal";
 import { PhotoFrame, SectionHeading } from "@/components/foundation";
 import { photos } from "@/lib/site";
 
@@ -67,20 +68,22 @@ function Gallery() {
       <section className="gallery-cinema overflow-hidden bg-[hsl(var(--foreground))] px-5 py-14 text-white lg:px-10 lg:py-24">
         <div className="mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
-            <SectionHeading
-              eyebrow="The family, in frames"
-              eyebrowTone="accent"
-              title={
-                <>
-                  Stay for the
-                  <br />
-                  <em className="font-normal text-[hsl(var(--accent))]">
-                    whole story.
-                  </em>
-                </>
-              }
-              headingClassName="max-w-xl leading-[.92] tracking-[-.04em] sm:text-7xl"
-            />
+            <Reveal variant="left">
+              <SectionHeading
+                eyebrow="The family, in frames"
+                eyebrowTone="accent"
+                title={
+                  <>
+                    Stay for the
+                    <br />
+                    <em className="font-normal text-[hsl(var(--accent))]">
+                      whole story.
+                    </em>
+                  </>
+                }
+                headingClassName="max-w-xl leading-[.92] tracking-[-.04em] sm:text-7xl"
+              />
+            </Reveal>
             <div className="flex items-center gap-4">
               <div className="hidden text-right sm:block">
                 <p className="mono-label text-[9px] text-white/45">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Shell, ButtonLink } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
+import { Reveal } from "@/components/reveal";
 
 const newsItems = [
   {
@@ -48,10 +49,8 @@ function News() {
           {newsItems.map((item, i) => {
             const open = openIndex === i;
             return (
-              <article
-                key={item.title}
-                className="grid gap-5 border-t border-[hsl(var(--foreground)/.18)] py-8 sm:grid-cols-[.28fr_1fr_.25fr] sm:gap-10"
-              >
+              <Reveal key={item.title} delay={Math.min(i, 2) * 100}>
+                <article className="grid gap-5 border-t border-[hsl(var(--foreground)/.18)] py-8 sm:grid-cols-[.28fr_1fr_.25fr] sm:gap-10">
                 <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
                   {item.date}
                 </p>
@@ -87,6 +86,7 @@ function News() {
                   {item.tag}
                 </p>
               </article>
+              </Reveal>
             );
           })}
         </div>

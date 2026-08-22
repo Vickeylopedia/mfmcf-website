@@ -3,6 +3,7 @@ import { Check, Clock3, Mail, MapPin, Mic2, Send } from "lucide-react";
 import { useSubmitContact } from "@workspace/api-client-react";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
+import { Reveal } from "@/components/reveal";
 
 function Contact() {
   const [name, setName] = useState("");
@@ -41,47 +42,50 @@ function Contact() {
       />
       <section className="px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto grid max-w-[1380px] gap-14 lg:grid-cols-[.7fr_1.3fr]">
-          <div>
-            <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
-              Your next Sunday
-            </p>
-            <div className="mt-8 space-y-7">
-              <ContactDetail
-                icon={<MapPin />}
-                title="Find us"
-                body={
-                  <>
-                    New Lecture Theatre
-                    <br />
-                    Federal University of Agriculture, Abeokuta
-                  </>
-                }
-              />
-              <ContactDetail
-                icon={<Clock3 />}
-                title="Gather with us"
-                body={
-                  <>
-                    Sundays at 9:00 AM
-                    <br />
-                    Wednesdays at 5:00 PM
-                  </>
-                }
-              />
-              <ContactDetail
-                icon={<Mail />}
-                title="Write to us"
-                body={
-                  <>
-                    mfmcf.funaab@gmail.com
-                    <br />
-                    We usually reply within a day.
-                  </>
-                }
-              />
+          <Reveal variant="left">
+            <div>
+              <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
+                Your next Sunday
+              </p>
+              <div className="mt-8 space-y-7">
+                <ContactDetail
+                  icon={<MapPin />}
+                  title="Find us"
+                  body={
+                    <>
+                      New Lecture Theatre
+                      <br />
+                      Federal University of Agriculture, Abeokuta
+                    </>
+                  }
+                />
+                <ContactDetail
+                  icon={<Clock3 />}
+                  title="Gather with us"
+                  body={
+                    <>
+                      Sundays at 9:00 AM
+                      <br />
+                      Wednesdays at 5:00 PM
+                    </>
+                  }
+                />
+                <ContactDetail
+                  icon={<Mail />}
+                  title="Write to us"
+                  body={
+                    <>
+                      mfmcf.funaab@gmail.com
+                      <br />
+                      We usually reply within a day.
+                    </>
+                  }
+                />
+              </div>
             </div>
-          </div>
-          <form
+          </Reveal>
+          <Reveal variant="right" delay={100}>
+            <form
             onSubmit={handleSubmit}
             className="border border-[hsl(var(--foreground)/.16)] bg-[hsl(var(--card))] p-6 sm:p-9"
           >
@@ -182,6 +186,7 @@ function Contact() {
               </div>
             )}
           </form>
+          </Reveal>
         </div>
       </section>
     </Shell>

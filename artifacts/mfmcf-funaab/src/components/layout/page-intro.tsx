@@ -13,7 +13,7 @@ export function PageIntro({
   children?: ReactNode;
 }) {
   return (
-    <section className="site-grid border-b border-[hsl(var(--foreground)/.1)] px-5 pb-16 pt-20 lg:px-10 lg:pb-24 lg:pt-28">
+    <section className="site-grid border-b border-[hsl(var(--foreground)/.1)] px-5 pb-16 pt-24 lg:px-10 lg:pb-24 lg:pt-32">
       <div className="mx-auto max-w-[1380px]">
         <Eyebrow weight="bold" className="reveal">
           {eyebrow}

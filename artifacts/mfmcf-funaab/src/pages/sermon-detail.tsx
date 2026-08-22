@@ -1,6 +1,7 @@
 import { ArrowLeft, Mail } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
+import { Reveal } from "@/components/reveal";
 import {
   ActionLink,
   Eyebrow,
@@ -17,7 +18,7 @@ function SermonDetail() {
 
   return (
     <Shell>
-      <section className="site-grid border-b border-[hsl(var(--foreground)/.1)] px-5 pb-16 pt-14 lg:px-10 lg:pb-20 lg:pt-16">
+      <section className="site-grid border-b border-[hsl(var(--foreground)/.1)] px-5 pb-16 pt-24 lg:px-10 lg:pb-20 lg:pt-28">
         <div className="mx-auto max-w-[1380px]">
           <Link
             href="/sermons"
@@ -28,17 +29,20 @@ function SermonDetail() {
             Back to the archive
           </Link>
           <div className="mt-10 grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
-            <div className="relative reveal">
-              <PhotoFrame
-                src={sermon.image}
-                alt={sermon.title}
-                className="aspect-[1.18] w-full max-w-md shadow-2xl"
-              />
-              <span className="mono-label absolute -bottom-4 left-4 bg-[hsl(var(--accent))] px-4 py-2 text-[9px] text-[hsl(var(--foreground))]">
-                {sermon.tag}
-              </span>
-            </div>
-            <div className="reveal reveal-delay-1 lg:pt-4">
+            <Reveal variant="left">
+              <div className="relative">
+                <PhotoFrame
+                  src={sermon.image}
+                  alt={sermon.title}
+                  className="aspect-[1.18] w-full max-w-md shadow-2xl"
+                />
+                <span className="mono-label absolute -bottom-4 left-4 bg-[hsl(var(--accent))] px-4 py-2 text-[9px] text-[hsl(var(--foreground))]">
+                  {sermon.tag}
+                </span>
+              </div>
+            </Reveal>
+            <Reveal variant="right" delay={100}>
+              <div className="lg:pt-4">
               <Eyebrow weight="bold">
                 Sunday service · {sermon.date}
               </Eyebrow>
@@ -53,13 +57,15 @@ function SermonDetail() {
                   <p key={paragraph.slice(0, 24)}>{paragraph}</p>
                 ))}
               </div>
-            </div>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
       <section className="px-5 py-16 lg:px-10 lg:py-20">
         <div className="mx-auto grid max-w-[1380px] gap-6 md:grid-cols-2">
-          <div className="border-t border-[hsl(var(--foreground)/.18)] pt-6">
+          <Reveal>
+            <div className="border-t border-[hsl(var(--foreground)/.18)] pt-6">
             <Eyebrow>Scripture</Eyebrow>
             <p className="display-font mt-5 text-4xl tracking-[-.02em] sm:text-5xl">
               {sermon.scripture}
@@ -87,20 +93,43 @@ function SermonDetail() {
               Request this recording
             </a>
           </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <div className="border border-[hsl(var(--foreground)/.16)] bg-[hsl(var(--card))] p-6 sm:p-8">
+              <Eyebrow>The recording</Eyebrow>
+              <p className="mt-5 max-w-md text-sm leading-6 text-[hsl(var(--muted-foreground))]">
+                We keep audio from our gatherings in the family archive. Ask
+                for this message and we will send the recording your way,
+                usually within a day.
+              </p>
+              <a
+                href={`mailto:mfmcf.funaab@gmail.com?subject=${encodeURIComponent(
+                  `Recording request: ${sermon.title}`,
+                )}`}
+                data-testid="link-sermon-request-recording"
+                className="group mt-7 inline-flex items-center gap-3 border border-[hsl(var(--primary))] bg-[hsl(var(--primary))] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-transparent hover:text-[hsl(var(--primary))]"
+              >
+                <Mail className="size-4" />
+                Request this recording
+              </a>
+            </div>
+          </Reveal>
         </div>
       </section>
       <section className="bg-[hsl(var(--secondary))] px-5 py-16 lg:px-10 lg:py-20">
-        <div className="mx-auto flex max-w-[1380px] flex-col justify-between gap-7 sm:flex-row sm:items-center">
-          <div>
-            <Eyebrow>One more thing</Eyebrow>
-            <h2 className="display-font mt-3 max-w-lg text-4xl leading-[.96] tracking-[-.03em] sm:text-5xl">
-              Sundays are better in the room.
-            </h2>
+        <Reveal>
+          <div className="mx-auto flex max-w-[1380px] flex-col justify-between gap-7 sm:flex-row sm:items-center">
+            <div>
+              <Eyebrow>One more thing</Eyebrow>
+              <h2 className="display-font mt-3 max-w-lg text-4xl leading-[.96] tracking-[-.03em] sm:text-5xl">
+                Sundays are better in the room.
+              </h2>
+            </div>
+            <ActionLink href="/sermons" testId="link-sermons-cta">
+              Browse the whole archive
+            </ActionLink>
           </div>
-          <ActionLink href="/sermons" testId="link-sermons-cta">
-            Browse the whole archive
-          </ActionLink>
-        </div>
+        </Reveal>
       </section>
     </Shell>
   );

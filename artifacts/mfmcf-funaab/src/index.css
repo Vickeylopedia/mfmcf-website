@@ -45,6 +45,7 @@
   --muted-foreground: 263 13% 44%;
   --accent: 35 83% 65%;
   --accent-foreground: 263 35% 18%;
+  --ease: cubic-bezier(.2,.8,.2,1);
   --app-font-sans: 'DM Sans', sans-serif;
   --app-font-serif: 'Fraunces', Georgia, serif;
   --app-font-mono: 'Space Mono', monospace;
@@ -79,6 +80,13 @@
 @layer utilities {
   .display-font { font-family: var(--app-font-serif); }
   .mono-label { font-family: var(--app-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+  /* Scroll reveals: hidden until .is-visible is added by the Reveal component. */
+  .reveal-item { opacity: 0; transition: opacity .8s var(--ease), transform .8s var(--ease); will-change: opacity, transform; }
+  .reveal-up { transform: translateY(28px); }
+  .reveal-left { transform: translateX(-36px); }
+  .reveal-right { transform: translateX(36px); }
+  .reveal-scale { transform: scale(.94); }
+  .reveal-item.is-visible { opacity: 1; transform: none; }
   .site-grid { background-image: linear-gradient(to right, hsl(var(--foreground) / .045) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground) / .045) 1px, transparent 1px); background-size: 32px 32px; }
   .text-balance { text-wrap: balance; }
   .reveal { animation: rise-in .75s cubic-bezier(.2,.8,.2,1) both; }
@@ -134,4 +142,5 @@
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
   .photo-shift:hover { transform: none; }
   .gallery-card:not(.is-active) { opacity: .86; transform: none; }
+  .reveal-item { opacity: 1; transform: none; transition: none; }
 }

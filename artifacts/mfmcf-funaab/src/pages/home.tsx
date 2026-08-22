@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
+import { Reveal } from "@/components/reveal";
 import {
   ActionLink,
   Eyebrow,
@@ -24,7 +25,7 @@ import { getSermon, type Sermon } from "@/lib/sermons";
 function Home() {
   return (
     <Shell>
-      <section className="home-hero relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-16 text-white lg:px-10 lg:pb-24 lg:pt-24">
+      <section className="home-hero relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
         <div className="home-orbit pointer-events-none absolute -right-32 -top-40 size-[32rem] rounded-full border border-white/10" />
         <div className="home-orbit home-orbit-small pointer-events-none absolute -right-16 -top-24 size-[25rem] rounded-full border border-white/10" />
         <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
@@ -86,12 +87,15 @@ function Home() {
       </section>
       <section className="bg-[hsl(var(--card))] px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
-          <SectionHeading
-            eyebrow="Our north star"
-            title="A family that makes room."
-            headingClassName="mt-5 max-w-md leading-[.96]"
-          />
-          <div className="max-w-2xl lg:pt-10">
+          <Reveal variant="left">
+            <SectionHeading
+              eyebrow="Our north star"
+              title="A family that makes room."
+              headingClassName="mt-5 max-w-md leading-[.96]"
+            />
+          </Reveal>
+          <Reveal variant="right" delay={100}>
+            <div className="max-w-2xl lg:pt-10">
             <p className="text-2xl leading-snug text-[hsl(var(--foreground))] sm:text-3xl">
               “Family of Love” is not a line on a banner. It is how we choose
               to show up — with open seats, honest questions, loud worship,
@@ -109,6 +113,7 @@ function Home() {
               </span>
             </div>
           </div>
+          </Reveal>
         </div>
       </section>
       <section className="px-5 py-16 lg:px-10 lg:py-24">
@@ -130,97 +135,115 @@ function Home() {
             </ActionLink>
           </div>
           <div className="mt-12 grid gap-px border border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--foreground)/.12)] md:grid-cols-3">
-            <EventCard
-              day="SUN"
-              title="Sunday Gathering"
-              detail="A full-hearted service for the week ahead."
-              time="9:00 AM"
-            />
-            <EventCard
-              day="WED"
-              title="Midweek Recharge"
-              detail="Scripture, prayer, and the questions in between."
-              time="5:00 PM"
-            />
-            <EventCard
-              day="FRI"
-              title="Family Hangout"
-              detail="A softer landing after a long campus week."
-              time="4:30 PM"
-            />
+            <Reveal className="h-full">
+              <EventCard
+                day="SUN"
+                title="Sunday Gathering"
+                detail="A full-hearted service for the week ahead."
+                time="9:00 AM"
+              />
+            </Reveal>
+            <Reveal className="h-full" delay={120}>
+              <EventCard
+                day="WED"
+                title="Midweek Recharge"
+                detail="Scripture, prayer, and the questions in between."
+                time="5:00 PM"
+              />
+            </Reveal>
+            <Reveal className="h-full" delay={240}>
+              <EventCard
+                day="FRI"
+                title="Family Hangout"
+                detail="A softer landing after a long campus week."
+                time="4:30 PM"
+              />
+            </Reveal>
           </div>
         </div>
       </section>
       <section className="bg-[hsl(var(--secondary))] px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto max-w-[1380px]">
           <div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]">
-            <div>
-              <SectionHeading
-                eyebrow="From the archive"
-                title={
-                  <>
-                    God still
-                    <br />
-                    <em className="font-normal">speaks.</em>
-                  </>
-                }
-                headingClassName="leading-[.94] tracking-[-.04em]"
-              />
-              <p className="mt-6 max-w-sm text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-                Catch up on a word you missed, or press play on something you
-                need today.
-              </p>
-              <Link
-                href="/sermons"
-                data-testid="link-home-sermon-archive"
-                className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[hsl(var(--primary))]"
-              >
-                Browse the sermon archive{" "}
-                <ArrowUpRight className="size-4" />
-              </Link>
-            </div>
+            <Reveal variant="left">
+              <div>
+                <SectionHeading
+                  eyebrow="From the archive"
+                  title={
+                    <>
+                      God still
+                      <br />
+                      <em className="font-normal">speaks.</em>
+                    </>
+                  }
+                  headingClassName="leading-[.94] tracking-[-.04em]"
+                />
+                <p className="mt-6 max-w-sm text-sm leading-6 text-[hsl(var(--muted-foreground))]">
+                  Catch up on a word you missed, or press play on something you
+                  need today.
+                </p>
+                <Link
+                  href="/sermons"
+                  data-testid="link-home-sermon-archive"
+                  className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[hsl(var(--primary))]"
+                >
+                  Browse the sermon archive{" "}
+                  <ArrowUpRight className="size-4" />
+                </Link>
+              </div>
+            </Reveal>
             <div className="grid gap-4 sm:grid-cols-2">
-              <SermonCard sermon={getSermon("the-grace-called-favour")} />
-              <SermonCard sermon={getSermon("life-giving-spirits")} />
+              <Reveal variant="scale">
+                <SermonCard sermon={getSermon("the-grace-called-favour")} />
+              </Reveal>
+              <Reveal variant="scale" delay={120}>
+                <SermonCard sermon={getSermon("life-giving-spirits")} />
+              </Reveal>
             </div>
           </div>
         </div>
       </section>
       <section className="overflow-hidden bg-[hsl(var(--foreground))] px-5 py-20 text-white lg:px-10 lg:py-28">
         <div className="mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
-          <div>
-            <Quote className="size-9 text-[hsl(var(--accent))]" />
-            <p className="display-font mt-7 max-w-4xl text-5xl leading-[.98] tracking-[-.03em] sm:text-7xl">
-              You do not have to have it all together before you belong.
-            </p>
-            <p className="mt-8 text-sm text-white/55">
-              — A note from one of our family meetings
-            </p>
-          </div>
-          <div className="relative mx-auto w-full max-w-sm">
-            <PhotoFrame
-              src={getSermon("when-prayer-becomes-home")?.image ?? ""}
-              alt="Students in a moment of prayer"
-              frame="foreground"
-              className="aspect-[4/5]"
-            />
-            <div className="absolute -bottom-5 -left-5 bg-[hsl(var(--accent))] px-5 py-4 text-[hsl(var(--foreground))]">
-              <p className="mono-label text-[9px]">Family of Love</p>
-              <p className="mt-1 text-sm font-bold">A place to be known.</p>
+          <Reveal variant="left">
+            <div>
+              <Quote className="size-9 text-[hsl(var(--accent))]" />
+              <p className="display-font mt-7 max-w-4xl text-5xl leading-[.98] tracking-[-.03em] sm:text-7xl">
+                You do not have to have it all together before you belong.
+              </p>
+              <p className="mt-8 text-sm text-white/55">
+                — A note from one of our family meetings
+              </p>
             </div>
-          </div>
+          </Reveal>
+          <Reveal variant="scale" delay={120}>
+            <div className="relative mx-auto w-full max-w-sm">
+              <PhotoFrame
+                src={getSermon("when-prayer-becomes-home")?.image ?? ""}
+                alt="Students in a moment of prayer"
+                frame="foreground"
+                className="aspect-[4/5]"
+              />
+              <div className="absolute -bottom-5 -left-5 bg-[hsl(var(--accent))] px-5 py-4 text-[hsl(var(--foreground))]">
+                <p className="mono-label text-[9px]">Family of Love</p>
+                <p className="mt-1 text-sm font-bold">A place to be known.</p>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
       <section className="site-grid px-5 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto flex max-w-[1380px] flex-col justify-between gap-8 border-y border-[hsl(var(--foreground)/.14)] py-10 sm:flex-row sm:items-center">
-          <div>
-            <Eyebrow>Keep in touch</Eyebrow>
-            <h2 className="display-font mt-3 text-4xl tracking-[-.03em] sm:text-5xl">
-              The good stuff, occasionally.
-            </h2>
+        <Reveal>
+          <div className="mx-auto flex max-w-[1380px] flex-col justify-between gap-8 border-y border-[hsl(var(--foreground)/.14)] py-10 sm:flex-row sm:items-center">
+            <div>
+              <Eyebrow>Keep in touch</Eyebrow>
+              <h2 className="display-font mt-3 text-4xl tracking-[-.03em] sm:text-5xl">
+                The good stuff, occasionally.
+              </h2>
+            </div>
+            <NewsletterForm />
           </div>
-          <NewsletterForm />
-        </div>
+        </Reveal>
       </section>
     </Shell>
   );
@@ -238,7 +261,7 @@ function EventCard({
   time: string;
 }) {
   return (
-    <article className="group bg-[hsl(var(--card))] p-6 transition hover:bg-[hsl(var(--primary))] hover:text-white sm:p-8">
+    <article className="group h-full bg-[hsl(var(--card))] p-6 transition hover:bg-[hsl(var(--primary))] hover:text-white sm:p-8">
       <div className="flex items-start justify-between">
         <Eyebrow className="[.group:hover_&]:text-[hsl(var(--accent))]">
           {day}
