@@ -63,48 +63,58 @@ function Sermons() {
             </button>
           </div>
           {filtered.length ? (
-            <div className="grid gap-x-6 gap-y-12 md:grid-cols-2">
+            <div className="border-b border-[hsl(var(--foreground)/.15)]">
               {filtered.map((sermon, i) => (
-                <Reveal key={sermon.slug} delay={(i % 2) * 120}>
-                  <article className="group grid h-full gap-5 sm:grid-cols-[.9fr_1.1fr]">
-                  <div className="relative aspect-[1.18] overflow-hidden">
-                    <img
-                      src={sermon.image}
-                      alt=""
-                      className="photo-shift h-full w-full object-cover"
-                    />
+                <Reveal key={sermon.slug} delay={(i % 2) * 100}>
+                  <article className="group grid grid-cols-[auto_1fr] items-center gap-5 border-t border-[hsl(var(--foreground)/.15)] py-7 sm:grid-cols-[auto_auto_1fr_auto] sm:gap-8">
+                    <span
+                      aria-hidden="true"
+                      className="display-font hidden w-14 text-5xl leading-none text-[hsl(var(--foreground)/.16)] lg:block"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
                     <Link
                       href={`/sermons/${sermon.slug}`}
                       aria-label={`Play ${sermon.title}`}
                       data-testid={`button-play-sermon-${i}`}
-                      className="absolute bottom-4 left-4 flex size-11 items-center justify-center bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] transition hover:scale-105"
+                      className="relative block w-20 shrink-0 sm:w-24"
                     >
-                      <Play className="ml-0.5 size-4 fill-current" />
+                      <div className="aspect-square overflow-hidden">
+                        <img
+                          src={sermon.image}
+                          alt=""
+                          className="photo-shift h-full w-full object-cover"
+                        />
+                      </div>
+                      <span className="absolute bottom-1.5 left-1.5 flex size-7 items-center justify-center bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <Play className="ml-0.5 size-3 fill-current" />
+                      </span>
                     </Link>
-                  </div>
-                  <div className="flex flex-col justify-end border-t border-[hsl(var(--foreground)/.15)] pt-4 sm:border-t-0 sm:pt-0">
-                    <p className="mono-label text-[9px] text-[hsl(var(--primary))]">
-                      {sermon.tag} · {sermon.date}
-                    </p>
-                    <h2 className="display-font mt-3 text-3xl leading-none sm:text-4xl">
-                      <Link
-                        href={`/sermons/${sermon.slug}`}
-                        className="transition hover:text-[hsl(var(--primary))]"
-                      >
-                        {sermon.title}
-                      </Link>
-                    </h2>
-                    <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-                      {sermon.speaker}
-                    </p>
+                    <div className="min-w-0">
+                      <p className="mono-label text-[9px] text-[hsl(var(--primary))]">
+                        {sermon.tag} · {sermon.date}
+                      </p>
+                      <h2 className="display-font mt-2 text-3xl leading-none transition-transform duration-300 group-hover:translate-x-1 sm:text-4xl">
+                        <Link
+                          href={`/sermons/${sermon.slug}`}
+                          className="transition-colors hover:text-[hsl(var(--primary))]"
+                        >
+                          {sermon.title}
+                        </Link>
+                      </h2>
+                      <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
+                        {sermon.speaker}
+                      </p>
+                    </div>
                     <Link
                       href={`/sermons/${sermon.slug}`}
+                      aria-label={`Listen to ${sermon.title}`}
                       data-testid={`button-listen-sermon-${i}`}
-                      className="mt-8 flex w-fit items-center gap-2 text-xs font-bold text-[hsl(var(--primary))]"
+                      className="hidden items-center gap-2 text-xs font-bold text-[hsl(var(--primary))] sm:flex"
                     >
-                      Listen to message <ArrowUpRight className="size-4" />
+                      Listen
+                      <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
-                  </div>
                   </article>
                 </Reveal>
               ))}

@@ -239,6 +239,11 @@ function Footer() {
             </a>
           </div>
         </div>
+        <div className="mt-12 overflow-hidden" aria-hidden="true">
+          <p className="display-font -mb-[.16em] select-none text-center text-[22vw] leading-[.82] tracking-[-.04em] text-white/5">
+            MFMCF
+          </p>
+        </div>
       </div>
     </footer>
   );

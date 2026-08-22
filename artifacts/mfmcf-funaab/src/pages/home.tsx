@@ -23,6 +23,7 @@ import {
   SectionHeading,
 } from "@/components/foundation";
 import { getSermon, type Sermon } from "@/lib/sermons";
+import { photos } from "@/lib/site";
 
 function Home() {
   const heroCollage = useParallax(72);
@@ -86,6 +87,20 @@ function Home() {
               alt="Three fellowship members smiling together"
               className="hero-photo-secondary absolute bottom-0 left-0 h-[54%] w-[58%] bg-white/10"
             />
+            <div className="absolute left-0 top-8 z-10 hidden w-[32%] -rotate-[5deg] sm:block">
+              <div className="sticker bg-white p-2">
+                <div className="aspect-[4/5] overflow-hidden">
+                  <img
+                    src={photos.community}
+                    alt="The fellowship gathered together"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <p className="mono-label px-1 pb-0.5 pt-2 text-[8px] text-[hsl(var(--muted-foreground))]">
+                  The whole family
+                </p>
+              </div>
+            </div>
             <div className="hero-info-card absolute bottom-10 right-0 border border-white/30 bg-[hsl(var(--foreground))] px-5 py-4 text-white shadow-xl sm:bottom-16 sm:px-7">
               <Eyebrow tone="accent" className="text-[9px]">
                 This Sunday
