@@ -176,7 +176,11 @@ Patterns documented but composed in place (see pages):
   bordered chip. The hero is deliberately maximal; every other section
   keeps to one or two editorial elements. On stacked (below-lg)
   layouts the sun and arcs drop to the collage zone so they never sit
-  behind the headline.
+  behind the headline. The scene is quietly alive: wave bars dance as a
+  staggered equalizer, the sun and accent ring breathe on offset phases,
+  the dashed ring rotates, the halftone drifts, plus-marks twinkle, and
+  the headline marker swipes in once on load (all loops die under
+  reduced motion).
 - **Editorial layer** — oversized background words (`.ghost-word`,
   Fraunces at ~20vw, `foreground/.055` or light/accent variants, desktop
   only, clipped by their section), the `Marquee` band (mono labels +
