@@ -164,6 +164,19 @@ to screens):
 
 Patterns documented but composed in place (see pages):
 
+- **Hero graphic language (home)** — the violet field is a designed
+  surface, not a flat color: film grain (`.grain`), a tonal
+  foreground/.16 wedge clipping the right half, a solid marigold sun
+  rising behind the photo collage with two drawn concentric arcs
+  (accent ring + dashed white ring), a halftone `.dot-grid-light` patch,
+  a soundwave bar strip along the base (marigold every third bar,
+  halved count on phones), vertical spine caption (`.spine-text`,
+  xl-only), and registration plus-marks. The headline carries a
+  marigold marker swipe under its first line and the eyebrow sits in a
+  bordered chip. The hero is deliberately maximal; every other section
+  keeps to one or two editorial elements. On stacked (below-lg)
+  layouts the sun and arcs drop to the collage zone so they never sit
+  behind the headline.
 - **Editorial layer** — oversized background words (`.ghost-word`,
   Fraunces at ~20vw, `foreground/.055` or light/accent variants, desktop
   only, clipped by their section), the `Marquee` band (mono labels +
