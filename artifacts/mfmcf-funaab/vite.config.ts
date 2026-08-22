@@ -69,6 +69,10 @@ export default defineConfig({
     strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
+    proxy: {
+      // Dev only: forward API calls to the api-server (see replit.md, port 5000).
+      '/api': process.env.API_PROXY_TARGET ?? 'http://localhost:5000',
+    },
     fs: {
       strict: true,
     },

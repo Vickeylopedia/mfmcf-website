@@ -34,3 +34,13 @@ export type ContactMessage = ContactMessageInput & {
   createdAt: string;
 };
 
+export interface NewsletterSignupInput {
+  /** @maxLength 200 */
+  email: string;
+}
+
+export type NewsletterSignup = NewsletterSignupInput & {
+  id: number;
+  createdAt: string;
+};
+

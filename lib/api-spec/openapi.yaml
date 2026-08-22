@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: contact
     description: Contact form operations
+  - name: newsletter
+    description: Newsletter signup operations
 paths:
   /healthz:
     get:
@@ -45,6 +47,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ContactMessage"
+        "400":
+          description: Invalid input
+  /newsletter:
+    post:
+      operationId: subscribeNewsletter
+      tags: [newsletter]
+      summary: Subscribe an email to the newsletter
+      description: Stores a newsletter signup; resubscribing an existing email is a no-op
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterSignupInput"
+      responses:
+        "201":
+          description: Subscribed (or already subscribed)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsletterSignup"
         "400":
           description: Invalid input
 components:
@@ -83,6 +106,28 @@ components:
     ContactMessage:
       allOf:
         - $ref: "#/components/schemas/ContactMessageInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+          required:
+            - id
+            - createdAt
+    NewsletterSignupInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 200
+      required:
+        - email
+    NewsletterSignup:
+      allOf:
+        - $ref: "#/components/schemas/NewsletterSignupInput"
         - type: object
           properties:
             id:

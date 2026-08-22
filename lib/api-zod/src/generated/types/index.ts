@@ -9,3 +9,5 @@
 export * from './contactMessage';
 export * from './contactMessageInput';
 export * from './healthStatus';
+export * from './newsletterSignup';
+export * from './newsletterSignupInput';

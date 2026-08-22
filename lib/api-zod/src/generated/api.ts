@@ -59,3 +59,27 @@ export const SubmitContactResponse = zod.object({
 }))
 
 
+/**
+ * Stores a newsletter signup; resubscribing an existing email is a no-op
+ * @summary Subscribe an email to the newsletter
+ */
+export const subscribeNewsletterBodyEmailMax = 200;
+
+
+
+export const SubscribeNewsletterBody = zod.object({
+  "email": zod.email().max(subscribeNewsletterBodyEmailMax)
+})
+
+export const subscribeNewsletterResponseOneEmailMax = 200;
+
+
+
+export const SubscribeNewsletterResponse = zod.object({
+  "email": zod.email().max(subscribeNewsletterResponseOneEmailMax)
+}).and(zod.object({
+  "id": zod.int(),
+  "createdAt": zod.coerce.date()
+}))
+
+
