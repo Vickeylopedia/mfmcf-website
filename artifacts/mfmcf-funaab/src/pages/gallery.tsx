@@ -65,8 +65,12 @@ function Gallery() {
         }
         intro="A visual diary of the people, prayers, colour, and ordinary joy that make MFMCF FUNAAB feel like home."
       />
-      <section className="gallery-cinema overflow-hidden bg-[hsl(var(--foreground))] px-5 py-14 text-white lg:px-10 lg:py-24">
-        <div className="mx-auto max-w-[1380px]">
+      <section className="gallery-cinema relative overflow-hidden bg-[hsl(var(--foreground))] px-5 py-14 text-white lg:px-10 lg:py-24">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 z-0 size-[26rem] rounded-full bg-[hsl(var(--accent)/.18)] blur-[120px]"
+        />
+        <div className="relative z-10 mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
             <Reveal variant="left">
               <SectionHeading

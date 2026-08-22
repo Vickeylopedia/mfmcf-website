@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSubscribeNewsletter } from "@workspace/api-client-react";
+import { useParallax } from "@/hooks/use-parallax";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -23,12 +24,17 @@ import {
 import { getSermon, type Sermon } from "@/lib/sermons";
 
 function Home() {
+  const heroCollage = useParallax(72);
   return (
     <Shell>
       <section className="home-hero relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
         <div className="home-orbit pointer-events-none absolute -right-32 -top-40 size-[32rem] rounded-full border border-white/10" />
         <div className="home-orbit home-orbit-small pointer-events-none absolute -right-16 -top-24 size-[25rem] rounded-full border border-white/10" />
-        <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 top-1/3 z-0 size-[30rem] rounded-full bg-[hsl(var(--accent)/.3)] blur-[120px]"
+        />
+        <div className="relative z-10 mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
           <div className="relative z-10 reveal">
             <Eyebrow tone="accent">
               Mountain of Fire &amp; Miracles Campus Fellowship
@@ -58,7 +64,10 @@ function Home() {
               </Link>
             </div>
           </div>
-          <div className="relative min-h-[420px] reveal reveal-delay-2 sm:min-h-[560px]">
+          <div
+            ref={heroCollage}
+            className="relative min-h-[420px] sm:min-h-[560px]"
+          >
             <PhotoFrame
               src={getSermon("the-grace-called-favour")?.image ?? ""}
               alt="Students gathered during a Sunday service"
@@ -203,8 +212,16 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="overflow-hidden bg-[hsl(var(--foreground))] px-5 py-20 text-white lg:px-10 lg:py-28">
-        <div className="mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
+      <section className="relative overflow-hidden bg-[hsl(var(--foreground))] px-5 py-20 text-white lg:px-10 lg:py-28">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-32 -top-24 z-0 size-[26rem] rounded-full bg-[hsl(var(--accent)/.22)] blur-[120px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 -left-24 z-0 size-[22rem] rounded-full bg-[hsl(var(--primary)/.35)] blur-[110px]"
+        />
+        <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
           <Reveal variant="left">
             <div>
               <Quote className="size-9 text-[hsl(var(--accent))]" />

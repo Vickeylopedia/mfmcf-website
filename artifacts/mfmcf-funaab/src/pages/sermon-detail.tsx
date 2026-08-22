@@ -31,10 +31,14 @@ function SermonDetail() {
           <div className="mt-10 grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-start">
             <Reveal variant="left">
               <div className="relative">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -left-10 top-10 z-0 size-72 rounded-full bg-[hsl(var(--accent)/.35)] blur-[100px]"
+                />
                 <PhotoFrame
                   src={sermon.image}
                   alt={sermon.title}
-                  className="aspect-[1.18] w-full max-w-md shadow-2xl"
+                  className="relative z-10 aspect-[1.18] w-full max-w-md shadow-2xl"
                 />
                 <span className="mono-label absolute -bottom-4 left-4 bg-[hsl(var(--accent))] px-4 py-2 text-[9px] text-[hsl(var(--foreground))]">
                   {sermon.tag}

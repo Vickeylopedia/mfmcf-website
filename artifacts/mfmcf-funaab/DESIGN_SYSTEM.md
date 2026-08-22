@@ -135,11 +135,17 @@ Behavior rules:
   IntersectionObserver adds `is-visible` once). Variants map to intent:
   headings rise (`up`), split-grid columns drift in from their side
   (`left`/`right`), photos settle (`scale`), list items stagger
-  (`delay` ≤ 300ms). Scroll-jacking and parallax libraries are
-  deliberately avoided.
-- `@media (prefers-reduced-motion: reduce)` collapses all durations to
-  `.01ms`, disables hover transforms, and shows `.reveal-item` content
-  immediately — keep every new effect inside this contract.
+  (`delay` ≤ 300ms). Reveals combine travel (44–56px), opacity, and a
+  blur-to-sharp fade over `.9s`. The hero photo collage carries a gentle
+  scroll parallax via `useParallax` (rAF-throttled, transform-only).
+  Decorative atmosphere — large blurred accent/violet fields
+  (`blur-[100–120px]`, low opacity) — sits behind hero, quote, gallery
+  cinema, and sermon-detail compositions. Scroll-jacking and parallax
+  libraries are deliberately avoided.
+- `@media (prefers-reduced-motion: reduce)` reduces rather than removes:
+  loops and hovers stop, parallax is skipped, and reveals collapse to a
+  short `.25s` opacity fade (no travel, no blur). Keep every new effect
+  inside this contract.
 
 ---
 
