@@ -52,20 +52,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <div className="min-h-[100dvh] overflow-x-hidden">
-      <div className="announcement-bar border-b border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--primary))] px-4 py-2 text-center text-[10px] font-semibold tracking-[.18em] text-white sm:text-xs">
-        <span
-          className="pulse-dot mr-2 inline-block size-1.5 rounded-full bg-[hsl(var(--accent))] align-middle"
-          aria-hidden="true"
-        />
-        SUNDAY GATHERING · 9:00 AM · FUNAAB CAMPUS
-        <span className="hidden text-white/55 sm:inline">
-          {" "}
-          · FAMILY OF LOVE
-        </span>
-      </div>
-      <header className="relative z-30 border-b border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--background)/.9)] backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between px-5 py-4 lg:px-10">
+    <div className="min-h-[100dvh] overflow-x-clip pt-3 lg:pt-4">
+      <header className="sticky top-3 z-40 px-3 lg:top-4 lg:px-6">
+        <div className="mx-auto flex max-w-[1380px] items-center justify-between rounded-full border border-[hsl(var(--foreground)/.1)] bg-gradient-to-b from-[hsl(var(--background)/.95)] via-[hsl(var(--background)/.88)] to-[hsl(var(--background)/.8)] px-4 py-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl sm:px-5 lg:px-6">
           <Link
             href="/"
             data-testid="link-logo-home"
@@ -133,7 +122,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
         {menuOpen && (
           <nav
-            className="border-t border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--card))] px-5 py-3 lg:hidden"
+            className="mx-auto mt-2 max-w-[1380px] rounded-2xl border border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--background)/.95)] p-3 shadow-lg shadow-[hsl(var(--foreground)/.07)] backdrop-blur-xl lg:hidden"
             aria-label="Mobile navigation"
           >
             {navItems.map((item) => (
@@ -142,7 +131,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
                 data-testid={`link-mobile-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.08)] py-4 text-sm font-semibold last:border-0"
+                className="flex items-center justify-between rounded-full px-4 py-3 text-sm font-semibold transition-colors hover:bg-[hsl(var(--secondary))] sm:px-5"
               >
                 {item.label}
                 <ArrowUpRight className="size-4 text-[hsl(var(--primary))]" />

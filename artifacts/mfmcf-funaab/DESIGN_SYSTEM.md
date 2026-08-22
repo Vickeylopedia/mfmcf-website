@@ -153,9 +153,14 @@ to screens):
 
 Patterns documented but composed in place (see pages):
 
-- **Announcement bar** — primary fill, pulse dot, mono microcopy.
-- **Header** — logo tile (white frame, hover rotate-3), mono chapter lockup,
-  nav links with scale-x underline, outline CONNECT button.
+- **Header (floating bar)** — detached sticky pill: inset from all edges,
+  `rounded-full`, gradient background
+  (`background/.95 → /.8` top-to-bottom) over `backdrop-blur-xl`, thin
+  foreground/10 border, soft shadow. Logo tile (white frame, hover
+  rotate-3), mono chapter lockup, nav links with scale-x underline, outline
+  CONNECT button. Mobile menu is a matching floating dropdown panel
+  (`rounded-2xl`, same blur treatment) with pill hover rows. The page
+  wrapper uses `overflow-x-clip` (not `hidden`, which breaks sticky).
 - **Hero collage** — main + secondary framed photos, floating info card
   (foreground fill), accent spark badge, two orbit rings, radial atmosphere.
 - **EventCard** — day tag + calendar icon, display title, hairline footer
@@ -185,5 +190,5 @@ When applying the system to screens:
    `--duration-*` custom properties.
 3. New sections must choose: which background tier (light / secondary /
    foreground), which eyebrow tone, and one motion moment maximum.
-4. Never introduce a third accent color, a radius above 4px (badges
-   excepted), or an emoji.
+4. Never introduce a third accent color, a radius above 4px (badges and the
+   floating header/menu pills excepted), or an emoji.
