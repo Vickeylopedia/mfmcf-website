@@ -27,6 +27,12 @@ import { getSermon } from "@/lib/sermons";
 import { useSermons, type SermonView } from "@/lib/queries";
 import { photos } from "@/lib/site";
 
+/** Soundwave bar heights (%) for the hero's base strip. */
+const heroWave = [
+  18, 32, 52, 78, 46, 64, 92, 58, 38, 70, 96, 54, 30, 60, 84, 44, 24, 56, 74,
+  40, 66, 88, 50, 28, 62, 80, 42, 68, 34, 58,
+];
+
 function Home() {
   const heroCollage = useParallax(72);
   const { sermons } = useSermons();
@@ -35,18 +41,69 @@ function Home() {
       <section className="home-hero grain relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
         <div className="home-orbit pointer-events-none absolute -right-32 -top-40 size-[32rem] rounded-full border border-white/10" />
         <div className="home-orbit home-orbit-small pointer-events-none absolute -right-16 -top-24 size-[25rem] rounded-full border border-white/10" />
+        {/* Tonal wedge: deepens the right half so the collage sits in shadow. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-[58%] bg-[hsl(var(--foreground)/.16)] [clip-path:polygon(26%_0,100%_0,100%_100%,0_100%)]"
+        />
+        {/* Marigold sun with drawn concentric arcs, rising behind the collage.
+            Below lg the layout stacks, so the sun drops to the collage zone. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-[14%] top-[50%] size-[17rem] rounded-full border border-[hsl(var(--accent)/.45)] lg:right-[26%] lg:top-[16%] lg:size-[21rem]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-[10%] top-[46%] size-[22rem] rounded-full border border-dashed border-white/20 lg:right-[23%] lg:top-[12%] lg:size-[27rem]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-[22%] top-[56%] z-0 size-[11rem] rounded-full bg-[hsl(var(--accent))] lg:right-[30%] lg:top-[20%] lg:size-[15rem]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 top-1/3 z-0 size-[30rem] rounded-full bg-[hsl(var(--accent)/.28)] blur-[120px]"
+        />
         <div
           aria-hidden="true"
           className="dot-grid-light pointer-events-none absolute right-[6%] top-10 h-[46%] w-[42%] opacity-50"
         />
+        {/* Soundwave floor: worship energy along the base of the hero.
+            Fewer bars on phones so the strip never crowds the edge. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-[12rem] -left-[9rem] size-[34rem] rounded-full border border-dashed border-white/15"
-        />
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 flex h-20 items-end justify-between px-5 opacity-80 sm:hidden"
+        >
+          {heroWave
+            .filter((_, i) => i % 2 === 0)
+            .map((height, i) => (
+              <span
+                key={i}
+                className={`w-1 rounded-t-full ${
+                  i % 2 === 0
+                    ? "bg-[hsl(var(--accent)/.85)]"
+                    : "bg-white/25"
+                }`}
+                style={{ height: `${height}%` }}
+              />
+            ))}
+        </div>
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-24 top-1/3 z-0 size-[30rem] rounded-full bg-[hsl(var(--accent)/.3)] blur-[120px]"
-        />
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 hidden h-28 items-end justify-between gap-1 px-10 opacity-80 sm:flex"
+        >
+          {heroWave.map((height, i) => (
+            <span
+              key={i}
+              className={`w-1.5 rounded-t-full ${
+                i % 3 === 0
+                  ? "bg-[hsl(var(--accent)/.85)]"
+                  : "bg-white/25"
+              }`}
+              style={{ height: `${height}%` }}
+            />
+          ))}
+        </div>
         <span
           aria-hidden="true"
           className="ghost-word ghost-word-light right-[-4%] top-[52%] hidden lg:block"
@@ -67,17 +124,26 @@ function Home() {
         </span>
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-[20%] right-[5%] hidden font-mono text-lg font-bold text-white/30 lg:block"
+          className="pointer-events-none absolute bottom-[24%] right-[5%] hidden font-mono text-lg font-bold text-white/30 lg:block"
         >
           +
         </span>
         <div className="relative z-10 mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
           <div className="relative z-10 reveal">
-            <Eyebrow tone="accent">
+            <Eyebrow
+              tone="accent"
+              className="inline-block border border-[hsl(var(--accent)/.45)] px-3 py-1.5"
+            >
               Mountain of Fire &amp; Miracles Campus Fellowship
             </Eyebrow>
             <h1 className="display-font mt-7 max-w-2xl text-6xl leading-[.88] tracking-[-.055em] sm:text-8xl lg:text-[9.2rem]">
-              Family
+              <span className="relative inline-block">
+                Family
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-[.06em] -left-[3%] -z-10 h-[.16em] w-[106%] -rotate-1 bg-[hsl(var(--accent)/.8)]"
+                />
+              </span>
               <br />
               <em className="font-normal text-[hsl(var(--accent))]">
                 of Love.
