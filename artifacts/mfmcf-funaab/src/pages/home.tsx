@@ -50,15 +50,16 @@ function Home() {
             Below lg the layout stacks, so the sun drops to the collage zone. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[14%] top-[50%] size-[17rem] rounded-full border border-[hsl(var(--accent)/.45)] lg:right-[26%] lg:top-[16%] lg:size-[21rem]"
+          className="sun-breathe pointer-events-none absolute right-[14%] top-[50%] size-[17rem] rounded-full border border-[hsl(var(--accent)/.45)] lg:right-[26%] lg:top-[16%] lg:size-[21rem]"
+          style={{ animationDuration: "9s" }}
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[10%] top-[46%] size-[22rem] rounded-full border border-dashed border-white/20 lg:right-[23%] lg:top-[12%] lg:size-[27rem]"
+          className="ring-spin pointer-events-none absolute right-[10%] top-[46%] size-[22rem] rounded-full border border-dashed border-white/20 lg:right-[23%] lg:top-[12%] lg:size-[27rem]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[22%] top-[56%] z-0 size-[11rem] rounded-full bg-[hsl(var(--accent))] lg:right-[30%] lg:top-[20%] lg:size-[15rem]"
+          className="sun-breathe pointer-events-none absolute right-[22%] top-[56%] z-0 size-[11rem] rounded-full bg-[hsl(var(--accent))] lg:right-[30%] lg:top-[20%] lg:size-[15rem]"
         />
         <div
           aria-hidden="true"
@@ -66,7 +67,7 @@ function Home() {
         />
         <div
           aria-hidden="true"
-          className="dot-grid-light pointer-events-none absolute right-[6%] top-10 h-[46%] w-[42%] opacity-50"
+          className="dot-drift dot-grid-light pointer-events-none absolute right-[6%] top-10 h-[46%] w-[42%] opacity-50"
         />
         {/* Soundwave floor: worship energy along the base of the hero.
             Fewer bars on phones so the strip never crowds the edge. */}
@@ -79,12 +80,16 @@ function Home() {
             .map((height, i) => (
               <span
                 key={i}
-                className={`w-1 rounded-t-full ${
+                className={`wave-bar w-1 rounded-t-full ${
                   i % 2 === 0
                     ? "bg-[hsl(var(--accent)/.85)]"
                     : "bg-white/25"
                 }`}
-                style={{ height: `${height}%` }}
+                style={{
+                  height: `${height}%`,
+                  animationDelay: `${i * 0.11}s`,
+                  animationDuration: `${1.4 + (i % 4) * 0.25}s`,
+                }}
               />
             ))}
         </div>
@@ -95,18 +100,22 @@ function Home() {
           {heroWave.map((height, i) => (
             <span
               key={i}
-              className={`w-1.5 rounded-t-full ${
+              className={`wave-bar w-1.5 rounded-t-full ${
                 i % 3 === 0
                   ? "bg-[hsl(var(--accent)/.85)]"
                   : "bg-white/25"
               }`}
-              style={{ height: `${height}%` }}
+              style={{
+                height: `${height}%`,
+                animationDelay: `${i * 0.09}s`,
+                animationDuration: `${1.4 + (i % 5) * 0.2}s`,
+              }}
             />
           ))}
         </div>
         <span
           aria-hidden="true"
-          className="ghost-word ghost-word-light right-[-4%] top-[52%] hidden lg:block"
+          className="ghost-drift ghost-word ghost-word-light right-[-4%] top-[52%] hidden lg:block"
         >
           LOVE
         </span>
@@ -118,13 +127,14 @@ function Home() {
         </span>
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute left-[30%] top-[14%] hidden font-mono text-lg font-bold text-white/30 lg:block"
+          className="twinkle pointer-events-none absolute left-[30%] top-[14%] hidden font-mono text-lg font-bold text-white/30 lg:block"
         >
           +
         </span>
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-[24%] right-[5%] hidden font-mono text-lg font-bold text-white/30 lg:block"
+          className="twinkle pointer-events-none absolute bottom-[24%] right-[5%] hidden font-mono text-lg font-bold text-white/30 lg:block"
+          style={{ animationDelay: "1.6s" }}
         >
           +
         </span>
@@ -141,7 +151,7 @@ function Home() {
                 Family
                 <span
                   aria-hidden="true"
-                  className="absolute -bottom-[.06em] -left-[3%] -z-10 h-[.16em] w-[106%] -rotate-1 bg-[hsl(var(--accent)/.8)]"
+                  className="marker-swipe absolute -bottom-[.06em] -left-[3%] -z-10 h-[.16em] w-[106%] bg-[hsl(var(--accent)/.8)]"
                 />
               </span>
               <br />

@@ -96,6 +96,14 @@
   .marquee-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
   @keyframes marquee { to { transform: translateX(-50%); } }
   .sticker { box-shadow: 0 10px 30px hsl(var(--foreground) / .18); }
+  /* Hero life: equalizer bars, drifting halftone, breathing sun, twinkles. */
+  .wave-bar { transform-origin: bottom; animation: wave-bar 1.8s var(--ease) infinite; }
+  .dot-drift { animation: dot-drift 16s linear infinite; }
+  .sun-breathe { animation: sun-breathe 7s ease-in-out infinite; }
+  .ring-spin { animation: ring-rotate 90s linear infinite; }
+  .twinkle { animation: twinkle 4s ease-in-out infinite; }
+  .marker-swipe { transform-origin: left; animation: marker-swipe .7s .5s cubic-bezier(.2,.8,.2,1) both; }
+  .ghost-drift { animation: ghost-drift 12s ease-in-out infinite alternate; }
   /* More editorial print texture: vertical spine captions and film grain. */
   .spine-text { writing-mode: vertical-rl; }
   .grain::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .05; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.7'/></svg>"); }
@@ -149,6 +157,32 @@
 @keyframes hero-settle {
   from { opacity: 0; transform: scale(1.07) translateY(14px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes wave-bar {
+  0%, 100% { transform: scaleY(.5); }
+  50% { transform: scaleY(1); }
+}
+@keyframes dot-drift {
+  to { background-position: 60px 30px; }
+}
+@keyframes sun-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+@keyframes ring-rotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: .3; }
+  50% { opacity: .75; }
+}
+@keyframes marker-swipe {
+  from { transform: scaleX(0) rotate(-1deg); }
+  to { transform: scaleX(1) rotate(-1deg); }
+}
+@keyframes ghost-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-2.5%); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
