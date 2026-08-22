@@ -60,6 +60,79 @@ export const SubmitContactResponse = zod.object({
 
 
 /**
+ * All sermons, newest first
+ * @summary List sermons
+ */
+export const ListSermonsResponseItem = zod.object({
+  "id": zod.int(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "speaker": zod.string(),
+  "date": zod.string(),
+  "iso": zod.string(),
+  "tag": zod.string(),
+  "scripture": zod.string(),
+  "summary": zod.array(zod.string()),
+  "artworkUrl": zod.string().nullable(),
+  "audioUrl": zod.string().nullable()
+})
+export const ListSermonsResponse = zod.array(ListSermonsResponseItem)
+
+
+/**
+ * @summary Get one sermon
+ */
+export const GetSermonParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const GetSermonResponse = zod.object({
+  "id": zod.int(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "speaker": zod.string(),
+  "date": zod.string(),
+  "iso": zod.string(),
+  "tag": zod.string(),
+  "scripture": zod.string(),
+  "summary": zod.array(zod.string()),
+  "artworkUrl": zod.string().nullable(),
+  "audioUrl": zod.string().nullable()
+})
+
+
+/**
+ * All news notes, newest first
+ * @summary List news notes
+ */
+export const ListNewsResponseItem = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "date": zod.string(),
+  "iso": zod.string(),
+  "tag": zod.string(),
+  "body": zod.string(),
+  "full": zod.string(),
+  "artworkUrl": zod.string().nullable()
+})
+export const ListNewsResponse = zod.array(ListNewsResponseItem)
+
+
+/**
+ * @summary List gallery items
+ */
+export const ListGalleryResponseItem = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "type": zod.string(),
+  "desc": zod.string(),
+  "imageUrl": zod.string(),
+  "position": zod.int()
+})
+export const ListGalleryResponse = zod.array(ListGalleryResponseItem)
+
+
+/**
  * Stores a newsletter signup; resubscribing an existing email is a no-op
  * @summary Subscribe an email to the newsletter
  */

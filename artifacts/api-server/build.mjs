@@ -65,6 +65,9 @@ async function buildAll() {
       "@opentelemetry/*",
       "@google-cloud/*",
       "@google/*",
+      // Loaded lazily (only on Replit) by src/lib/storage.ts; bundling it
+      // hoists its GCS imports into the startup path.
+      "@replit/object-storage",
       "googleapis",
       "firebase-admin",
       "@parcel/watcher",

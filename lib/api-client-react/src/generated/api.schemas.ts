@@ -44,3 +44,37 @@ export type NewsletterSignup = NewsletterSignupInput & {
   createdAt: string;
 };
 
+export interface SermonDto {
+  id: number;
+  slug: string;
+  title: string;
+  speaker: string;
+  date: string;
+  iso: string;
+  tag: string;
+  scripture: string;
+  summary: string[];
+  artworkUrl: string | null;
+  audioUrl: string | null;
+}
+
+export interface NewsPostDto {
+  id: number;
+  title: string;
+  date: string;
+  iso: string;
+  tag: string;
+  body: string;
+  full: string;
+  artworkUrl: string | null;
+}
+
+export interface GalleryItemDto {
+  id: number;
+  title: string;
+  type: string;
+  desc: string;
+  imageUrl: string;
+  position: number;
+}
+

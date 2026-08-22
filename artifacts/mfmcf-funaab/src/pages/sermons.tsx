@@ -4,11 +4,12 @@ import { Link } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
-import { sermons } from "@/lib/sermons";
+import { useSermons, type SermonView } from "@/lib/queries";
 
 function Sermons() {
   const [query, setQuery] = useState("");
   const [latestFirst, setLatestFirst] = useState(true);
+  const { sermons, isLoading } = useSermons();
   const filtered = useMemo(() => {
     const matches = sermons.filter((s) =>
       `${s.title} ${s.speaker} ${s.tag}`
@@ -16,7 +17,7 @@ function Sermons() {
         .includes(query.toLowerCase()),
     );
     return latestFirst ? matches : [...matches].reverse();
-  }, [query, latestFirst]);
+  }, [sermons, query, latestFirst]);
   return (
     <Shell>
       <PageIntro
@@ -93,6 +94,7 @@ function Sermons() {
                     <div className="min-w-0">
                       <p className="mono-label text-[9px] text-[hsl(var(--primary))]">
                         {sermon.tag} · {sermon.date}
+                        {sermon.audio ? " · audio" : ""}
                       </p>
                       <h2 className="display-font mt-2 text-3xl leading-none transition-transform duration-300 group-hover:translate-x-1 sm:text-4xl">
                         <Link

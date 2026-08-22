@@ -11,10 +11,13 @@ import Gallery from "@/pages/gallery";
 import Home from "@/pages/home";
 import News from "@/pages/news";
 import NotFound from "@/pages/not-found";
+import Admin from "@/pages/admin";
 import SermonDetail from "@/pages/sermon-detail";
 import Sermons from "@/pages/sermons";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 30_000 } },
+});
 
 function Router() {
   return (
@@ -28,6 +31,7 @@ function Router() {
         <Route path="/gallery" component={Gallery} />
         <Route path="/news" component={News} />
         <Route path="/contact" component={Contact} />
+        <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

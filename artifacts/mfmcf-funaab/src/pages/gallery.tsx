@@ -4,58 +4,15 @@ import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
 import { PhotoFrame, SectionHeading } from "@/components/foundation";
+import { useGallery } from "@/lib/queries";
 import { photos } from "@/lib/site";
-
-const galleryItems = [
-  {
-    image: photos.gathering,
-    title: "A Sunday with the family",
-    type: "Worship",
-    desc: "The room settles, the voices rise, and somebody always saves you a seat.",
-  },
-  {
-    image: photos.joy,
-    title: "Joy looks good on us",
-    type: "Community",
-    desc: "Three friends, one bright afternoon, and absolutely no shortage of laughter.",
-  },
-  {
-    image: photos.prayer,
-    title: "Held in prayer",
-    type: "Worship",
-    desc: "The quiet moments count, too.",
-  },
-  {
-    image: photos.word,
-    title: "The Word in the room",
-    type: "Teaching",
-    desc: "Listening closely. Leaving changed.",
-  },
-  {
-    image: photos.worship,
-    title: "Room for every story",
-    type: "Community",
-    desc: "Different backgrounds, one table.",
-  },
-  {
-    image: photos.community,
-    title: "The whole family, gathered",
-    type: "Community",
-    desc: "Full rooms, full hearts — the chapter in one frame.",
-  },
-  {
-    image: photos.fellowshipWorship,
-    title: "Every voice welcome",
-    type: "Worship",
-    desc: "Loud or quiet, off-key or on — it all counts as praise here.",
-  },
-];
 
 function Gallery() {
   const [filter, setFilter] = useState("All");
   const [active, setActive] = useState(0);
+  const { gallery, isLoading } = useGallery();
   const filters = ["All", "Worship", "Community", "Teaching"];
-  const shown = galleryItems.filter(
+  const shown = gallery.filter(
     (item) => filter === "All" || item.type === filter,
   );
   const safeActive = active >= shown.length ? 0 : active;

@@ -8,6 +8,9 @@
 
 export * from './contactMessage';
 export * from './contactMessageInput';
+export * from './galleryItemDto';
 export * from './healthStatus';
 export * from './newsletterSignup';
 export * from './newsletterSignupInput';
+export * from './newsPostDto';
+export * from './sermonDto';

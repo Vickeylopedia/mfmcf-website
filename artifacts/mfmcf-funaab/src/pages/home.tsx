@@ -22,11 +22,13 @@ import {
   PhotoFrame,
   SectionHeading,
 } from "@/components/foundation";
-import { getSermon, type Sermon } from "@/lib/sermons";
+import { getSermon } from "@/lib/sermons";
+import { useSermons, type SermonView } from "@/lib/queries";
 import { photos } from "@/lib/site";
 
 function Home() {
   const heroCollage = useParallax(72);
+  const { sermons } = useSermons();
   return (
     <Shell>
       <section className="home-hero relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
@@ -249,10 +251,10 @@ function Home() {
             </Reveal>
             <div className="grid gap-4 sm:grid-cols-2">
               <Reveal variant="scale">
-                <SermonCard sermon={getSermon("the-grace-called-favour")} />
+                <SermonCard sermon={sermons[0]} />
               </Reveal>
               <Reveal variant="scale" delay={120}>
-                <SermonCard sermon={getSermon("life-giving-spirits")} />
+                <SermonCard sermon={sermons[1]} />
               </Reveal>
             </div>
           </div>
@@ -346,7 +348,7 @@ function EventCard({
   );
 }
 
-function SermonCard({ sermon }: { sermon?: Sermon }) {
+function SermonCard({ sermon }: { sermon?: SermonView }) {
   if (!sermon) return null;
   return (
     <Link

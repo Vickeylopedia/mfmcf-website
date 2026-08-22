@@ -14,6 +14,12 @@ tags:
     description: Contact form operations
   - name: newsletter
     description: Newsletter signup operations
+  - name: sermons
+    description: Sermon archive reads
+  - name: news
+    description: News note reads
+  - name: gallery
+    description: Gallery reads
 paths:
   /healthz:
     get:
@@ -49,7 +55,70 @@ paths:
                 $ref: "#/components/schemas/ContactMessage"
         "400":
           description: Invalid input
-  /newsletter:
+  /sermons:
+    get:
+      operationId: listSermons
+      tags: [sermons]
+      summary: List sermons
+      description: All sermons, newest first
+      responses:
+        "200":
+          description: Sermon list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SermonDto"
+  /sermons/{slug}:
+    get:
+      operationId: getSermon
+      tags: [sermons]
+      summary: Get one sermon
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The sermon
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SermonDto"
+        "404":
+          description: Not found
+  /news:
+    get:
+      operationId: listNews
+      tags: [news]
+      summary: List news notes
+      description: All news notes, newest first
+      responses:
+        "200":
+          description: News list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewsPostDto"
+  /gallery:
+    get:
+      operationId: listGallery
+      tags: [gallery]
+      summary: List gallery items
+      responses:
+        "200":
+          description: Gallery list, in display order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryItemDto"
     post:
       operationId: subscribeNewsletter
       tags: [newsletter]
@@ -138,3 +207,95 @@ components:
           required:
             - id
             - createdAt
+    SermonDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        speaker:
+          type: string
+        date:
+          type: string
+        iso:
+          type: string
+        tag:
+          type: string
+        scripture:
+          type: string
+        summary:
+          type: array
+          items:
+            type: string
+        artworkUrl:
+          type: string
+          nullable: true
+        audioUrl:
+          type: string
+          nullable: true
+      required:
+        - id
+        - slug
+        - title
+        - speaker
+        - date
+        - iso
+        - tag
+        - scripture
+        - summary
+        - artworkUrl
+        - audioUrl
+    NewsPostDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        date:
+          type: string
+        iso:
+          type: string
+        tag:
+          type: string
+        body:
+          type: string
+        full:
+          type: string
+        artworkUrl:
+          type: string
+          nullable: true
+      required:
+        - id
+        - title
+        - date
+        - iso
+        - tag
+        - body
+        - full
+        - artworkUrl
+    GalleryItemDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+        desc:
+          type: string
+        imageUrl:
+          type: string
+        position:
+          type: integer
+      required:
+        - id
+        - title
+        - type
+        - desc
+        - imageUrl
+        - position

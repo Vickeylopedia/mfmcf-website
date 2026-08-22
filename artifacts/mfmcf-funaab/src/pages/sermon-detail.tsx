@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
 import { Reveal } from "@/components/reveal";
@@ -9,19 +9,22 @@ import {
   PhotoFrame,
 } from "@/components/foundation";
 import { getSermon } from "@/lib/sermons";
+import { useSermons } from "@/lib/queries";
 import { withBase } from "@/lib/site";
 import NotFound from "@/pages/not-found";
 
 function SermonDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const sermon = slug ? getSermon(slug) : undefined;
+  const { sermons } = useSermons();
+  const sermon = slug ? sermons.find((s) => s.slug === slug) : undefined;
 
   if (!sermon) return <NotFound />;
 
   const requestHref = `mailto:mfmcf.funaab@gmail.com?subject=${encodeURIComponent(
     `Recording request: ${sermon.title}`,
   )}`;
-  const audioSrc = withBase(`/assets/audio/${sermon.slug}.mp3`);
+  const audioSrc =
+    sermon.audio ?? withBase(`/assets/audio/${sermon.slug}.mp3`);
 
   return (
     <Shell>
@@ -93,6 +96,16 @@ function SermonDetail() {
               title={sermon.title}
               requestHref={requestHref}
             />
+            {sermon.audio && (
+              <a
+                href={`${sermon.audio}${sermon.audio.includes("?") ? "&" : "?"}download=1`}
+                data-testid="link-sermon-download"
+                className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))] transition hover:text-[hsl(var(--foreground))]"
+              >
+                <Download className="size-4" />
+                Download the audio
+              </a>
+            )}
           </Reveal>
         </div>
       </section>

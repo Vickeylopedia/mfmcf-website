@@ -22,9 +22,12 @@ import type {
 import type {
   ContactMessage,
   ContactMessageInput,
+  GalleryItemDto,
   HealthStatus,
+  NewsPostDto,
   NewsletterSignup,
-  NewsletterSignupInput
+  NewsletterSignupInput,
+  SermonDto
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -204,12 +207,322 @@ export const useSubmitContact = <TError = ErrorType<void>,
       return useMutation(getSubmitContactMutationOptions(options));
     }
 
+export const getListSermonsUrl = () => {
+
+
+
+
+  return `/api/sermons`
+}
+
+/**
+ * All sermons, newest first
+ * @summary List sermons
+ */
+export const listSermons = async ( options?: Parameters<typeof customFetch>[1]): Promise<SermonDto[]> => {
+
+  return customFetch<SermonDto[]>(getListSermonsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSermonsQueryKey = () => {
+    return [
+    `/api/sermons`
+    ] as const;
+    }
+
+
+export const getListSermonsQueryOptions = <TData = Awaited<ReturnType<typeof listSermons>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSermons>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSermonsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSermons>>> = ({ signal }) => listSermons({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSermons>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSermonsQueryResult = NonNullable<Awaited<ReturnType<typeof listSermons>>>
+export type ListSermonsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List sermons
+ */
+
+export function useListSermons<TData = Awaited<ReturnType<typeof listSermons>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSermons>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSermonsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetSermonUrl = (slug: string,) => {
+
+
+
+
+  return `/api/sermons/${slug}`
+}
+
+/**
+ * @summary Get one sermon
+ */
+export const getSermon = async (slug: string, options?: Parameters<typeof customFetch>[1]): Promise<SermonDto> => {
+
+  return customFetch<SermonDto>(getGetSermonUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSermonQueryKey = (slug: string,) => {
+    return [
+    `/api/sermons/${slug}`
+    ] as const;
+    }
+
+
+export const getGetSermonQueryOptions = <TData = Awaited<ReturnType<typeof getSermon>>, TError = ErrorType<void>>(slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSermon>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSermonQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSermon>>> = ({ signal }) => getSermon(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSermon>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSermonQueryResult = NonNullable<Awaited<ReturnType<typeof getSermon>>>
+export type GetSermonQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get one sermon
+ */
+
+export function useGetSermon<TData = Awaited<ReturnType<typeof getSermon>>, TError = ErrorType<void>>(
+ slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSermon>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSermonQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListNewsUrl = () => {
+
+
+
+
+  return `/api/news`
+}
+
+/**
+ * All news notes, newest first
+ * @summary List news notes
+ */
+export const listNews = async ( options?: Parameters<typeof customFetch>[1]): Promise<NewsPostDto[]> => {
+
+  return customFetch<NewsPostDto[]>(getListNewsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListNewsQueryKey = () => {
+    return [
+    `/api/news`
+    ] as const;
+    }
+
+
+export const getListNewsQueryOptions = <TData = Awaited<ReturnType<typeof listNews>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListNewsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listNews>>> = ({ signal }) => listNews({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listNews>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListNewsQueryResult = NonNullable<Awaited<ReturnType<typeof listNews>>>
+export type ListNewsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List news notes
+ */
+
+export function useListNews<TData = Awaited<ReturnType<typeof listNews>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListNewsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListGalleryUrl = () => {
+
+
+
+
+  return `/api/gallery`
+}
+
+/**
+ * @summary List gallery items
+ */
+export const listGallery = async ( options?: Parameters<typeof customFetch>[1]): Promise<GalleryItemDto[]> => {
+
+  return customFetch<GalleryItemDto[]>(getListGalleryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListGalleryQueryKey = () => {
+    return [
+    `/api/gallery`
+    ] as const;
+    }
+
+
+export const getListGalleryQueryOptions = <TData = Awaited<ReturnType<typeof listGallery>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGallery>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListGalleryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listGallery>>> = ({ signal }) => listGallery({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listGallery>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListGalleryQueryResult = NonNullable<Awaited<ReturnType<typeof listGallery>>>
+export type ListGalleryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List gallery items
+ */
+
+export function useListGallery<TData = Awaited<ReturnType<typeof listGallery>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGallery>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListGalleryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getSubscribeNewsletterUrl = () => {
 
 
 
 
-  return `/api/newsletter`
+  return `/api/gallery`
 }
 
 /**
