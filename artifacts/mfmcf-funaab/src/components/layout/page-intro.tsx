@@ -5,15 +5,26 @@ export function PageIntro({
   eyebrow,
   title,
   intro,
+  ghost,
   children,
 }: {
   eyebrow: string;
   title: ReactNode;
   intro?: string;
+  /** Oversized editorial word printed behind the section. */
+  ghost?: string;
   children?: ReactNode;
 }) {
   return (
-    <section className="site-grid border-b border-[hsl(var(--foreground)/.1)] px-5 pb-16 pt-24 lg:px-10 lg:pb-24 lg:pt-32">
+    <section className="site-grid relative overflow-hidden border-b border-[hsl(var(--foreground)/.1)] px-5 pb-16 pt-24 lg:px-10 lg:pb-24 lg:pt-32">
+      {ghost && (
+        <span
+          aria-hidden="true"
+          className="ghost-word -bottom-8 left-0 hidden md:block"
+        >
+          {ghost}
+        </span>
+      )}
       <div className="mx-auto max-w-[1380px]">
         <Eyebrow weight="bold" className="reveal">
           {eyebrow}

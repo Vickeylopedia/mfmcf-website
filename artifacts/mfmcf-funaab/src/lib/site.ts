@@ -13,6 +13,10 @@ export const photos = {
   joy: withBase("/assets/image_1787352917176.png"),
   prayer: withBase("/assets/image_1787353043632.png"),
   word: withBase("/assets/image_1787353067577.png"),
+  community: withBase("/assets/fellowship-community.jpg"),
+  fellowshipWorship: withBase("/assets/fellowship-worship.jpg"),
+  students: withBase("/assets/fellowship-students.jpg"),
+  service: withBase("/assets/fellowship-gathering.jpg"),
 };
 
 export const navItems = [

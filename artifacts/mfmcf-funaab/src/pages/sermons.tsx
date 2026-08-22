@@ -21,6 +21,7 @@ function Sermons() {
     <Shell>
       <PageIntro
         eyebrow="Listen back"
+        ghost="ARCHIVE"
         title={
           <>
             Words for the

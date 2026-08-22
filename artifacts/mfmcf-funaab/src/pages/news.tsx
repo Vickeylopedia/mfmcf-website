@@ -35,6 +35,7 @@ function News() {
     <Shell>
       <PageIntro
         eyebrow="Notes from the family"
+        ghost="NOTES"
         title={
           <>
             What’s happening

@@ -37,6 +37,18 @@ const galleryItems = [
     type: "Community",
     desc: "Different backgrounds, one table.",
   },
+  {
+    image: photos.community,
+    title: "The whole family, gathered",
+    type: "Community",
+    desc: "Full rooms, full hearts — the chapter in one frame.",
+  },
+  {
+    image: photos.fellowshipWorship,
+    title: "Every voice welcome",
+    type: "Worship",
+    desc: "Loud or quiet, off-key or on — it all counts as praise here.",
+  },
 ];
 
 function Gallery() {
@@ -56,6 +68,7 @@ function Gallery() {
     <Shell>
       <PageIntro
         eyebrow="Life together"
+        ghost="FRAMES"
         title={
           <>
             Small moments.

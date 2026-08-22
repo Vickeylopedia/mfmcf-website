@@ -15,6 +15,7 @@ import {
 import { Link } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
 import { Reveal } from "@/components/reveal";
+import { Marquee } from "@/components/marquee";
 import {
   ActionLink,
   Eyebrow,
@@ -34,6 +35,12 @@ function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute -right-24 top-1/3 z-0 size-[30rem] rounded-full bg-[hsl(var(--accent)/.3)] blur-[120px]"
         />
+        <span
+          aria-hidden="true"
+          className="ghost-word ghost-word-light right-[-4%] top-[52%] hidden lg:block"
+        >
+          LOVE
+        </span>
         <div className="relative z-10 mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
           <div className="relative z-10 reveal">
             <Eyebrow tone="accent">
@@ -94,8 +101,29 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="bg-[hsl(var(--card))] px-5 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
+      <Marquee
+        items={[
+          "Family of Love",
+          "Word",
+          "Worship",
+          "Welcome",
+          "Prayer",
+          "Community",
+          "FUNAAB Campus",
+        ]}
+      />
+      <section className="relative overflow-hidden bg-[hsl(var(--card))] px-5 py-16 lg:px-10 lg:py-24">
+        <span
+          aria-hidden="true"
+          className="ghost-word -bottom-10 right-[-2%]"
+        >
+          ROOM
+        </span>
+        <div
+          aria-hidden="true"
+          className="dot-grid absolute -left-10 -top-10 size-64 opacity-70"
+        />
+        <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
           <Reveal variant="left">
             <SectionHeading
               eyebrow="Our north star"
@@ -104,8 +132,11 @@ function Home() {
             />
           </Reveal>
           <Reveal variant="right" delay={100}>
-            <div className="max-w-2xl lg:pt-10">
-            <p className="text-2xl leading-snug text-[hsl(var(--foreground))] sm:text-3xl">
+            <div className="relative max-w-2xl lg:pt-10">
+              <span className="sticker absolute -top-7 right-6 hidden rotate-[3deg] bg-[hsl(var(--accent))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--foreground))] sm:block">
+                Making room · since day one
+              </span>
+              <p className="text-2xl leading-snug text-[hsl(var(--foreground))] sm:text-3xl">
               “Family of Love” is not a line on a banner. It is how we choose
               to show up — with open seats, honest questions, loud worship,
               and the kind of care that remembers your exam timetable.
@@ -221,6 +252,12 @@ function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute -bottom-32 -left-24 z-0 size-[22rem] rounded-full bg-[hsl(var(--primary)/.35)] blur-[110px]"
         />
+        <span
+          aria-hidden="true"
+          className="ghost-word ghost-word-light left-[-3%] top-6 hidden lg:block"
+        >
+          BELONG
+        </span>
         <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-center">
           <Reveal variant="left">
             <div>

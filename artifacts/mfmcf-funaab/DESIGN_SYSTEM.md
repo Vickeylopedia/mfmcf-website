@@ -164,6 +164,15 @@ to screens):
 
 Patterns documented but composed in place (see pages):
 
+- **Editorial layer** — oversized background words (`.ghost-word`,
+  Fraunces at ~20vw, `foreground/.055` or light/accent variants, desktop
+  only, clipped by their section), the `Marquee` band (mono labels +
+  asterisks scrolling on an accent/primary/foreground strip), `.dot-grid`
+  texture patches, and rotated `.sticker` badges (solid accent chips with
+  soft shadow) overlapping photos and statements. About's story section
+  composes these as an overlapping collage: polaroid-framed photo, tilted
+  inset photo, corner sticker. One or two editorial elements per section,
+  never all at once.
 - **Header (floating glass bar)** — fixed overlay, inset from all edges,
   `rounded-2xl`, gradient background (`background/.95 → /.8` top-to-bottom)
   over `backdrop-blur-xl`, thin foreground/10 border, soft shadow. Floats

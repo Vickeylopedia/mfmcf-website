@@ -31,6 +31,7 @@ function Contact() {
     <Shell>
       <PageIntro
         eyebrow="Come as you are"
+        ghost="HELLO"
         title={
           <>
             Let’s make

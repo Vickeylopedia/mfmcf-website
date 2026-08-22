@@ -8,6 +8,7 @@ function About() {
     <Shell>
       <PageIntro
         eyebrow="Who we are"
+        ghost="FAMILY"
         title={<>The kind of faith you can bring to class.</>}
         intro="MFMCF FUNAAB is a campus Christian family — rooted in prayer, honest about the journey, and convinced that nobody should have to do university life alone."
       >
@@ -17,20 +18,44 @@ function About() {
           <Stat number="∞" label="Room to grow" />
         </div>
       </PageIntro>
-      <section className="px-5 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
+      <section className="relative overflow-hidden px-5 py-16 lg:px-10 lg:py-24">
+        <span
+          aria-hidden="true"
+          className="ghost-word -bottom-10 left-[-2%]"
+        >
+          STORY
+        </span>
+        <div
+          aria-hidden="true"
+          className="dot-grid absolute right-0 top-10 size-56 opacity-70"
+        />
+        <div className="relative z-10 mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
           <Reveal variant="left">
-            <div className="relative">
-              <div className="aspect-[.82] max-w-md overflow-hidden">
-                <img
-                  src={photos.joy}
-                  alt="Fellowship members celebrating together"
-                  className="photo-shift h-full w-full object-cover"
-                />
+            <div className="relative max-w-md pr-6 pb-12 sm:pr-10">
+              <span className="sticker absolute -left-3 -top-6 z-20 rotate-[-6deg] bg-[hsl(var(--accent))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--foreground))]">
+                Family of Love
+              </span>
+              <div className="sticker -rotate-[2deg] bg-white p-3">
+                <div className="aspect-[.82] overflow-hidden">
+                  <img
+                    src={photos.joy}
+                    alt="Fellowship members celebrating together"
+                    className="photo-shift h-full w-full object-cover"
+                  />
+                </div>
+                <p className="mono-label px-1 pb-1 pt-3 text-[9px] text-[hsl(var(--muted-foreground))]">
+                  A Sunday with the family
+                </p>
               </div>
-              <p className="absolute -bottom-5 -right-2 bg-[hsl(var(--accent))] px-5 py-4 text-sm font-bold sm:right-10">
-                Family of Love, since day one.
-              </p>
+              <div className="sticker absolute -bottom-0 right-0 z-10 w-[48%] rotate-[4deg] border-8 border-[hsl(var(--primary))] bg-white">
+                <div className="aspect-square overflow-hidden">
+                  <img
+                    src={photos.fellowshipWorship}
+                    alt="Hands lifted during a moment of worship"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
             </div>
           </Reveal>
           <Reveal variant="right" delay={100}>
@@ -61,8 +86,14 @@ function About() {
           </Reveal>
         </div>
       </section>
-      <section className="bg-[hsl(var(--secondary))] px-5 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto max-w-[1380px]">
+      <section className="relative overflow-hidden bg-[hsl(var(--secondary))] px-5 py-16 lg:px-10 lg:py-24">
+        <span
+          aria-hidden="true"
+          className="ghost-word -bottom-10 right-[-2%]"
+        >
+          ROOTS
+        </span>
+        <div className="relative z-10 mx-auto max-w-[1380px]">
           <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
             What holds us together
           </p>
