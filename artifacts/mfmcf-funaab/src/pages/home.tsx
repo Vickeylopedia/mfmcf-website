@@ -4,6 +4,7 @@ import { useParallax } from "@/hooks/use-parallax";
 import {
   ArrowDownRight,
   ArrowUpRight,
+  Asterisk,
   CalendarDays,
   Check,
   Clock3,
@@ -31,9 +32,17 @@ function Home() {
   const { sermons } = useSermons();
   return (
     <Shell>
-      <section className="home-hero relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
+      <section className="home-hero grain relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
         <div className="home-orbit pointer-events-none absolute -right-32 -top-40 size-[32rem] rounded-full border border-white/10" />
         <div className="home-orbit home-orbit-small pointer-events-none absolute -right-16 -top-24 size-[25rem] rounded-full border border-white/10" />
+        <div
+          aria-hidden="true"
+          className="dot-grid-light pointer-events-none absolute right-[6%] top-10 h-[46%] w-[42%] opacity-50"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-[12rem] -left-[9rem] size-[34rem] rounded-full border border-dashed border-white/15"
+        />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-24 top-1/3 z-0 size-[30rem] rounded-full bg-[hsl(var(--accent)/.3)] blur-[120px]"
@@ -43,6 +52,24 @@ function Home() {
           className="ghost-word ghost-word-light right-[-4%] top-[52%] hidden lg:block"
         >
           LOVE
+        </span>
+        <span
+          aria-hidden="true"
+          className="spine-text pointer-events-none absolute left-2 top-1/2 hidden -translate-y-1/2 font-mono text-[10px] font-bold uppercase tracking-[.32em] text-white/30 xl:block"
+        >
+          MFMCF · FUNAAB · FAMILY OF LOVE
+        </span>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[30%] top-[14%] hidden font-mono text-lg font-bold text-white/30 lg:block"
+        >
+          +
+        </span>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-[20%] right-[5%] hidden font-mono text-lg font-bold text-white/30 lg:block"
+        >
+          +
         </span>
         <div className="relative z-10 mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
           <div className="relative z-10 reveal">
@@ -173,8 +200,32 @@ function Home() {
           </Reveal>
         </div>
       </section>
-      <section className="px-5 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto max-w-[1380px]">
+      <section className="relative overflow-hidden px-5 py-16 lg:px-10 lg:py-24">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full border border-[hsl(var(--foreground)/.08)]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-20 bottom-6 size-72 rounded-full border border-dashed border-[hsl(var(--foreground)/.12)]"
+        />
+        <div
+          aria-hidden="true"
+          className="dot-grid pointer-events-none absolute right-1/4 top-10 size-48 opacity-60"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[7%] top-[34%] hidden font-mono text-lg font-bold text-[hsl(var(--foreground)/.2)] lg:block"
+        >
+          +
+        </span>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-[16%] right-[10%] hidden font-mono text-lg font-bold text-[hsl(var(--foreground)/.2)] lg:block"
+        >
+          +
+        </span>
+        <div className="relative z-10 mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <SectionHeading
               eyebrow="A week with us"
@@ -219,8 +270,16 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="bg-[hsl(var(--secondary))] px-5 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto max-w-[1380px]">
+      <section className="relative overflow-hidden bg-[hsl(var(--secondary))] px-5 py-16 lg:px-10 lg:py-24">
+        <Asterisk
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-10 -top-12 size-48 rotate-12 text-[hsl(var(--primary)/.12)]"
+        />
+        <div
+          aria-hidden="true"
+          className="dot-grid pointer-events-none absolute bottom-8 right-[8%] size-40 opacity-60"
+        />
+        <div className="relative z-10 mx-auto max-w-[1380px]">
           <div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]">
             <Reveal variant="left">
               <div>
@@ -260,7 +319,7 @@ function Home() {
           </div>
         </div>
       </section>
-      <section className="relative overflow-hidden bg-[hsl(var(--foreground))] px-5 py-20 text-white lg:px-10 lg:py-28">
+      <section className="grain relative overflow-hidden bg-[hsl(var(--foreground))] px-5 py-20 text-white lg:px-10 lg:py-28">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-32 -top-24 z-0 size-[26rem] rounded-full bg-[hsl(var(--accent)/.22)] blur-[120px]"
