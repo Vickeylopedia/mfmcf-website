@@ -191,12 +191,14 @@ Patterns documented but composed in place (see pages):
   inset photo, corner sticker. One or two editorial elements per section,
   never all at once.
 - **Header (floating glass bar)** — fixed overlay, inset from all edges,
-  `rounded-2xl`, gradient background (`background/.95 → /.8` top-to-bottom)
-  over `backdrop-blur-xl`, thin foreground/10 border, soft shadow. Floats
+  `rounded-xl` with a 2px marigold top rule (masthead device), gradient
+  background (`background/.95 → /.8` top-to-bottom) over
+  `backdrop-blur-md`, thin foreground/10 border, soft shadow. Floats
   over the hero (page content starts at y=0; page tops carry clearance
   padding). Logo tile (white frame, hover rotate-3), mono chapter lockup,
-  nav links with scale-x underline, outline CONNECT button. Mobile menu is
-  a matching floating dropdown panel (`rounded-xl`, same blur treatment)
+  nav links in the mono wayfinding style (uppercase, bold, tracked) with
+  scale-x underline, outline CONNECT button. Mobile menu is a matching
+  floating dropdown panel (`rounded-lg`, same rule + blur treatment)
   with pill hover rows. The page wrapper uses `overflow-x-clip` (not
   `hidden`, which breaks sticky).
 - **Hero collage** — main + secondary framed photos, floating info card
