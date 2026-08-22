@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import {
   ArrowDownRight,
+  ArrowUpRight,
   CalendarDays,
   Check,
   Clock3,
@@ -9,10 +11,15 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
-import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
-import { Shell, ButtonLink } from "@/components/layout/site-shell";
-import { photos } from "@/lib/site";
+import { Shell } from "@/components/layout/site-shell";
+import {
+  ActionLink,
+  Eyebrow,
+  PhotoFrame,
+  SectionHeading,
+} from "@/components/foundation";
+import { getSermon, type Sermon } from "@/lib/sermons";
 
 function Home() {
   return (
@@ -22,9 +29,9 @@ function Home() {
         <div className="home-orbit home-orbit-small pointer-events-none absolute -right-16 -top-24 size-[25rem] rounded-full border border-white/10" />
         <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[.85fr_1.15fr] lg:items-end">
           <div className="relative z-10 reveal">
-            <p className="mono-label text-[10px] text-[hsl(var(--accent))]">
-              Mountain of Fire & Miracles Campus Fellowship
-            </p>
+            <Eyebrow tone="accent">
+              Mountain of Fire &amp; Miracles Campus Fellowship
+            </Eyebrow>
             <h1 className="display-font mt-7 max-w-2xl text-6xl leading-[.88] tracking-[-.055em] sm:text-8xl lg:text-[9.2rem]">
               Family
               <br />
@@ -37,9 +44,9 @@ function Home() {
               gets practical and no one has to walk campus alone.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              <ButtonLink href="/contact" inverted>
+              <ActionLink href="/contact" inverted testId="link-contact-cta">
                 Plan your first visit
-              </ButtonLink>
+              </ActionLink>
               <Link
                 href="/about"
                 data-testid="link-home-our-story"
@@ -51,25 +58,21 @@ function Home() {
             </div>
           </div>
           <div className="relative min-h-[420px] reveal reveal-delay-2 sm:min-h-[560px]">
-            <div className="hero-photo-main absolute right-0 top-0 h-[76%] w-[78%] overflow-hidden border-8 border-[hsl(var(--primary))] bg-white/10 shadow-2xl">
-              <img
-                src={photos.gathering}
-                alt="Students gathered during a Sunday service"
-                className="photo-shift h-full w-full object-cover"
-                data-testid="img-home-hero"
-              />
-            </div>
-            <div className="hero-photo-secondary absolute bottom-0 left-0 h-[54%] w-[58%] overflow-hidden border-8 border-[hsl(var(--primary))] bg-white/10">
-              <img
-                src={photos.joy}
-                alt="Three fellowship members smiling together"
-                className="photo-shift h-full w-full object-cover"
-              />
-            </div>
+            <PhotoFrame
+              src={getSermon("the-grace-called-favour")?.image ?? ""}
+              alt="Students gathered during a Sunday service"
+              className="hero-photo-main absolute right-0 top-0 h-[76%] w-[78%] bg-white/10 shadow-2xl"
+              testId="img-home-hero"
+            />
+            <PhotoFrame
+              src={getSermon("life-giving-spirits")?.image ?? ""}
+              alt="Three fellowship members smiling together"
+              className="hero-photo-secondary absolute bottom-0 left-0 h-[54%] w-[58%] bg-white/10"
+            />
             <div className="hero-info-card absolute bottom-10 right-0 border border-white/30 bg-[hsl(var(--foreground))] px-5 py-4 text-white shadow-xl sm:bottom-16 sm:px-7">
-              <p className="mono-label text-[9px] text-[hsl(var(--accent))]">
+              <Eyebrow tone="accent" className="text-[9px]">
                 This Sunday
-              </p>
+              </Eyebrow>
               <p className="mt-1 font-semibold">Word · Worship · Welcome</p>
               <p className="mt-1 text-xs text-white/60">
                 New Lecture Theatre · 9:00 AM
@@ -83,14 +86,11 @@ function Home() {
       </section>
       <section className="bg-[hsl(var(--card))] px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
-          <div>
-            <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
-              Our north star
-            </p>
-            <h2 className="display-font mt-5 max-w-md text-5xl leading-[.96] tracking-[-.035em] sm:text-6xl">
-              A family that makes room.
-            </h2>
-          </div>
+          <SectionHeading
+            eyebrow="Our north star"
+            title="A family that makes room."
+            headingClassName="mt-5 max-w-md leading-[.96]"
+          />
           <div className="max-w-2xl lg:pt-10">
             <p className="text-2xl leading-snug text-[hsl(var(--foreground))] sm:text-3xl">
               “Family of Love” is not a line on a banner. It is how we choose
@@ -114,17 +114,20 @@ function Home() {
       <section className="px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-            <div>
-              <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
-                A week with us
-              </p>
-              <h2 className="display-font mt-4 text-5xl leading-none tracking-[-.035em] sm:text-6xl">
-                There’s a place
-                <br />
-                in the rhythm.
-              </h2>
-            </div>
-            <ButtonLink href="/contact">See where to find us</ButtonLink>
+            <SectionHeading
+              eyebrow="A week with us"
+              title={
+                <>
+                  There’s a place
+                  <br />
+                  in the rhythm.
+                </>
+              }
+              headingClassName="leading-none"
+            />
+            <ActionLink href="/contact" testId="link-contact-cta">
+              See where to find us
+            </ActionLink>
           </div>
           <div className="mt-12 grid gap-px border border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--foreground)/.12)] md:grid-cols-3">
             <EventCard
@@ -152,14 +155,17 @@ function Home() {
         <div className="mx-auto max-w-[1380px]">
           <div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]">
             <div>
-              <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
-                From the archive
-              </p>
-              <h2 className="display-font mt-4 text-5xl leading-[.94] tracking-[-.04em] sm:text-6xl">
-                God still
-                <br />
-                <em className="font-normal">speaks.</em>
-              </h2>
+              <SectionHeading
+                eyebrow="From the archive"
+                title={
+                  <>
+                    God still
+                    <br />
+                    <em className="font-normal">speaks.</em>
+                  </>
+                }
+                headingClassName="leading-[.94] tracking-[-.04em]"
+              />
               <p className="mt-6 max-w-sm text-sm leading-6 text-[hsl(var(--muted-foreground))]">
                 Catch up on a word you missed, or press play on something you
                 need today.
@@ -174,16 +180,8 @@ function Home() {
               </Link>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <SermonCard
-                title="The grace called favour"
-                date="Sunday service · Psalm 5:12"
-                image={photos.word}
-              />
-              <SermonCard
-                title="Life-giving spirits"
-                date="Sunday service · 1 Cor 15:45"
-                image={photos.worship}
-              />
+              <SermonCard sermon={getSermon("the-grace-called-favour")} />
+              <SermonCard sermon={getSermon("life-giving-spirits")} />
             </div>
           </div>
         </div>
@@ -200,13 +198,12 @@ function Home() {
             </p>
           </div>
           <div className="relative mx-auto w-full max-w-sm">
-            <div className="aspect-[4/5] overflow-hidden border-8 border-[hsl(var(--foreground))]">
-              <img
-                src={photos.prayer}
-                alt="Students in a moment of prayer"
-                className="photo-shift h-full w-full object-cover"
-              />
-            </div>
+            <PhotoFrame
+              src={getSermon("when-prayer-becomes-home")?.image ?? ""}
+              alt="Students in a moment of prayer"
+              frame="foreground"
+              className="aspect-[4/5]"
+            />
             <div className="absolute -bottom-5 -left-5 bg-[hsl(var(--accent))] px-5 py-4 text-[hsl(var(--foreground))]">
               <p className="mono-label text-[9px]">Family of Love</p>
               <p className="mt-1 text-sm font-bold">A place to be known.</p>
@@ -217,9 +214,7 @@ function Home() {
       <section className="site-grid px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto flex max-w-[1380px] flex-col justify-between gap-8 border-y border-[hsl(var(--foreground)/.14)] py-10 sm:flex-row sm:items-center">
           <div>
-            <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
-              Keep in touch
-            </p>
+            <Eyebrow>Keep in touch</Eyebrow>
             <h2 className="display-font mt-3 text-4xl tracking-[-.03em] sm:text-5xl">
               The good stuff, occasionally.
             </h2>
@@ -243,11 +238,11 @@ function EventCard({
   time: string;
 }) {
   return (
-    <article className="bg-[hsl(var(--card))] p-6 transition hover:bg-[hsl(var(--primary))] hover:text-white sm:p-8">
+    <article className="group bg-[hsl(var(--card))] p-6 transition hover:bg-[hsl(var(--primary))] hover:text-white sm:p-8">
       <div className="flex items-start justify-between">
-        <span className="mono-label text-[10px] text-[hsl(var(--primary))]">
+        <Eyebrow className="[.group:hover_&]:text-[hsl(var(--accent))]">
           {day}
-        </span>
+        </Eyebrow>
         <CalendarDays className="size-5 opacity-50" />
       </div>
       <h3 className="display-font mt-14 text-3xl leading-none">{title}</h3>
@@ -259,27 +254,25 @@ function EventCard({
   );
 }
 
-function SermonCard({
-  title,
-  date,
-  image,
-}: {
-  title: string;
-  date: string;
-  image: string;
-}) {
+function SermonCard({ sermon }: { sermon?: Sermon }) {
+  if (!sermon) return null;
   return (
     <Link
-      href="/sermons"
-      data-testid={`link-sermon-${title.toLowerCase().replaceAll(" ", "-")}`}
+      href={`/sermons/${sermon.slug}`}
+      data-testid={`link-sermon-${sermon.title.toLowerCase().replaceAll(" ", "-")}`}
       className="group block"
     >
-      <div className="aspect-[1.28] overflow-hidden">
-        <img src={image} alt="" className="photo-shift h-full w-full object-cover" />
-      </div>
+      <PhotoFrame
+        src={sermon.image}
+        alt=""
+        frame="none"
+        className="aspect-[1.28]"
+      />
       <div className="border border-t-0 border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--card))] p-5">
-        <p className="mono-label text-[9px] text-[hsl(var(--primary))]">{date}</p>
-        <h3 className="mt-3 text-xl font-semibold">{title}</h3>
+        <p className="mono-label text-[9px] text-[hsl(var(--primary))]">
+          Sunday service · {sermon.scripture}
+        </p>
+        <h3 className="mt-3 text-xl font-semibold">{sermon.title}</h3>
         <span className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))]">
           Listen now <Play className="size-3 fill-current" />
         </span>
@@ -290,38 +283,53 @@ function SermonCard({
 
 function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const subscribe = useSubscribeNewsletter();
+  const sent = subscribe.isSuccess;
+
   return (
     <form
-      className="flex w-full max-w-md gap-2"
+      className="w-full max-w-md"
       onSubmit={(e) => {
         e.preventDefault();
-        if (email.trim()) setSent(true);
+        if (email.trim()) subscribe.mutate({ data: { email } });
       }}
     >
-      <label htmlFor="newsletter-email" className="sr-only">
-        Email address
-      </label>
-      <input
-        id="newsletter-email"
-        type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={sent ? "You’re on the list." : "Your email address"}
-        disabled={sent}
-        data-testid="input-newsletter-email"
-        className="min-w-0 flex-1 border border-[hsl(var(--foreground)/.18)] bg-[hsl(var(--card)/.6)] px-4 py-3 text-sm outline-none transition placeholder:text-[hsl(var(--muted-foreground))] focus:border-[hsl(var(--primary))]"
-      />
-      <button
-        type="submit"
-        disabled={sent}
-        data-testid="button-newsletter-submit"
-        className="flex shrink-0 items-center gap-2 bg-[hsl(var(--primary))] px-4 py-3 text-xs font-bold text-white transition hover:bg-[hsl(var(--foreground))]"
-      >
-        {sent ? <Check className="size-4" /> : <Send className="size-4" />}
-        <span className="hidden sm:inline">{sent ? "Thank you" : "Join us"}</span>
-      </button>
+      <div className="flex gap-2">
+        <label htmlFor="newsletter-email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="newsletter-email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={sent ? "You’re on the list." : "Your email address"}
+          disabled={sent || subscribe.isPending}
+          data-testid="input-newsletter-email"
+          className="min-w-0 flex-1 border border-[hsl(var(--foreground)/.18)] bg-[hsl(var(--card)/.6)] px-4 py-3 text-sm outline-none transition placeholder:text-[hsl(var(--muted-foreground))] focus:border-[hsl(var(--primary))]"
+        />
+        <button
+          type="submit"
+          disabled={sent || subscribe.isPending}
+          data-testid="button-newsletter-submit"
+          className="flex shrink-0 items-center gap-2 bg-[hsl(var(--primary))] px-4 py-3 text-xs font-bold text-white transition hover:bg-[hsl(var(--foreground))] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {sent ? <Check className="size-4" /> : <Send className="size-4" />}
+          <span className="hidden sm:inline">
+            {sent ? "Thank you" : subscribe.isPending ? "Joining…" : "Join us"}
+          </span>
+        </button>
+      </div>
+      {subscribe.isError && (
+        <p
+          role="alert"
+          data-testid="text-newsletter-error"
+          className="mt-2 text-sm font-semibold text-red-600"
+        >
+          That didn’t go through. Please try again in a moment.
+        </p>
+      )}
     </form>
   );
 }

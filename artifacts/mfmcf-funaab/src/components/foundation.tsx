@@ -1,26 +1,34 @@
 import type { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
+import { cn } from "@/lib/utils";
 
 /**
  * Design-system foundations. Extracted verbatim from the live screens — see
- * DESIGN_SYSTEM.md. Screens still compose their own classes; these primitives
- * exist so the apply pass can swap them in without visual change.
+ * DESIGN_SYSTEM.md. Later className overrides win via tailwind-merge, so a
+ * screen can tweak leading/max-width without forking the primitive.
  */
 
 /** Mono eyebrow label. `primary` on light backgrounds, `accent` on dark. */
 export function Eyebrow({
   children,
   tone = "primary",
-  className = "",
+  weight = "regular",
+  className,
 }: {
   children: ReactNode;
   tone?: "primary" | "accent";
+  weight?: "regular" | "bold";
   className?: string;
 }) {
   return (
     <p
-      className={`mono-label text-[10px] font-bold text-[hsl(var(--${tone}))] ${className}`}
+      className={cn(
+        "mono-label text-[10px] text-[hsl(var(--primary))]",
+        tone === "accent" && "text-[hsl(var(--accent))]",
+        weight === "bold" && "font-bold",
+        className,
+      )}
     >
       {children}
     </p>
@@ -30,26 +38,25 @@ export function Eyebrow({
 /** Eyebrow + Fraunces display heading, the standard section opener. */
 export function SectionHeading({
   eyebrow,
+  eyebrowTone = "primary",
   title,
-  tone = "primary",
-  size = "section",
-  className = "",
+  className,
+  headingClassName,
 }: {
   eyebrow: string;
+  eyebrowTone?: "primary" | "accent";
   title: ReactNode;
-  tone?: "primary" | "accent";
-  size?: "section" | "cinema";
   className?: string;
+  headingClassName?: string;
 }) {
   return (
     <div className={className}>
-      <Eyebrow tone={tone}>{eyebrow}</Eyebrow>
+      <Eyebrow tone={eyebrowTone}>{eyebrow}</Eyebrow>
       <h2
-        className={`display-font mt-4 tracking-[-.035em] ${
-          size === "cinema"
-            ? "max-w-xl text-5xl leading-[.92] tracking-[-.04em] sm:text-7xl"
-            : "mt-5 max-w-md text-5xl leading-[.96] sm:text-6xl"
-        }`}
+        className={cn(
+          "display-font mt-4 text-5xl tracking-[-.035em] sm:text-6xl",
+          headingClassName,
+        )}
       >
         {title}
       </h2>
@@ -72,17 +79,16 @@ const actionArrow = (
 export function ActionButton({
   children,
   inverted = false,
-  className = "",
+  className,
   ...rest
 }: {
   children: ReactNode;
   inverted?: boolean;
-  className?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
-      className={`${actionClasses(inverted)} ${className}`}
+      className={cn(actionClasses(inverted), className)}
       {...rest}
     >
       {children}
@@ -96,7 +102,7 @@ export function ActionLink({
   href,
   children,
   inverted = false,
-  className = "",
+  className,
   testId,
 }: {
   href: string;
@@ -109,7 +115,7 @@ export function ActionLink({
     <Link
       href={href}
       {...(testId ? { "data-testid": testId } : {})}
-      className={`${actionClasses(inverted)} ${className}`}
+      className={cn(actionClasses(inverted), className)}
     >
       {children}
       {actionArrow}
@@ -117,28 +123,41 @@ export function ActionLink({
   );
 }
 
-/** Bordered photo frame with the signature hover scale. */
+/** Photo frame. Bordered hero style by default; `frame="none"` for plain crops. */
 export function PhotoFrame({
   src,
   alt,
-  className = "",
-  imgClassName = "",
+  frame = "primary",
   shift = true,
+  className,
+  imgClassName,
+  testId,
 }: {
   src: string;
   alt: string;
+  frame?: "primary" | "foreground" | "none";
+  shift?: boolean;
   className?: string;
   imgClassName?: string;
-  shift?: boolean;
+  testId?: string;
 }) {
   return (
     <div
-      className={`overflow-hidden border-8 border-[hsl(var(--primary))] bg-white/10 ${className}`}
+      className={cn(
+        "overflow-hidden",
+        frame !== "none" && `border-8 border-[hsl(var(--${frame}))]`,
+        className,
+      )}
     >
       <img
         src={src}
         alt={alt}
-        className={`h-full w-full object-cover ${shift ? "photo-shift" : ""} ${imgClassName}`}
+        {...(testId ? { "data-testid": testId } : {})}
+        className={cn(
+          "h-full w-full object-cover",
+          shift && "photo-shift",
+          imgClassName,
+        )}
       />
     </div>
   );

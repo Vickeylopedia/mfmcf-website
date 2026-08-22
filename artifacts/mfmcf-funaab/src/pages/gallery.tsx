@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
+import { PhotoFrame, SectionHeading } from "@/components/foundation";
 import { photos } from "@/lib/site";
 
 const galleryItems = [
@@ -66,18 +67,20 @@ function Gallery() {
       <section className="gallery-cinema overflow-hidden bg-[hsl(var(--foreground))] px-5 py-14 text-white lg:px-10 lg:py-24">
         <div className="mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
-            <div>
-              <p className="mono-label text-[10px] text-[hsl(var(--accent))]">
-                The family, in frames
-              </p>
-              <h2 className="display-font mt-4 max-w-xl text-5xl leading-[.92] tracking-[-.04em] sm:text-7xl">
-                Stay for the
-                <br />
-                <em className="font-normal text-[hsl(var(--accent))]">
-                  whole story.
-                </em>
-              </h2>
-            </div>
+            <SectionHeading
+              eyebrow="The family, in frames"
+              eyebrowTone="accent"
+              title={
+                <>
+                  Stay for the
+                  <br />
+                  <em className="font-normal text-[hsl(var(--accent))]">
+                    whole story.
+                  </em>
+                </>
+              }
+              headingClassName="max-w-xl leading-[.92] tracking-[-.04em] sm:text-7xl"
+            />
             <div className="flex items-center gap-4">
               <div className="hidden text-right sm:block">
                 <p className="mono-label text-[9px] text-white/45">
@@ -125,13 +128,13 @@ function Gallery() {
                   i === safeActive ? "is-active" : ""
                 }`}
               >
-                <div className="gallery-card-image aspect-[1.18] overflow-hidden bg-white/10 sm:aspect-[1.35]">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                <PhotoFrame
+                  src={item.image}
+                  alt={item.title}
+                  frame="none"
+                  shift={false}
+                  className="gallery-card-image aspect-[1.18] bg-white/10 sm:aspect-[1.35]"
+                />
                 <div className="gallery-card-shade absolute inset-0" />
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
                   <p className="mono-label text-[9px] text-[hsl(var(--accent))]">
