@@ -15,9 +15,26 @@ import { Eyebrow } from "@/components/foundation";
 import { downloadSermonWithArtwork } from "@/lib/audio-downloader";
 
 function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
+  if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
+  const totalSecs = Math.floor(seconds);
+  const hrs = Math.floor(totalSecs / 3600);
+  const mins = Math.floor((totalSecs % 3600) / 60);
+  const secs = totalSecs % 60;
+  if (hrs > 0) {
+    return `${hrs}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+function formatCurrentTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0:00";
+  const totalSecs = Math.floor(seconds);
+  const hrs = Math.floor(totalSecs / 3600);
+  const mins = Math.floor((totalSecs % 3600) / 60);
+  const secs = totalSecs % 60;
+  if (hrs > 0) {
+    return `${hrs}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
   return `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
@@ -208,8 +225,8 @@ export function AudioPlayer({
               />
             </div>
             <div className="mt-2 flex justify-between font-mono text-[10px] font-bold text-[hsl(var(--muted-foreground))]">
-              <span>{formatTime(current)}</span>
-              <span>{duration > 0 ? formatTime(duration) : "35:00"}</span>
+              <span>{formatCurrentTime(current)}</span>
+              <span>{duration > 0 ? formatTime(duration) : "--:--"}</span>
             </div>
           </div>
         </div>
@@ -336,10 +353,24 @@ export function AudioPlayer({
         ref={audioRef}
         src={src}
         preload="metadata"
+        crossOrigin="anonymous"
         onLoadedMetadata={(e) => {
-          if (e.currentTarget.duration && !Number.isNaN(e.currentTarget.duration)) {
+          if (e.currentTarget.duration && Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
             setDuration(e.currentTarget.duration);
           }
+        }}
+        onDurationChange={(e) => {
+          if (e.currentTarget.duration && Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
+            setDuration(e.currentTarget.duration);
+          }
+        }}
+        onCanPlay={(e) => {
+          if (e.currentTarget.duration && Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
+            setDuration(e.currentTarget.duration);
+          }
+        }}
+        onError={() => {
+          setPlaying(false);
         }}
         onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
         onPlay={() => setPlaying(true)}

@@ -204,22 +204,95 @@ function galleryForm(input: GalleryInput): FormData {
   return form;
 }
 
-export const createSermon = async (input: SermonInput) => {
+function uploadWithProgress<T>(
+  url: string,
+  method: "POST" | "PUT",
+  body: FormData,
+  onProgress?: (percent: number) => void,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.withCredentials = true;
+
+    const headers = adminHeaders();
+    for (const [key, value] of Object.entries(headers)) {
+      xhr.setRequestHeader(key, value);
+    }
+
+    if (xhr.upload && onProgress) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable && event.total > 0) {
+          const percent = Math.min(
+            99,
+            Math.round((event.loaded / event.total) * 100),
+          );
+          onProgress(percent);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      if (onProgress) onProgress(100);
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(xhr.responseText || "{}");
+      } catch {
+        parsed = null;
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(parsed as T);
+      } else {
+        const errorMsg =
+          parsed?.message || `Upload failed (status ${xhr.status})`;
+        reject(new Error(errorMsg));
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network connection error during file upload"));
+    };
+
+    xhr.ontimeout = () => {
+      reject(new Error("Upload request timed out"));
+    };
+
+    xhr.send(body);
+  });
+}
+
+export const createSermon = async (
+  input: SermonInput,
+  onProgress?: (percent: number) => void,
+) => {
   try {
-    const res = await fetch(apiUrl("/api/admin/sermons"), withForm(sermonForm(input)));
-    if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+    return await uploadWithProgress(
+      apiUrl("/api/admin/sermons"),
+      "POST",
+      sermonForm(input),
+      onProgress,
+    );
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   return addLocalSermon(input);
 };
 
-export const updateSermon = async (id: number, input: SermonInput) => {
+export const updateSermon = async (
+  id: number,
+  input: SermonInput,
+  onProgress?: (percent: number) => void,
+) => {
   try {
-    const res = await fetch(apiUrl(`/api/admin/sermons/${id}`), withPutForm(sermonForm(input)));
-    if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+    return await uploadWithProgress(
+      apiUrl(`/api/admin/sermons/${id}`),
+      "PUT",
+      sermonForm(input),
+      onProgress,
+    );
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   return updateLocalSermon(id, input);
 };
@@ -228,29 +301,44 @@ export const deleteSermon = async (id: number) => {
   try {
     const res = await fetch(apiUrl(`/api/admin/sermons/${id}`), withDelete());
     if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   await deleteLocalSermon(id);
   return { deleted: true };
 };
 
-export const createNews = async (input: NewsInput) => {
+export const createNews = async (
+  input: NewsInput,
+  onProgress?: (percent: number) => void,
+) => {
   try {
-    const res = await fetch(apiUrl("/api/admin/news"), withForm(newsForm(input)));
-    if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+    return await uploadWithProgress(
+      apiUrl("/api/admin/news"),
+      "POST",
+      newsForm(input),
+      onProgress,
+    );
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   return addLocalNews(input);
 };
 
-export const updateNews = async (id: number, input: NewsInput) => {
+export const updateNews = async (
+  id: number,
+  input: NewsInput,
+  onProgress?: (percent: number) => void,
+) => {
   try {
-    const res = await fetch(apiUrl(`/api/admin/news/${id}`), withPutForm(newsForm(input)));
-    if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+    return await uploadWithProgress(
+      apiUrl(`/api/admin/news/${id}`),
+      "PUT",
+      newsForm(input),
+      onProgress,
+    );
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   return updateLocalNews(id, input);
 };
@@ -259,29 +347,44 @@ export const deleteNews = async (id: number) => {
   try {
     const res = await fetch(apiUrl(`/api/admin/news/${id}`), withDelete());
     if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   await deleteLocalNews(id);
   return { deleted: true };
 };
 
-export const createGalleryItem = async (input: GalleryInput) => {
+export const createGalleryItem = async (
+  input: GalleryInput,
+  onProgress?: (percent: number) => void,
+) => {
   try {
-    const res = await fetch(apiUrl("/api/admin/gallery"), withForm(galleryForm(input)));
-    if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+    return await uploadWithProgress(
+      apiUrl("/api/admin/gallery"),
+      "POST",
+      galleryForm(input),
+      onProgress,
+    );
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   return addLocalGalleryItem(input);
 };
 
-export const updateGalleryItem = async (id: number, input: GalleryInput) => {
+export const updateGalleryItem = async (
+  id: number,
+  input: GalleryInput,
+  onProgress?: (percent: number) => void,
+) => {
   try {
-    const res = await fetch(apiUrl(`/api/admin/gallery/${id}`), withPutForm(galleryForm(input)));
-    if (res.ok) return await json(res);
-  } catch {
-    // API server offline
+    return await uploadWithProgress(
+      apiUrl(`/api/admin/gallery/${id}`),
+      "PUT",
+      galleryForm(input),
+      onProgress,
+    );
+  } catch (err) {
+    if (API_BASE) throw err;
   }
   return updateLocalGalleryItem(id, input);
 };

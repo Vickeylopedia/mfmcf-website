@@ -162,7 +162,11 @@ export async function downloadSermonWithArtwork({
   try {
     // 1. Fetch audio buffer
     const audioRes = await fetch(audioSrc);
-    if (!audioRes.ok) throw new Error("Audio download failed");
+    if (!audioRes.ok) throw new Error(`Audio download failed (HTTP ${audioRes.status})`);
+    const contentType = audioRes.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      throw new Error("Server returned HTML document instead of audio media file");
+    }
     const audioArrayBuffer = await audioRes.arrayBuffer();
     const audioBytes = new Uint8Array(audioArrayBuffer);
 
@@ -214,9 +218,12 @@ export async function downloadSermonWithArtwork({
   } catch (err) {
     console.warn("Direct embedding failed; falling back to direct download", err);
 
-    // Direct audio download
+    // Direct audio download with attachment header request
+    const downloadUrl = audioSrc.includes("?")
+      ? `${audioSrc}&download=1`
+      : `${audioSrc}?download=1`;
     const audioLink = document.createElement("a");
-    audioLink.href = audioSrc;
+    audioLink.href = downloadUrl;
     audioLink.download = safeFilename;
     audioLink.target = "_blank";
     document.body.appendChild(audioLink);

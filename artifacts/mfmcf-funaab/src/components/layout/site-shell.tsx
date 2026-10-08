@@ -65,7 +65,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="min-h-[100dvh] overflow-x-clip">
       <header className="fixed inset-x-0 top-2 z-40 px-3 lg:top-3 lg:px-6">
         <div className="mx-auto max-w-[1380px]">
-          <div className="flex items-center justify-between border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-4 py-3 sm:px-8 shadow-[4px_4px_0px_hsl(var(--foreground))] [clip-path:polygon(14px_0,100%_0,calc(100%-14px)_100%,0_100%)] sm:[clip-path:polygon(22px_0,100%_0,calc(100%-22px)_100%,0_100%)]">
+          <div className="flex items-center justify-between border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-4 py-3 sm:px-8 shadow-[4px_4px_0px_hsl(var(--foreground))]">
             <Link
               href="/"
               data-testid="link-logo-home"

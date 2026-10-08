@@ -19,7 +19,7 @@ import {
   updateSermon,
 } from "@/lib/admin-api";
 import { useGallery, useNews, useSermons } from "@/lib/queries";
-import { withBase } from "@/lib/site";
+import { withBase, resolveMediaUrl } from "@/lib/site";
 
 /**
  * Admin studio: password-gated content management for sermons, news, and
@@ -91,6 +91,65 @@ function FileHint({ file, hint }: { file: File | null; hint: string }) {
     <p className="mono-label mt-2 text-[9px] normal-case tracking-normal text-[hsl(var(--muted-foreground))]">
       {file ? file.name : hint}
     </p>
+  );
+}
+
+function UploadProgress({
+  progress,
+  label = "Uploading media files…",
+}: {
+  progress: number;
+  label?: string;
+}) {
+  return (
+    <div className="space-y-2 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))] p-3.5 shadow-[2px_2px_0px_hsl(var(--foreground))]">
+      <div className="flex items-center justify-between font-mono text-xs font-bold">
+        <span>{progress < 100 ? label : "Processing and finalizing…"}</span>
+        <span className="font-black text-[hsl(var(--primary))]">{progress}%</span>
+      </div>
+      <div className="h-3 w-full overflow-hidden border border-[hsl(var(--foreground))] bg-white">
+        <div
+          className="h-full bg-[hsl(var(--primary))] transition-all duration-150"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <p className="font-mono text-[10px] text-[hsl(var(--muted-foreground))]">
+        {progress < 100
+          ? "Please keep this browser window open until upload completes."
+          : "Almost done, saving to database…"}
+      </p>
+    </div>
+  );
+}
+
+function ThumbnailImage({
+  src,
+  alt = "",
+  className = "h-full w-full object-cover",
+}: {
+  src?: string | null;
+  alt?: string;
+  className?: string;
+}) {
+  const [error, setError] = useState(false);
+  const resolved = resolveMediaUrl(src);
+
+  if (!resolved || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[hsl(var(--secondary))] text-[hsl(var(--muted-foreground))] font-mono text-[9px] uppercase tracking-wider">
+        No art
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={resolved}
+      alt={alt}
+      onError={() => setError(true)}
+      className={className}
+      loading="lazy"
+    />
   );
 }
 
@@ -276,6 +335,7 @@ function SermonsAdmin() {
   });
   const [artwork, setArtwork] = useState<File | null>(null);
   const [audio, setAudio] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const invalidate = () => client.invalidateQueries({ queryKey: ["sermons"] });
@@ -287,12 +347,16 @@ function SermonsAdmin() {
         artwork,
         audio,
       };
-      if (editing !== null && editing >= 0) {
-        return updateSermon(editing, input);
+      if (artwork || audio) {
+        setUploadProgress(0);
       }
-      return createSermon(input);
+      if (editing !== null && editing >= 0) {
+        return updateSermon(editing, input, (p) => setUploadProgress(p));
+      }
+      return createSermon(input, (p) => setUploadProgress(p));
     },
     onSuccess: async () => {
+      setUploadProgress(null);
       setError(null);
       setEditing(null);
       setForm({ title: "", speaker: "", iso: "", tag: "Teaching", scripture: "", description: "" });
@@ -300,7 +364,10 @@ function SermonsAdmin() {
       setAudio(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => {
+      setUploadProgress(null);
+      setError(err.message);
+    },
   });
   const remove = useMutation({
     mutationFn: (id: number) => deleteSermon(id),
@@ -416,6 +483,12 @@ function SermonsAdmin() {
             <FileHint file={audio} hint="mp3, m4a, aac, ogg or wav — up to 60MB" />
           </Field>
           <FormError message={error} />
+          {uploadProgress !== null && (
+            <UploadProgress
+              progress={uploadProgress}
+              label={audio ? "Uploading sermon audio & artwork…" : "Uploading sermon…"}
+            />
+          )}
           <div className="flex items-center gap-3">
             <AdminButton type="submit" disabled={save.isPending}>
               {save.isPending ? (
@@ -449,11 +522,10 @@ function SermonsAdmin() {
               key={sermon.slug}
               className="flex items-center gap-4 border-t border-[hsl(var(--foreground)/.12)] py-4"
             >
-              <div className="size-14 shrink-0 overflow-hidden bg-[hsl(var(--secondary))]">
-                <img
+              <div className="size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground)/.2)] bg-[hsl(var(--secondary))]">
+                <ThumbnailImage
                   src={sermon.image}
-                  alt=""
-                  className="h-full w-full object-cover"
+                  alt={sermon.title}
                 />
               </div>
               <div className="min-w-0 flex-1">
@@ -492,23 +564,31 @@ function NewsAdmin() {
     full: "",
   });
   const [artwork, setArtwork] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const invalidate = () => client.invalidateQueries({ queryKey: ["news"] });
   const save = useMutation({
     mutationFn: () => {
       const input = { ...form, artwork };
-      if (editing !== null && editing >= 0) return updateNews(editing, input);
-      return createNews(input);
+      if (artwork) setUploadProgress(0);
+      if (editing !== null && editing >= 0) {
+        return updateNews(editing, input, (p) => setUploadProgress(p));
+      }
+      return createNews(input, (p) => setUploadProgress(p));
     },
     onSuccess: async () => {
+      setUploadProgress(null);
       setError(null);
       setEditing(null);
       setForm({ title: "", iso: "", tag: "Family", body: "", full: "" });
       setArtwork(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => {
+      setUploadProgress(null);
+      setError(err.message);
+    },
   });
   const remove = useMutation({
     mutationFn: (id: number) => deleteNews(id),
@@ -598,6 +678,12 @@ function NewsAdmin() {
             <FileHint file={artwork} hint="jpg, png, webp or gif" />
           </Field>
           <FormError message={error} />
+          {uploadProgress !== null && (
+            <UploadProgress
+              progress={uploadProgress}
+              label="Uploading announcement note…"
+            />
+          )}
           <div className="flex items-center gap-3">
             <AdminButton type="submit" disabled={save.isPending}>
               {save.isPending ? (
@@ -631,8 +717,8 @@ function NewsAdmin() {
               className="flex items-center gap-4 border-t border-[hsl(var(--foreground)/.12)] py-4"
             >
               {post.artwork && (
-                <div className="size-14 shrink-0 overflow-hidden bg-[hsl(var(--secondary))]">
-                  <img src={post.artwork} alt="" className="h-full w-full object-cover" />
+                <div className="size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground)/.2)] bg-[hsl(var(--secondary))]">
+                  <ThumbnailImage src={post.artwork} alt={post.title} />
                 </div>
               )}
               <div className="min-w-0 flex-1">
@@ -664,19 +750,27 @@ function GalleryAdmin() {
   const client = useQueryClient();
   const [form, setForm] = useState({ title: "", type: "Community", desc: "" });
   const [image, setImage] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const invalidate = () =>
     client.invalidateQueries({ queryKey: ["gallery"] });
   const save = useMutation({
-    mutationFn: () => createGalleryItem({ ...form, image }),
+    mutationFn: () => {
+      if (image) setUploadProgress(0);
+      return createGalleryItem({ ...form, image }, (p) => setUploadProgress(p));
+    },
     onSuccess: async () => {
+      setUploadProgress(null);
       setError(null);
       setForm({ title: "", type: "Community", desc: "" });
       setImage(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => {
+      setUploadProgress(null);
+      setError(err.message);
+    },
   });
   const remove = useMutation({
     mutationFn: (id: number) => deleteGalleryItem(id),
@@ -736,6 +830,12 @@ function GalleryAdmin() {
             <FileHint file={image} hint="jpg, png, webp or gif — landscape works best" />
           </Field>
           <FormError message={error} />
+          {uploadProgress !== null && (
+            <UploadProgress
+              progress={uploadProgress}
+              label="Uploading photo story…"
+            />
+          )}
           <AdminButton type="submit" disabled={save.isPending}>
             {save.isPending ? (
               <Loader2 className="size-4 animate-spin" />
@@ -755,10 +855,9 @@ function GalleryAdmin() {
               className="group relative border border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--card))] p-2"
             >
               <div className="aspect-[1.18] overflow-hidden bg-[hsl(var(--secondary))]">
-                <img
-                  src={item.image.startsWith("/") ? withBase(item.image) : item.image}
+                <ThumbnailImage
+                  src={item.image}
                   alt={item.title}
-                  className="h-full w-full object-cover"
                 />
               </div>
               <p className="mt-2 truncate px-1 text-xs font-bold">{item.title}</p>

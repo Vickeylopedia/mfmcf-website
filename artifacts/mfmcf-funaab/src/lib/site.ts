@@ -1,11 +1,31 @@
 import { Facebook, Instagram, Youtube } from "lucide-react";
 
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? "https://mfmcf-funaab-api.onrender.com" : "")
+).replace(/\/+$/, "");
+
 /**
  * Static asset URLs must be prefixed with the deploy base path: Vite only
  * rewrites asset URLs it can see at build time, not runtime string literals.
  */
 export const withBase = (path: string) =>
   `${import.meta.env.BASE_URL.replace(/\/$/, "")}${path}`;
+
+/**
+ * Resolves media URLs (uploaded artwork, audio, gallery photos):
+ * - If already absolute (http:, https:, data:, blob:) -> return as-is
+ * - If backend file path (/api/...) -> prepend API_BASE_URL
+ * - If frontend static asset (/assets/...) -> use withBase()
+ */
+export const resolveMediaUrl = (url: string | null | undefined): string => {
+  if (!url) return "";
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+  if (url.startsWith("/api/")) {
+    return `${API_BASE_URL}${url}`;
+  }
+  return withBase(url);
+};
 
 export const logo = withBase("/assets/mfmcf_funaab_logo_no_bg.png");
 

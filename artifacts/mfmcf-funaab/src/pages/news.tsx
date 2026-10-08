@@ -37,10 +37,13 @@ function News() {
                 <article className="grid gap-5 border-t border-[hsl(var(--foreground)/.18)] py-8 sm:grid-cols-[.28fr_1fr_.25fr] sm:gap-10">
                   <div>
                     {item.artwork && (
-                      <div className="mb-3 aspect-square w-16 overflow-hidden bg-[hsl(var(--secondary))] sm:w-full">
+                      <div className="mb-3 aspect-square w-16 overflow-hidden border border-[hsl(var(--foreground)/.15)] bg-[hsl(var(--secondary))] sm:w-full">
                         <img
                           src={item.artwork}
-                          alt=""
+                          alt={item.title}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/assets/image_1787352840643.png";
+                          }}
                           className="h-full w-full object-cover"
                         />
                       </div>

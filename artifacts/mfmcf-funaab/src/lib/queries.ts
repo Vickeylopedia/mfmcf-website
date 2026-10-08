@@ -7,7 +7,7 @@ import {
   type NewsPostDto,
   type SermonDto,
 } from "@workspace/api-client-react";
-import { withBase, photos } from "@/lib/site";
+import { withBase, photos, resolveMediaUrl } from "@/lib/site";
 import {
   getLocalSermons,
   getLocalNews,
@@ -41,9 +41,9 @@ const mapSermon = (dto: SermonDto, index: number): SermonView => ({
   scripture: dto.scripture,
   summary: dto.summary,
   image: dto.artworkUrl
-    ? withBase(dto.artworkUrl)
+    ? resolveMediaUrl(dto.artworkUrl)
     : FALLBACK_ART[index % FALLBACK_ART.length],
-  audio: dto.audioUrl ? withBase(dto.audioUrl) : null,
+  audio: dto.audioUrl ? resolveMediaUrl(dto.audioUrl) : null,
 });
 
 export function useSermons() {
@@ -70,7 +70,7 @@ export const mapNews = (dto: NewsPostDto): NewsView => ({
   tag: dto.tag,
   body: dto.body,
   full: dto.full,
-  artwork: dto.artworkUrl ? withBase(dto.artworkUrl) : null,
+  artwork: dto.artworkUrl ? resolveMediaUrl(dto.artworkUrl) : null,
 });
 
 export function useNews() {
@@ -94,7 +94,7 @@ export const mapGallery = (dto: GalleryItemDto): GalleryView => ({
   title: dto.title,
   type: dto.type,
   desc: dto.desc,
-  image: withBase(dto.imageUrl),
+  image: resolveMediaUrl(dto.imageUrl),
 });
 
 export function useGallery() {

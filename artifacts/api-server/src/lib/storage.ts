@@ -1,5 +1,5 @@
 import { createReadStream, existsSync } from "node:fs";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import {
@@ -107,6 +107,82 @@ export async function putObject(
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, bytes);
   return key;
+}
+
+export async function getObjectInfo(
+  key: string,
+): Promise<{ size: number; contentType: string } | null> {
+  const contentType = contentTypeFor(key);
+
+  if (onR2 && r2Bucket) {
+    try {
+      const client = getS3Client();
+      const res = await client.send(
+        new HeadObjectCommand({
+          Bucket: r2Bucket,
+          Key: key,
+        }),
+      );
+      return {
+        size: res.ContentLength ?? 0,
+        contentType: res.ContentType || contentType,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  if (onReplit) {
+    const client = await getReplitClient();
+    const exists = await client.exists(key);
+    if (!exists.ok || !exists.value) return null;
+    return { size: 0, contentType };
+  }
+
+  const target = localPath(key);
+  if (!existsSync(target)) return null;
+  try {
+    const s = await stat(target);
+    return { size: s.size, contentType };
+  } catch {
+    return null;
+  }
+}
+
+export async function getObjectStream(
+  key: string,
+  range?: { start: number; end: number },
+): Promise<Readable | null> {
+  if (onR2 && r2Bucket) {
+    try {
+      const client = getS3Client();
+      const res = await client.send(
+        new GetObjectCommand({
+          Bucket: r2Bucket,
+          Key: key,
+          Range: range ? `bytes=${range.start}-${range.end}` : undefined,
+        }),
+      );
+      if (!res.Body) return null;
+      return res.Body as Readable;
+    } catch {
+      return null;
+    }
+  }
+
+  if (onReplit) {
+    const client = await getReplitClient();
+    const exists = await client.exists(key);
+    if (!exists.ok || !exists.value) return null;
+    return client.downloadAsStream(key);
+  }
+
+  const target = localPath(key);
+  if (!existsSync(target)) return null;
+  if (range) {
+    return createReadStream(target, { start: range.start, end: range.end });
+  }
+  return createReadStream(target);
 }
 
 export async function getObject(

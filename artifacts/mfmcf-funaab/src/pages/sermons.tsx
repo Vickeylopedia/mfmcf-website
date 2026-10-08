@@ -82,10 +82,13 @@ function Sermons() {
                       data-testid={`button-play-sermon-${i}`}
                       className="relative block w-20 shrink-0 sm:w-24"
                     >
-                      <div className="aspect-square overflow-hidden">
+                      <div className="aspect-square overflow-hidden bg-[hsl(var(--secondary))]">
                         <img
                           src={sermon.image}
-                          alt=""
+                          alt={sermon.title}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/assets/image_1787353067577.png";
+                          }}
                           className="photo-shift h-full w-full object-cover"
                         />
                       </div>
