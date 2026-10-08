@@ -748,23 +748,90 @@ function NewsAdmin() {
 function GalleryAdmin() {
   const { gallery, isLoading } = useGallery();
   const client = useQueryClient();
-  const [form, setForm] = useState({ title: "", type: "Community", desc: "" });
-  const [image, setImage] = useState<File | null>(null);
+
+  // Custom categories saved in localStorage and merged from existing items
+  const [categories, setCategories] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem("mfmcf_gallery_custom_categories");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return ["Fellowship", "Gatherings", "Outreach", "Bible Study"];
+  });
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("Fellowship");
+  const [isNewCategory, setIsNewCategory] = useState<boolean>(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Sync any categories in existing gallery into the categories menu
+  useEffect(() => {
+    if (gallery.length > 0) {
+      const fromItems = Array.from(new Set(gallery.map((g) => g.type).filter(Boolean)));
+      setCategories((prev) => {
+        const merged = Array.from(new Set([...prev, ...fromItems]));
+        try {
+          localStorage.setItem("mfmcf_gallery_custom_categories", JSON.stringify(merged));
+        } catch {}
+        return merged;
+      });
+    }
+  }, [gallery]);
+
   const invalidate = () =>
     client.invalidateQueries({ queryKey: ["gallery"] });
+
   const save = useMutation({
-    mutationFn: () => {
-      if (image) setUploadProgress(0);
-      return createGalleryItem({ ...form, image }, (p) => setUploadProgress(p));
+    mutationFn: async () => {
+      const categoryToUse = (
+        isNewCategory ? newCategoryName.trim() : selectedCategory.trim()
+      ) || "Moments";
+
+      if (!categoryToUse) {
+        throw new Error("Please specify a category for the images.");
+      }
+      if (selectedFiles.length === 0) {
+        throw new Error("Please select at least one image to upload.");
+      }
+
+      // Save new custom category to state & localStorage for future reuse
+      setCategories((prev) => {
+        const updated = Array.from(new Set([...prev, categoryToUse]));
+        try {
+          localStorage.setItem("mfmcf_gallery_custom_categories", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+
+      setUploadProgress(0);
+
+      // Upload all selected images in sequence with cumulative progress
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        await createGalleryItem(
+          {
+            title: categoryToUse,
+            type: categoryToUse,
+            desc: "",
+            image: file,
+          },
+          (percent) => {
+            const overall = Math.round(
+              ((i + percent / 100) / selectedFiles.length) * 100,
+            );
+            setUploadProgress(overall);
+          },
+        );
+      }
+      setUploadProgress(100);
     },
     onSuccess: async () => {
       setUploadProgress(null);
       setError(null);
-      setForm({ title: "", type: "Community", desc: "" });
-      setImage(null);
+      setSelectedFiles([]);
+      setIsNewCategory(false);
+      setNewCategoryName("");
       await invalidate();
     },
     onError: (err: Error) => {
@@ -772,6 +839,7 @@ function GalleryAdmin() {
       setError(err.message);
     },
   });
+
   const remove = useMutation({
     mutationFn: (id: number) => deleteGalleryItem(id),
     onSuccess: invalidate,
@@ -790,59 +858,97 @@ function GalleryAdmin() {
         }}
         className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-6 sm:p-8"
       >
-        <Eyebrow>Add to the gallery</Eyebrow>
+        <Eyebrow>Upload gallery photos</Eyebrow>
+        <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+          Select multiple photos at once. They will all be filed under the chosen category.
+        </p>
+
         <div className="mt-6 space-y-5">
-          <Field label="Title">
-            <input
-              className={inputClass}
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              required
-            />
-          </Field>
+          {/* Custom Category Selection */}
           <Field label="Category">
-            <select
-              className={inputClass}
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-            >
-              <option>Worship</option>
-              <option>Community</option>
-              <option>Teaching</option>
-            </select>
+            <div className="space-y-3">
+              <select
+                className={inputClass}
+                value={isNewCategory ? "__new__" : selectedCategory}
+                onChange={(e) => {
+                  if (e.target.value === "__new__") {
+                    setIsNewCategory(true);
+                  } else {
+                    setIsNewCategory(false);
+                    setSelectedCategory(e.target.value);
+                  }
+                }}
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+                <option value="__new__">+ Create new custom category…</option>
+              </select>
+
+              {isNewCategory && (
+                <div className="rounded border border-[hsl(var(--primary)/.4)] bg-[hsl(var(--secondary)/.4)] p-3">
+                  <label className="block text-xs font-bold text-[hsl(var(--primary))] mb-1">
+                    Enter new custom category name:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Fresher’s Welcome, Music Ministry…"
+                    className={inputClass}
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                  />
+                  <p className="mono-label mt-1.5 text-[9px] text-[hsl(var(--muted-foreground))]">
+                    This category will automatically become part of your category menu.
+                  </p>
+                </div>
+              )}
+            </div>
           </Field>
-          <Field label="Description">
-            <textarea
-              className={`${inputClass} min-h-20 resize-y`}
-              value={form.desc}
-              onChange={(e) => setForm({ ...form, desc: e.target.value })}
-              required
-            />
-          </Field>
-          <Field label="Image">
+
+          {/* Multiple Image Selector */}
+          <Field label="Photos (select multiple images at once)">
             <input
               type="file"
+              multiple
               accept="image/jpeg,image/png,image/webp,image/gif"
               className={`${inputClass} file:mr-3 file:border-0 file:bg-[hsl(var(--secondary))] file:px-3 file:py-1.5 file:text-xs file:font-bold`}
-              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                if (e.target.files) {
+                  setSelectedFiles(Array.from(e.target.files));
+                }
+              }}
               required
             />
-            <FileHint file={image} hint="jpg, png, webp or gif — landscape works best" />
+            {selectedFiles.length > 0 ? (
+              <p className="mt-2 font-mono text-xs font-bold text-[hsl(var(--primary))]">
+                ✓ {selectedFiles.length} photo{selectedFiles.length > 1 ? "s" : ""} selected for upload
+              </p>
+            ) : (
+              <FileHint file={null} hint="Select multiple photos (jpg, png, webp, gif)" />
+            )}
           </Field>
+
           <FormError message={error} />
+
           {uploadProgress !== null && (
             <UploadProgress
               progress={uploadProgress}
-              label="Uploading photo story…"
+              label={`Uploading ${selectedFiles.length} photo${selectedFiles.length > 1 ? "s" : ""}…`}
             />
           )}
-          <AdminButton type="submit" disabled={save.isPending}>
+
+          <AdminButton type="submit" disabled={save.isPending || selectedFiles.length === 0}>
             {save.isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <Check className="size-4" />
             )}
-            Add photo story
+            {selectedFiles.length > 0
+              ? `Upload ${selectedFiles.length} photo${selectedFiles.length > 1 ? "s" : ""}`
+              : "Upload photos"}
           </AdminButton>
         </div>
       </form>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useParallax } from "@/hooks/use-parallax";
@@ -9,6 +9,8 @@ import {
   Asterisk,
   CalendarDays,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   MapPin,
   Play,
@@ -27,7 +29,7 @@ import {
   SectionHeading,
 } from "@/components/foundation";
 import { getSermon } from "@/lib/sermons";
-import { useSermons, type SermonView } from "@/lib/queries";
+import { useSermons, useNews, type SermonView, type NewsView } from "@/lib/queries";
 import { photos } from "@/lib/site";
 
 const HERO_PHRASES = [
@@ -330,6 +332,7 @@ function Home() {
   useDocumentTitle();
   const heroCollage = useParallax(72);
   const { sermons } = useSermons();
+  const { news } = useNews();
   return (
     <Shell>
       <section className="home-hero grain relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
@@ -557,51 +560,27 @@ function Home() {
         <div className="relative z-10 mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <SectionHeading
-              eyebrow="Weekly meetings"
+              eyebrow="Campus happenings"
               title={
                 <>
-                  Join us
+                  What’s happening
                   <br />
-                  this week.
+                  in the family.
                 </>
               }
               headingClassName="leading-none"
             />
-            <ActionLink href="/contact" testId="link-contact-cta">
-              See where to find us
-            </ActionLink>
+            <Link
+              href="/news"
+              data-testid="link-home-news-archive"
+              className="inline-flex items-center gap-2 text-sm font-bold text-[hsl(var(--primary))] transition hover:translate-x-1"
+            >
+              Browse all stories & updates <ArrowUpRight className="size-4" />
+            </Link>
           </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            <Reveal className="h-full">
-              <EventCard
-                day="SUN"
-                title="Sunday Gathering"
-                detail="A full-hearted service for the week ahead with spirited worship, the Word, and a family that knows your name."
-                time="9:00 AM"
-                location="New Lecture Theatre (NLT)"
-                image={photos.gathering}
-              />
-            </Reveal>
-            <Reveal className="h-full" delay={120}>
-              <EventCard
-                day="WED"
-                title="Midweek Recharge"
-                detail="Scripture study, open prayer, and deep honest conversations in between lectures to refresh your walk."
-                time="5:00 PM"
-                location="Family Rooms"
-                image={photos.word}
-              />
-            </Reveal>
-            <Reveal className="h-full" delay={240}>
-              <EventCard
-                day="FRI"
-                title="Family Hangout"
-                detail="A softer landing after a long campus week — laughter, indoor games, singing, and genuine connection."
-                time="4:30 PM"
-                location="Fellowship Grounds"
-                image={photos.joy}
-              />
-            </Reveal>
+          {/* Continuous scrolling marquee animation driven by admin news items */}
+          <div className="mt-10 sm:mt-12">
+            <HappeningsCarousel items={news} />
           </div>
         </div>
       </section>
@@ -647,9 +626,9 @@ function Home() {
             </Reveal>
           </div>
 
-          {/* Non-stop horizontal scrolling carousel: only 4 latest sermons, horizontal on mobile */}
+          {/* Non-animating horizontal slider with 4 latest sermons & side Next button */}
           <div className="mt-10 sm:mt-12">
-            <SermonCarousel sermons={sermons} />
+            <SermonSlider sermons={sermons} />
           </div>
         </div>
       </section>
@@ -713,77 +692,127 @@ function Home() {
   );
 }
 
-function EventCard({
-  day,
-  title,
-  detail,
-  time,
-  location,
-  image,
+function HappeningCard({
+  item,
+  index,
 }: {
-  day: string;
-  title: string;
-  detail: string;
-  time: string;
-  location: string;
-  image: string;
+  item: NewsView;
+  index: number;
 }) {
+  const fallbackImages = [
+    photos.gathering,
+    photos.word,
+    photos.joy,
+    photos.worship,
+    photos.community,
+  ];
+  const image = item.artwork || fallbackImages[index % fallbackImages.length];
+
   return (
     <Link
-      href="/contact"
-      className="group relative flex h-full min-h-[440px] flex-col justify-between overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] p-6 sm:p-8 shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-500 hover:-translate-y-2 hover:shadow-[8px_8px_0px_hsl(var(--foreground))] block cursor-pointer"
+      href="/news"
+      className="group relative flex h-full min-h-[420px] w-[290px] sm:w-[350px] shrink-0 flex-col justify-between overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] p-6 sm:p-7 shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-500 hover:-translate-y-2 hover:shadow-[8px_8px_0px_hsl(var(--foreground))] select-none block cursor-pointer"
     >
-      {/* Background Photo with smooth cinematic zoom */}
+      {/* Background Photo with smooth zoom */}
       <img
         src={image}
-        alt={title}
+        alt={item.title}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = photos.gathering;
+        }}
         className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-108"
       />
 
-      {/* Top Vignette for Badge & Arrow Readability */}
+      {/* Top Vignette */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/60 via-black/25 to-transparent"
       />
 
-      {/* Bottom Multi-Stop Deep Gradient for Crisp Text Legibility */}
+      {/* Deep Gradient for Crisp Text Legibility */}
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-gradient-to-t from-[hsl(263_45%_6%)] via-[hsl(263_38%_9%)/.92] via-45% to-[hsl(263_32%_14%)/.25] transition-colors duration-500 group-hover:from-[hsl(263_50%_5%)] group-hover:via-[hsl(278_54%_12%)/.94]"
       />
 
-      {/* Top Bar: Neo-Brutalist Day Badge & Interactive Arrow */}
+      {/* Top Tag & Interactive Arrow */}
       <div className="relative z-10 flex items-start justify-between">
         <span className="inline-flex items-center gap-1.5 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-3 py-1 font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_white]">
           <CalendarDays className="size-3.5" />
-          {day}
+          {item.tag || "Campus Update"}
         </span>
         <span className="flex size-9 items-center justify-center border border-white/25 bg-black/40 text-white backdrop-blur-md transition-all duration-300 group-hover:border-[hsl(var(--accent))] group-hover:bg-[hsl(var(--accent))] group-hover:text-[hsl(var(--foreground))] group-hover:rotate-45">
           <ArrowUpRight className="size-4" />
         </span>
       </div>
 
-      {/* Bottom Content: Title, Description, Time & Location */}
-      <div className="relative z-10 mt-28">
+      {/* Bottom Content */}
+      <div className="relative z-10 mt-24">
         <p className="mono-label text-[10px] tracking-widest text-[hsl(var(--accent))] font-bold">
-          Weekly Gathering
+          {item.date || "Latest Update"}
         </p>
-        <h3 className="display-font mt-1 text-3xl font-bold leading-tight text-white tracking-[-0.02em] transition-colors duration-300 group-hover:text-[hsl(var(--accent))] sm:text-4xl">
-          {title}
+        <h3 className="display-font mt-1 text-2xl sm:text-3xl font-bold leading-tight text-white tracking-[-0.02em] transition-colors duration-300 group-hover:text-[hsl(var(--accent))] line-clamp-2">
+          {item.title}
         </h3>
-        <p className="mt-3 text-sm leading-relaxed text-white/90 font-medium line-clamp-3">
-          {detail}
+        <p className="mt-3 text-xs sm:text-sm leading-relaxed text-white/90 font-medium line-clamp-3">
+          {item.body}
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/20 pt-4 font-mono text-xs font-bold text-white/95">
+        <div className="mt-5 flex items-center justify-between border-t border-white/20 pt-4 font-mono text-xs font-bold text-white/95">
           <span className="flex items-center gap-1.5 text-[hsl(var(--accent))]">
-            <Clock3 className="size-4" /> {time}
+            Read update <ArrowUpRight className="size-3.5" />
           </span>
-          <span className="flex items-center gap-1.5 text-white/85">
-            <MapPin className="size-3.5 text-white/70" /> {location}
+          <span className="text-white/70 text-[11px]">
+            MFMCF FUNAAB
           </span>
         </div>
       </div>
     </Link>
+  );
+}
+
+function HappeningsCarousel({ items }: { items: NewsView[] }) {
+  if (!items || !items.length) return null;
+
+  // Duplicate items to create a continuous, non-stop seamless infinite loop
+  const base =
+    items.length >= 4
+      ? items
+      : [...items, ...items, ...items, ...items].slice(0, 6);
+  const loopItems = [...base, ...base];
+
+  return (
+    <div className="relative w-full overflow-hidden py-3">
+      {/* Editorial side edge gradient masks */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 sm:w-16 bg-gradient-to-r from-[hsl(var(--background))] to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 sm:w-16 bg-gradient-to-l from-[hsl(var(--background))] to-transparent"
+      />
+
+      {/* Non-stop horizontal scrolling track */}
+      <motion.div
+        className="flex flex-row flex-nowrap gap-5 sm:gap-6 will-change-transform"
+        animate={{
+          x: ["0%", "-50%"],
+        }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",
+          duration: 25,
+        }}
+      >
+        {loopItems.map((item, idx) => (
+          <HappeningCard
+            key={`${item.id}-${idx}`}
+            item={item}
+            index={idx}
+          />
+        ))}
+      </motion.div>
+    </div>
   );
 }
 
@@ -806,7 +835,8 @@ function SermonCard({
           src={sermon.image}
           alt={sermon.title}
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = "/assets/image_1787353067577.png";
+            (e.currentTarget as HTMLImageElement).src =
+              "/assets/image_1787353067577.png";
           }}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -837,50 +867,108 @@ function SermonCard({
   );
 }
 
-function SermonCarousel({ sermons }: { sermons: SermonView[] }) {
-  // Only four of the latest sermons should be displayed at the home screen
+function SermonSlider({ sermons }: { sermons: SermonView[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+
+  // Exactly four latest sermons
   const latestSermons = sermons.slice(0, 4);
+
+  const checkScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 15);
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [latestSermons.length]);
+
+  const handleNext = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const card = el.firstElementChild as HTMLElement | null;
+    const scrollStep = (card?.clientWidth || 300) + 24;
+    // If reached or near end, loop back smoothly to start
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 20) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: scrollStep, behavior: "smooth" });
+    }
+  };
+
+  const handlePrev = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const card = el.firstElementChild as HTMLElement | null;
+    const scrollStep = (card?.clientWidth || 300) + 24;
+    el.scrollBy({ left: -scrollStep, behavior: "smooth" });
+  };
+
   if (!latestSermons.length) return null;
 
-  // Duplicate items to create a continuous, non-stop seamless infinite loop
-  const base =
-    latestSermons.length >= 4
-      ? latestSermons
-      : [...latestSermons, ...latestSermons, ...latestSermons, ...latestSermons].slice(0, 4);
-  const loopItems = [...base, ...base];
-
   return (
-    <div className="relative w-full overflow-hidden py-3">
-      {/* Editorial side edge gradient masks */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 sm:w-16 bg-gradient-to-r from-[hsl(var(--secondary))] to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 sm:w-16 bg-gradient-to-l from-[hsl(var(--secondary))] to-transparent"
-      />
+    <div className="relative w-full">
+      {/* Mobile-friendly top action bar */}
+      <div className="flex items-center justify-between pb-3 sm:hidden">
+        <span className="mono-label text-[10px] text-[hsl(var(--muted-foreground))]">
+          Showing 4 recent sermons
+        </span>
+        <button
+          type="button"
+          onClick={handleNext}
+          className="inline-flex items-center gap-1.5 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-3 py-1.5 font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] active:translate-y-0.5"
+        >
+          <span>Next sermon</span>
+          <ChevronRight className="size-3.5 stroke-[3]" />
+        </button>
+      </div>
 
-      {/* Non-stop horizontal scrolling track */}
-      <motion.div
-        className="flex flex-row flex-nowrap gap-4 sm:gap-6 will-change-transform"
-        animate={{
-          x: ["0%", "-50%"],
-        }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",
-          duration: 22,
-        }}
-      >
-        {loopItems.map((sermon, idx) => (
-          <SermonCard
-            key={`${sermon.slug}-${idx}`}
-            sermon={sermon}
-            index={idx}
-          />
-        ))}
-      </motion.div>
+      <div className="relative">
+        {/* Left Side Button (when scrolled) */}
+        {canScrollLeft && (
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label="Previous sermon"
+            className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 hidden sm:flex size-11 items-center justify-center rounded-full border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-[3px_3px_0px_hsl(var(--foreground))] transition-all hover:scale-110 active:scale-95"
+          >
+            <ChevronLeft className="size-5 stroke-[2.5]" />
+          </button>
+        )}
+
+        {/* Right Side Button: Next sermon */}
+        <button
+          type="button"
+          onClick={handleNext}
+          aria-label="See next sermon"
+          className="absolute -right-3 sm:-right-6 top-1/2 -translate-y-1/2 z-20 hidden sm:flex items-center gap-2 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-4 py-3 font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        >
+          <span>Next sermon</span>
+          <ChevronRight className="size-4 stroke-[3]" />
+        </button>
+
+        {/* Horizontal Non-Animating Scrollable Track */}
+        <div
+          ref={containerRef}
+          className="flex flex-row flex-nowrap gap-5 sm:gap-6 overflow-x-auto scroll-smooth py-3 scrollbar-none snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {latestSermons.map((sermon, idx) => (
+            <div key={`${sermon.slug}-${idx}`} className="shrink-0 snap-start">
+              <SermonCard sermon={sermon} index={idx} />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

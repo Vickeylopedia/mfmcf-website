@@ -172,30 +172,40 @@ function Gallery() {
     };
   }, []);
 
-  const filters = ["All", "Worship", "Community", "Teaching"];
+  const [showAll, setShowAll] = useState(false);
+
+  // Dynamic categories from all gallery items
+  const dynamicCategories = [
+    "All",
+    ...Array.from(new Set(gallery.map((g) => g.type).filter(Boolean))),
+  ];
+  const filters = dynamicCategories.length > 1 ? dynamicCategories : ["All", "Fellowship", "Gatherings"];
 
   // Combine fetched/store gallery with latest uploads
   const sortedGallery = [...gallery].sort((a, b) => b.id - a.id);
 
-  const shown = sortedGallery.filter(
+  const filtered = sortedGallery.filter(
     (item) => filter === "All" || item.type === filter,
   );
 
+  // Show only 10 images initially, then expand with "See more"
+  const shown = showAll ? filtered : filtered.slice(0, 10);
+
   const currentIndex = selectedPhoto
-    ? shown.findIndex((p) => p.id === selectedPhoto.id)
+    ? filtered.findIndex((p) => p.id === selectedPhoto.id)
     : -1;
 
   const handlePrev = useCallback(() => {
-    if (shown.length === 0 || currentIndex === -1) return;
-    const nextIdx = (currentIndex - 1 + shown.length) % shown.length;
-    setSelectedPhoto(shown[nextIdx]);
-  }, [currentIndex, shown]);
+    if (filtered.length === 0 || currentIndex === -1) return;
+    const nextIdx = (currentIndex - 1 + filtered.length) % filtered.length;
+    setSelectedPhoto(filtered[nextIdx]);
+  }, [currentIndex, filtered]);
 
   const handleNext = useCallback(() => {
-    if (shown.length === 0 || currentIndex === -1) return;
-    const nextIdx = (currentIndex + 1) % shown.length;
-    setSelectedPhoto(shown[nextIdx]);
-  }, [currentIndex, shown]);
+    if (filtered.length === 0 || currentIndex === -1) return;
+    const nextIdx = (currentIndex + 1) % filtered.length;
+    setSelectedPhoto(filtered[nextIdx]);
+  }, [currentIndex, filtered]);
 
   // Spotlight Auto-Cycling Engine (Desktop only)
   useEffect(() => {
@@ -718,7 +728,10 @@ function Gallery() {
                 key={item}
                 type="button"
                 data-testid={`button-gallery-filter-${item.toLowerCase()}`}
-                onClick={() => setFilter(item)}
+                onClick={() => {
+                  setFilter(item);
+                  setShowAll(false);
+                }}
                 className={`border px-3.5 py-1.5 text-xs font-bold transition ${
                   filter === item
                     ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-[hsl(var(--foreground))]"
@@ -800,6 +813,26 @@ function Gallery() {
               );
             })}
           </div>
+
+          {/* See more moments button if there are more than 10 photos */}
+          {filtered.length > 10 && (
+            <div className="mt-12 mb-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAll((prev) => !prev)}
+                className="group inline-flex items-center gap-2.5 border-2 border-[hsl(var(--accent))] bg-[hsl(var(--accent))] px-8 py-3.5 font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[4px_4px_0px_white] transition hover:-translate-y-1 hover:bg-white"
+              >
+                {showAll ? (
+                  <span>Show first 10 photos only</span>
+                ) : (
+                  <>
+                    <span>See more moments ({filtered.length - 10} more)</span>
+                    <ChevronRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </button>
+            </div>
+          )}
 
           {shown.length === 0 && (
             <div className="mt-16 text-center py-16 border border-dashed border-white/20">

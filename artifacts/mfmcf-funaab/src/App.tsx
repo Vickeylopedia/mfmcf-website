@@ -15,6 +15,8 @@ import Admin from "@/pages/admin";
 import SermonDetail from "@/pages/sermon-detail";
 import Sermons from "@/pages/sermons";
 import { SplashScreen } from "@/components/splash-screen";
+import { AudioProvider } from "@/lib/audio-context";
+import { FloatingAudioPlayer } from "@/components/floating-audio-player";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000 } },
@@ -49,15 +51,19 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <SplashScreen />
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <AudioProvider>
+        <TooltipProvider>
+          <SplashScreen />
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <FloatingAudioPlayer />
+          <Toaster />
+        </TooltipProvider>
+      </AudioProvider>
     </QueryClientProvider>
   );
 }
 
 export default App;
+

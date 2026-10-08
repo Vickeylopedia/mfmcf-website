@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, type MouseEvent } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import {
   Check,
   Download,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Eyebrow } from "@/components/foundation";
 import { downloadSermonWithArtwork } from "@/lib/audio-downloader";
+import { useAudio } from "@/lib/audio-context";
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
@@ -45,6 +46,7 @@ export interface AudioPlayerProps {
   artworkUrl: string;
   scripture?: string;
   date?: string;
+  slug?: string;
 }
 
 export function AudioPlayer({
@@ -54,78 +56,83 @@ export function AudioPlayer({
   artworkUrl,
   scripture,
   date,
+  slug,
 }: AudioPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
+  const {
+    track: globalTrack,
+    isPlaying: globalPlaying,
+    currentTime: globalCurrent,
+    duration: globalDuration,
+    playbackRate,
+    volume,
+    isMuted,
+    playTrack,
+    togglePlay: globalTogglePlay,
+    seek: globalSeek,
+    skip: globalSkip,
+    setRate,
+    setVolume: globalSetVolume,
+    toggleMute: globalToggleMute,
+  } = useAudio();
 
-  const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
+  const barRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadDone, setDownloadDone] = useState(false);
+
+  const isCurrentTrack = globalTrack?.src === src;
+  const playing = isCurrentTrack && globalPlaying;
+  const current = isCurrentTrack ? globalCurrent : 0;
+  const duration = isCurrentTrack ? globalDuration : 0;
 
   // Speed options
   const speeds = [1, 1.25, 1.5, 2];
 
   const cycleSpeed = () => {
     const nextIdx = (speeds.indexOf(playbackRate) + 1) % speeds.length;
-    const nextSpeed = speeds[nextIdx];
-    setPlaybackRate(nextSpeed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = nextSpeed;
-    }
+    setRate(speeds[nextIdx]);
   };
 
   const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (audio.paused) {
-      audio.play().catch((err) => {
-        console.warn("Audio play prevented or file unavailable", err);
-      });
+    if (isCurrentTrack) {
+      globalTogglePlay();
     } else {
-      audio.pause();
+      playTrack({
+        src,
+        title,
+        speaker,
+        artworkUrl,
+        scripture,
+        date,
+        slug,
+      });
     }
   };
 
   const seek = (e: MouseEvent<HTMLDivElement>) => {
-    const audio = audioRef.current;
     const bar = barRef.current;
-    if (!audio || !bar || !duration) return;
+    if (!bar || !duration) return;
     const rect = bar.getBoundingClientRect();
     const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
     const newTime = ratio * duration;
-    audio.currentTime = newTime;
-    setCurrent(newTime);
+    if (isCurrentTrack) {
+      globalSeek(newTime);
+    } else {
+      playTrack({ src, title, speaker, artworkUrl, scripture, date, slug });
+      globalSeek(newTime);
+    }
   };
 
   const skip = (deltaSeconds: number) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const next = Math.min(Math.max(audio.currentTime + deltaSeconds, 0), duration || 9999);
-    audio.currentTime = next;
-    setCurrent(next);
-  };
-
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const next = !isMuted;
-    setIsMuted(next);
-    audio.muted = next;
+    if (isCurrentTrack) {
+      globalSkip(deltaSeconds);
+    } else {
+      playTrack({ src, title, speaker, artworkUrl, scripture, date, slug });
+    }
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number.parseFloat(e.target.value);
-    setVolume(val);
-    if (audioRef.current) {
-      audioRef.current.volume = val;
-      audioRef.current.muted = val === 0;
-      setIsMuted(val === 0);
-    }
+    globalSetVolume(val);
   };
 
   const handleDownload = async () => {
@@ -292,7 +299,7 @@ export function AudioPlayer({
           <div className="hidden items-center gap-2 lg:flex">
             <button
               type="button"
-              onClick={toggleMute}
+              onClick={globalToggleMute}
               className="text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]"
               aria-label={isMuted ? "Unmute" : "Mute"}
             >
@@ -342,37 +349,6 @@ export function AudioPlayer({
           </button>
         </div>
       </div>
-
-      {/* Hidden Native Audio Element */}
-      <audio
-        ref={audioRef}
-        src={src}
-        preload="metadata"
-        crossOrigin="anonymous"
-        onLoadedMetadata={(e) => {
-          if (e.currentTarget.duration && Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
-            setDuration(e.currentTarget.duration);
-          }
-        }}
-        onDurationChange={(e) => {
-          if (e.currentTarget.duration && Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
-            setDuration(e.currentTarget.duration);
-          }
-        }}
-        onCanPlay={(e) => {
-          if (e.currentTarget.duration && Number.isFinite(e.currentTarget.duration) && e.currentTarget.duration > 0) {
-            setDuration(e.currentTarget.duration);
-          }
-        }}
-        onError={() => {
-          setPlaying(false);
-        }}
-        onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onEnded={() => setPlaying(false)}
-        className="hidden"
-      />
     </div>
   );
 }

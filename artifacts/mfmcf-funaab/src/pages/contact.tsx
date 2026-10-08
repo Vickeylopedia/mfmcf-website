@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from "react";
-import { Check, Clock3, Mail, MapPin, Mic2, Send } from "lucide-react";
+import { ArrowUpRight, Check, Clock3, Mail, MapPin, Mic2, Send } from "lucide-react";
 import { useSubmitContact } from "@workspace/api-client-react";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
+import { Eyebrow } from "@/components/foundation";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function Contact() {
@@ -189,6 +190,43 @@ function Contact() {
               </div>
             )}
           </form>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── CAMPUS LOCATION MAP ── */}
+      <section className="border-t border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] px-5 py-12 lg:px-10 lg:py-16">
+        <div className="mx-auto max-w-[1380px]">
+          <Reveal>
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <Eyebrow>Find our gathering</Eyebrow>
+                <h2 className="display-font mt-2 text-3xl sm:text-4xl font-bold">
+                  Fellowship location on campus.
+                </h2>
+                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+                  Federal University of Agriculture, Abeokuta (FUNAAB) · New Lecture Theatre &amp; Chapel Grounds
+                </p>
+              </div>
+              <a
+                href="https://maps.app.goo.gl/xihdgqYP4ARSGjYLA"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-4 py-2 font-mono text-xs font-black uppercase text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-white"
+              >
+                Open in Google Maps <ArrowUpRight className="size-4" />
+              </a>
+            </div>
+
+            <div className="mt-6 overflow-hidden border-2 border-[hsl(var(--foreground))] shadow-[4px_4px_0px_hsl(var(--foreground))]">
+              <iframe
+                title="MFMCF FUNAAB Location Map"
+                src="https://maps.google.com/maps?q=Federal%20University%20of%20Agriculture%2C%20Abeokuta%2C%20Nigeria&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                className="h-[360px] w-full border-0 sm:h-[460px]"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
           </Reveal>
         </div>
       </section>

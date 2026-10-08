@@ -100,6 +100,7 @@ function SermonDetail() {
               artworkUrl={sermon.image}
               scripture={sermon.scripture}
               date={sermon.date}
+              slug={sermon.slug}
             />
           </Reveal>
         </div>
