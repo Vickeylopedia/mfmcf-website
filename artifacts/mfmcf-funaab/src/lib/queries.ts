@@ -53,11 +53,12 @@ export function useSermons() {
     retry: 1,
     staleTime: 30_000,
   });
+  const validData = Array.isArray(data) ? data : null;
   return {
-    sermons: data ? data.map(mapSermon) : getLocalSermons(),
+    sermons: validData ? validData.map(mapSermon) : getLocalSermons(),
     raw: data,
     isLoading,
-    live: data !== undefined,
+    live: validData !== null,
   };
 }
 
@@ -79,11 +80,12 @@ export function useNews() {
     retry: 1,
     staleTime: 30_000,
   });
+  const validData = Array.isArray(data) ? data : null;
   return {
-    news: data ? data.map(mapNews) : getLocalNews(),
+    news: validData ? validData.map(mapNews) : getLocalNews(),
     raw: data,
     isLoading,
-    live: data !== undefined,
+    live: validData !== null,
   };
 }
 
@@ -102,11 +104,12 @@ export function useGallery() {
     retry: 1,
     staleTime: 30_000,
   });
-  const items = data ? data.map(mapGallery) : getLocalGallery();
+  const validData = Array.isArray(data) ? data : null;
+  const items = validData ? validData.map(mapGallery) : getLocalGallery();
   return {
     gallery: [...items].sort((a, b) => b.id - a.id),
     raw: data,
     isLoading,
-    live: data !== undefined,
+    live: validData !== null,
   };
 }

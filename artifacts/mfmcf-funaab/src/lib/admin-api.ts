@@ -31,9 +31,16 @@ async function json<T>(res: Response): Promise<T> {
   return body as T;
 }
 
+export const API_BASE = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? "https://mfmcf-funaab-api.onrender.com" : "")
+).replace(/\/$/, "");
+
+const apiUrl = (path: string) => `${API_BASE}${path}`;
+
 export const getSession = async (): Promise<AdminSession> => {
   try {
-    const res = await fetch("/api/admin/session", {
+    const res = await fetch(apiUrl("/api/admin/session"), {
       headers: adminHeaders(),
       credentials: "include",
     });
@@ -64,7 +71,7 @@ export function adminHeaders(extra?: Record<string, string>): Record<string, str
 
 export async function login(password: string): Promise<void> {
   try {
-    const res = await fetch("/api/admin/login", {
+    const res = await fetch(apiUrl("/api/admin/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -104,7 +111,7 @@ export async function logout(): Promise<void> {
     sessionStorage.removeItem("mfmcf_admin_authenticated");
     localStorage.removeItem("mfmcf_admin_token");
   }
-  await fetch("/api/admin/logout", {
+  await fetch(apiUrl("/api/admin/logout"), {
     method: "POST",
     headers: adminHeaders(),
     credentials: "include",
@@ -199,7 +206,7 @@ function galleryForm(input: GalleryInput): FormData {
 
 export const createSermon = async (input: SermonInput) => {
   try {
-    const res = await fetch("/api/admin/sermons", withForm(sermonForm(input)));
+    const res = await fetch(apiUrl("/api/admin/sermons"), withForm(sermonForm(input)));
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -209,7 +216,7 @@ export const createSermon = async (input: SermonInput) => {
 
 export const updateSermon = async (id: number, input: SermonInput) => {
   try {
-    const res = await fetch(`/api/admin/sermons/${id}`, withPutForm(sermonForm(input)));
+    const res = await fetch(apiUrl(`/api/admin/sermons/${id}`), withPutForm(sermonForm(input)));
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -219,7 +226,7 @@ export const updateSermon = async (id: number, input: SermonInput) => {
 
 export const deleteSermon = async (id: number) => {
   try {
-    const res = await fetch(`/api/admin/sermons/${id}`, withDelete());
+    const res = await fetch(apiUrl(`/api/admin/sermons/${id}`), withDelete());
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -230,7 +237,7 @@ export const deleteSermon = async (id: number) => {
 
 export const createNews = async (input: NewsInput) => {
   try {
-    const res = await fetch("/api/admin/news", withForm(newsForm(input)));
+    const res = await fetch(apiUrl("/api/admin/news"), withForm(newsForm(input)));
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -240,7 +247,7 @@ export const createNews = async (input: NewsInput) => {
 
 export const updateNews = async (id: number, input: NewsInput) => {
   try {
-    const res = await fetch(`/api/admin/news/${id}`, withPutForm(newsForm(input)));
+    const res = await fetch(apiUrl(`/api/admin/news/${id}`), withPutForm(newsForm(input)));
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -250,7 +257,7 @@ export const updateNews = async (id: number, input: NewsInput) => {
 
 export const deleteNews = async (id: number) => {
   try {
-    const res = await fetch(`/api/admin/news/${id}`, withDelete());
+    const res = await fetch(apiUrl(`/api/admin/news/${id}`), withDelete());
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -261,7 +268,7 @@ export const deleteNews = async (id: number) => {
 
 export const createGalleryItem = async (input: GalleryInput) => {
   try {
-    const res = await fetch("/api/admin/gallery", withForm(galleryForm(input)));
+    const res = await fetch(apiUrl("/api/admin/gallery"), withForm(galleryForm(input)));
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -271,7 +278,7 @@ export const createGalleryItem = async (input: GalleryInput) => {
 
 export const updateGalleryItem = async (id: number, input: GalleryInput) => {
   try {
-    const res = await fetch(`/api/admin/gallery/${id}`, withPutForm(galleryForm(input)));
+    const res = await fetch(apiUrl(`/api/admin/gallery/${id}`), withPutForm(galleryForm(input)));
     if (res.ok) return await json(res);
   } catch {
     // API server offline
@@ -281,7 +288,7 @@ export const updateGalleryItem = async (id: number, input: GalleryInput) => {
 
 export const deleteGalleryItem = async (id: number) => {
   try {
-    const res = await fetch(`/api/admin/gallery/${id}`, withDelete());
+    const res = await fetch(apiUrl(`/api/admin/gallery/${id}`), withDelete());
     if (res.ok) return await json(res);
   } catch {
     // API server offline
