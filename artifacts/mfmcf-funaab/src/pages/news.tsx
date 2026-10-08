@@ -4,8 +4,10 @@ import { Shell, ButtonLink } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
 import { useNews } from "@/lib/queries";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function News() {
+  useDocumentTitle("Notes & Announcements");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { news, isLoading } = useNews();
 

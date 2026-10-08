@@ -1,0 +1,11 @@
+# Cloudflare Pages Routing & Reverse Proxy Configuration
+#
+# 1. API Reverse Proxy:
+# Proxies /api/* requests to your live Render backend web service.
+# Replace the URL below with your actual Render service URL (e.g. https://mfmcf-funaab-api.onrender.com/api/:splat).
+# The '200' status makes Cloudflare proxy the request seamlessly with NO cross-domain CORS issues.
+/api/*  https://mfmcf-funaab-api.onrender.com/api/:splat  200
+
+# 2. SPA Fallback:
+# Routes all other pages to index.html for client-side routing (wouter).
+/*  /index.html  200

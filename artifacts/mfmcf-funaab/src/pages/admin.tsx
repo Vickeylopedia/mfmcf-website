@@ -1,8 +1,9 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRight, Check, Loader2, Lock, Trash2, X } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, Loader2, Lock, Trash2, X } from "lucide-react";
 import { Link } from "wouter";
 import { Eyebrow } from "@/components/foundation";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
   createGalleryItem,
   createNews,
@@ -94,6 +95,25 @@ function FileHint({ file, hint }: { file: File | null; hint: string }) {
 }
 
 function Admin() {
+  useDocumentTitle("Admin Studio");
+
+  useEffect(() => {
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    const existingRobots = meta?.content;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "robots";
+      document.head.appendChild(meta);
+    }
+    meta.content = "noindex, nofollow";
+    return () => {
+      if (meta) {
+        if (existingRobots) meta.content = existingRobots;
+        else meta.remove();
+      }
+    };
+  }, []);
+
   const [tab, setTab] = useState<"sermons" | "news" | "gallery">("sermons");
   const session = useQuery({
     queryKey: ["admin-session"],
@@ -227,6 +247,16 @@ function Login({ configured }: { configured: boolean }) {
             Sign in
           </AdminButton>
         </div>
+        <div className="mt-5 text-center">
+          <Link
+            href="/"
+            data-testid="link-admin-back-to-site"
+            className="inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--foreground))]"
+          >
+            <ArrowLeft className="size-3.5" />
+            Back to website
+          </Link>
+        </div>
       </form>
     </div>
   );
@@ -279,8 +309,11 @@ function SermonsAdmin() {
 
   const startEdit = (id: number) => {
     const sermon = sermons.find((s) => s.id === id);
+    if (!sermon) return;
     const rawSermon = raw?.find((s) => s.id === id);
-    if (!sermon || !rawSermon) return;
+    const summaryText = rawSermon
+      ? rawSermon.summary.join("\n\n")
+      : sermon.summary.join("\n\n");
     setEditing(id);
     setForm({
       title: sermon.title,
@@ -288,7 +321,7 @@ function SermonsAdmin() {
       iso: sermon.iso,
       tag: sermon.tag,
       scripture: sermon.scripture,
-      description: rawSermon.summary.join("\n\n"),
+      description: summaryText,
     });
     setArtwork(null);
     setAudio(null);

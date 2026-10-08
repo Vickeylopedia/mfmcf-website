@@ -4,8 +4,10 @@ import { useSubmitContact } from "@workspace/api-client-react";
 import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function Contact() {
+  useDocumentTitle("Connect & Plan Your Visit");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [topic, setTopic] = useState("Planning my first visit");

@@ -1,19 +1,12 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { motion, type Variants } from "framer-motion";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export type RevealVariant = "up" | "left" | "right" | "scale";
 
 /**
- * Scroll reveal: the element stays hidden until it enters the viewport, then
- * transitions in once (see .reveal-item in index.css). Variants map to intent
- * — headings rise, split-grid columns drift in from their side, photos settle
- * at scale, list items stagger via `delay`.
+ * Scroll reveal: animates elements smoothly into view both when scrolling
+ * downward and upward across the site.
  */
 export function Reveal({
   children,
@@ -24,48 +17,45 @@ export function Reveal({
 }: {
   children: ReactNode;
   variant?: RevealVariant;
-  /** Stagger in ms; keep under ~300 so a section settles in one motion. */
+  /** Stagger in ms */
   delay?: number;
   className?: string;
   style?: CSSProperties;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -10% 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const variants: Record<RevealVariant, Variants> = {
+    up: {
+      hidden: { opacity: 0, y: 30 },
+      visible: { opacity: 1, y: 0 },
+    },
+    left: {
+      hidden: { opacity: 0, x: -36 },
+      visible: { opacity: 1, x: 0 },
+    },
+    right: {
+      hidden: { opacity: 0, x: 36 },
+      visible: { opacity: 1, x: 0 },
+    },
+    scale: {
+      hidden: { opacity: 0, scale: 0.94, y: 16 },
+      visible: { opacity: 1, scale: 1, y: 0 },
+    },
+  };
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "reveal-item",
-        `reveal-${variant}`,
-        visible && "is-visible",
-        className,
-      )}
-      style={{ transitionDelay: `${delay}ms`, ...style }}
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: false, amount: 0.05, margin: "0px 0px -30px 0px" }}
+      variants={variants[variant]}
+      transition={{
+        duration: 0.6,
+        delay: delay / 1000,
+        ease: [0.2, 0.8, 0.2, 1],
+      }}
+      className={cn(className)}
+      style={style}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

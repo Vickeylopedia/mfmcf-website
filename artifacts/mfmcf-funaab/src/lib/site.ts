@@ -19,6 +19,11 @@ export const photos = {
   fellowshipWorship: withBase("/assets/fellowship-worship.jpg"),
   students: withBase("/assets/fellowship-students.jpg"),
   service: withBase("/assets/fellowship-gathering.jpg"),
+  sundayPraise: withBase("/assets/gallery-sunday-praise.jpg"),
+  prayerFervent: withBase("/assets/gallery-prayer-fervent.jpg"),
+  familyUnity: withBase("/assets/gallery-family-unity.jpg"),
+  fellowshipJoy: withBase("/assets/gallery-fellowship-joy.jpg"),
+  preachingWord: withBase("/assets/gallery-preaching-word.jpg"),
 };
 
 export const navItems = [

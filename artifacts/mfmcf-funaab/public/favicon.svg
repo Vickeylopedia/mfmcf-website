@@ -1,3 +1,29 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2a124a" />
+      <stop offset="100%" stop-color="#140827" />
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="90" y1="30" x2="90" y2="135" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="60%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="crossGrad" x1="90" y1="40" x2="90" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e9d5ff" />
+    </linearGradient>
+  </defs>
+  <!-- Squircle Background -->
+  <rect width="180" height="180" rx="40" fill="url(#bgGrad)" />
+  <rect x="3" y="3" width="174" height="174" rx="37" stroke="#7c3aed" stroke-width="3" stroke-opacity="0.5" />
+  
+  <!-- Outer Glow Arc -->
+  <circle cx="90" cy="90" r="54" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4" stroke-opacity="0.35" />
+
+  <!-- Stylized Flame (Mountain of Fire / Holy Spirit) -->
+  <path d="M90 32C90 32 114 58 114 84C114 104 98 116 90 122C82 116 66 104 66 84C66 58 90 32 90 32Z" fill="url(#flameGrad)" fill-opacity="0.9" />
+
+  <!-- Clean Latin Cross in Center -->
+  <path d="M84 48H96V78H118V90H96V142H84V90H62V78H84V48Z" fill="url(#crossGrad)" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.3))" />
 </svg>

@@ -11,12 +11,14 @@ import {
 import { getSermon } from "@/lib/sermons";
 import { useSermons } from "@/lib/queries";
 import { withBase } from "@/lib/site";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import NotFound from "@/pages/not-found";
 
 function SermonDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { sermons } = useSermons();
   const sermon = slug ? sermons.find((s) => s.slug === slug) : undefined;
+  useDocumentTitle(sermon?.title ? `${sermon.title}` : "Sermon");
 
   if (!sermon) return <NotFound />;
 
@@ -24,7 +26,7 @@ function SermonDetail() {
     `Recording request: ${sermon.title}`,
   )}`;
   const audioSrc =
-    sermon.audio ?? withBase(`/assets/audio/${sermon.slug}.mp3`);
+    sermon.audio || withBase("/assets/audio/sample-sermon.mp3");
 
   return (
     <Shell>
@@ -94,18 +96,26 @@ function SermonDetail() {
             <AudioPlayer
               src={audioSrc}
               title={sermon.title}
-              requestHref={requestHref}
+              speaker={sermon.speaker}
+              artworkUrl={sermon.image}
+              scripture={sermon.scripture}
+              date={sermon.date}
             />
-            {sermon.audio && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
               <a
-                href={`${sermon.audio}${sermon.audio.includes("?") ? "&" : "?"}download=1`}
-                data-testid="link-sermon-download"
-                className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))] transition hover:text-[hsl(var(--foreground))]"
+                href={sermon.image}
+                download={`${sermon.title} - Artwork.jpg`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--primary))]"
               >
-                <Download className="size-4" />
-                Download the audio
+                <Download className="size-3.5" />
+                Save sermon cover flyer (HD)
               </a>
-            )}
+              <span className="font-mono text-[10px] text-[hsl(var(--muted-foreground)/.7)]">
+                Format: High Quality MP3 + Embedded Artwork
+              </span>
+            </div>
           </Reveal>
         </div>
       </section>

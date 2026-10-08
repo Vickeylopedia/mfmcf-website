@@ -1,0 +1,37 @@
+# Render Blueprint for MFMCF FUNAAB Backend API
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: mfmcf-funaab-api
+    runtime: node
+    plan: free
+    region: frankfurt # or oregon
+    buildCommand: pnpm install --frozen-lockfile=false && pnpm --filter @workspace/api-server run build
+    startCommand: pnpm --filter @workspace/api-server run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # 1. Database URL from Neon (https://neon.tech) or Supabase (https://supabase.com)
+      - key: DATABASE_URL
+        sync: false
+      # 2. Admin Studio Password (e.g. your chosen password for /admin)
+      - key: ADMIN_PASSWORD
+        sync: false
+      # 3. CORS origin (allows Cloudflare Pages domain or set to * or comma-separated domains)
+      - key: CORS_ORIGIN
+        value: "*"
+      # 4. Cloudflare R2 Object Storage for audio/photo uploads (optional, falls back to disk if not set)
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_PUBLIC_URL
+        sync: false

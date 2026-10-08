@@ -13,6 +13,7 @@ import { deleteObject, fileUrl, putObject } from "../lib/storage";
 import {
   ADMIN_COOKIE,
   checkPassword,
+  getTokenFromRequest,
   isAdminConfigured,
   issueToken,
   requireAdmin,
@@ -136,24 +137,32 @@ router.post("/admin/login", (req, res) => {
     setTimeout(() => res.status(401).json({ message: "Incorrect password" }), 400);
     return;
   }
-  res.cookie(ADMIN_COOKIE, issueToken(), {
+  const token = issueToken();
+  const isProd = process.env.NODE_ENV === "production";
+  res.cookie(ADMIN_COOKIE, token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   });
-  res.json({ authenticated: true });
+  res.json({ authenticated: true, token });
 });
 
 router.post("/admin/logout", (req, res) => {
-  res.clearCookie(ADMIN_COOKIE, { path: "/" });
+  const isProd = process.env.NODE_ENV === "production";
+  res.clearCookie(ADMIN_COOKIE, {
+    path: "/",
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
+  });
   res.json({ authenticated: false });
 });
 
 router.get("/admin/session", (req, res) => {
+  const token = getTokenFromRequest(req);
   const authenticated =
-    isAdminConfigured() && verifyToken(req.cookies?.[ADMIN_COOKIE]);
+    isAdminConfigured() && verifyToken(token);
   res.json({ authenticated, configured: isAdminConfigured() });
 });
 

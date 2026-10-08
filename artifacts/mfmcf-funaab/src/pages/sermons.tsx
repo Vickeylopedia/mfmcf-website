@@ -5,8 +5,10 @@ import { Shell } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
 import { useSermons, type SermonView } from "@/lib/queries";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function Sermons() {
+  useDocumentTitle("Sermon Archive");
   const [query, setQuery] = useState("");
   const [latestFirst, setLatestFirst] = useState(true);
   const { sermons, isLoading } = useSermons();

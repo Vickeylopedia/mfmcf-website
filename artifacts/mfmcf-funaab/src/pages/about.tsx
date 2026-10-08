@@ -2,8 +2,10 @@ import { Shell, ButtonLink } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
 import { photos } from "@/lib/site";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function About() {
+  useDocumentTitle("About Us");
   return (
     <Shell>
       <PageIntro

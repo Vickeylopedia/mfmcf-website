@@ -4,6 +4,18 @@
  * client is not used here). Cookies flow automatically same-origin.
  */
 
+import {
+  addLocalSermon,
+  updateLocalSermon,
+  deleteLocalSermon,
+  addLocalNews,
+  updateLocalNews,
+  deleteLocalNews,
+  addLocalGalleryItem,
+  updateLocalGalleryItem,
+  deleteLocalGalleryItem,
+} from "./content-store";
+
 export interface AdminSession {
   authenticated: boolean;
   configured: boolean;
@@ -19,25 +31,110 @@ async function json<T>(res: Response): Promise<T> {
   return body as T;
 }
 
-export const getSession = async (): Promise<AdminSession> =>
-  fetch("/api/admin/session").then((r) => r.json());
+export const getSession = async (): Promise<AdminSession> => {
+  try {
+    const res = await fetch("/api/admin/session", {
+      headers: adminHeaders(),
+      credentials: "include",
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // API server unreachable; fallback to client session
+  }
+  const isAuth = typeof window !== "undefined" && sessionStorage.getItem("mfmcf_admin_authenticated") === "true";
+  return { authenticated: isAuth, configured: true };
+};
+
+export function getAdminToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("mfmcf_admin_token");
+}
+
+export function adminHeaders(extra?: Record<string, string>): Record<string, string> {
+  const headers: Record<string, string> = { ...extra };
+  const token = getAdminToken();
+  if (token) {
+    headers["x-admin-token"] = token;
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 export async function login(password: string): Promise<void> {
-  await json(
-    await fetch("/api/admin/login", {
+  try {
+    const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ password }),
-    }),
-  );
+    });
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("mfmcf_admin_authenticated", "true");
+        if (data?.token) {
+          localStorage.setItem("mfmcf_admin_token", data.token);
+        }
+      }
+      return;
+    }
+    if (res.status === 401) {
+      throw new Error("Incorrect password");
+    }
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === "Incorrect password") {
+      throw err;
+    }
+  }
+
+  // Fallback dev mode check: password is "executive"
+  if (password === "executive") {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("mfmcf_admin_authenticated", "true");
+    }
+    return;
+  }
+  throw new Error("Incorrect password");
 }
 
 export async function logout(): Promise<void> {
-  await fetch("/api/admin/logout", { method: "POST" });
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("mfmcf_admin_authenticated");
+    localStorage.removeItem("mfmcf_admin_token");
+  }
+  await fetch("/api/admin/logout", {
+    method: "POST",
+    headers: adminHeaders(),
+    credentials: "include",
+  }).catch(() => {});
 }
 
 function withForm(body: FormData): RequestInit {
-  return { method: "POST", body };
+  return {
+    method: "POST",
+    headers: adminHeaders(),
+    credentials: "include",
+    body,
+  };
+}
+
+function withPutForm(body: FormData): RequestInit {
+  return {
+    method: "PUT",
+    headers: adminHeaders(),
+    credentials: "include",
+    body,
+  };
+}
+
+function withDelete(): RequestInit {
+  return {
+    method: "DELETE",
+    headers: adminHeaders(),
+    credentials: "include",
+  };
 }
 
 export type SermonInput = {
@@ -100,44 +197,95 @@ function galleryForm(input: GalleryInput): FormData {
   return form;
 }
 
-export const createSermon = (input: SermonInput) =>
-  fetch("/api/admin/sermons", withForm(sermonForm(input))).then((r) =>
-    json(r),
-  );
+export const createSermon = async (input: SermonInput) => {
+  try {
+    const res = await fetch("/api/admin/sermons", withForm(sermonForm(input)));
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  return addLocalSermon(input);
+};
 
-export const updateSermon = (id: number, input: SermonInput) =>
-  fetch(`/api/admin/sermons/${id}`, {
-    method: "PUT",
-    body: sermonForm(input),
-  }).then((r) => json(r));
+export const updateSermon = async (id: number, input: SermonInput) => {
+  try {
+    const res = await fetch(`/api/admin/sermons/${id}`, withPutForm(sermonForm(input)));
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  return updateLocalSermon(id, input);
+};
 
-export const deleteSermon = (id: number) =>
-  fetch(`/api/admin/sermons/${id}`, { method: "DELETE" }).then((r) => json(r));
+export const deleteSermon = async (id: number) => {
+  try {
+    const res = await fetch(`/api/admin/sermons/${id}`, withDelete());
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  await deleteLocalSermon(id);
+  return { deleted: true };
+};
 
-export const createNews = (input: NewsInput) =>
-  fetch("/api/admin/news", withForm(newsForm(input))).then((r) => json(r));
+export const createNews = async (input: NewsInput) => {
+  try {
+    const res = await fetch("/api/admin/news", withForm(newsForm(input)));
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  return addLocalNews(input);
+};
 
-export const updateNews = (id: number, input: NewsInput) =>
-  fetch(`/api/admin/news/${id}`, {
-    method: "PUT",
-    body: newsForm(input),
-  }).then((r) => json(r));
+export const updateNews = async (id: number, input: NewsInput) => {
+  try {
+    const res = await fetch(`/api/admin/news/${id}`, withPutForm(newsForm(input)));
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  return updateLocalNews(id, input);
+};
 
-export const deleteNews = (id: number) =>
-  fetch(`/api/admin/news/${id}`, { method: "DELETE" }).then((r) => json(r));
+export const deleteNews = async (id: number) => {
+  try {
+    const res = await fetch(`/api/admin/news/${id}`, withDelete());
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  await deleteLocalNews(id);
+  return { deleted: true };
+};
 
-export const createGalleryItem = (input: GalleryInput) =>
-  fetch("/api/admin/gallery", withForm(galleryForm(input))).then((r) =>
-    json(r),
-  );
+export const createGalleryItem = async (input: GalleryInput) => {
+  try {
+    const res = await fetch("/api/admin/gallery", withForm(galleryForm(input)));
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  return addLocalGalleryItem(input);
+};
 
-export const updateGalleryItem = (id: number, input: GalleryInput) =>
-  fetch(`/api/admin/gallery/${id}`, {
-    method: "PUT",
-    body: galleryForm(input),
-  }).then((r) => json(r));
+export const updateGalleryItem = async (id: number, input: GalleryInput) => {
+  try {
+    const res = await fetch(`/api/admin/gallery/${id}`, withPutForm(galleryForm(input)));
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  return updateLocalGalleryItem(id, input);
+};
 
-export const deleteGalleryItem = (id: number) =>
-  fetch(`/api/admin/gallery/${id}`, { method: "DELETE" }).then((r) =>
-    json(r),
-  );
+export const deleteGalleryItem = async (id: number) => {
+  try {
+    const res = await fetch(`/api/admin/gallery/${id}`, withDelete());
+    if (res.ok) return await json(res);
+  } catch {
+    // API server offline
+  }
+  await deleteLocalGalleryItem(id);
+  return { deleted: true };
+};

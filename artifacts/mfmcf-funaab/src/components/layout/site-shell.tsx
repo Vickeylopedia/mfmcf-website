@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
+  Lock,
   Mail,
   MapPin,
   Menu,
@@ -48,94 +50,120 @@ export function ScrollToTop() {
 export function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close menu on Escape key press
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
   return (
     <div className="min-h-[100dvh] overflow-x-clip">
-      <header className="fixed inset-x-0 top-3 z-40 px-3 lg:top-4 lg:px-6">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between rounded-xl border border-[hsl(var(--foreground)/.1)] border-t-2 border-t-[hsl(var(--accent))] bg-gradient-to-b from-[hsl(var(--background)/.95)] via-[hsl(var(--background)/.88)] to-[hsl(var(--background)/.8)] px-4 py-3 shadow-md shadow-[hsl(var(--foreground)/.07)] backdrop-blur-md sm:px-5 lg:px-6">
-          <Link
-            href="/"
-            data-testid="link-logo-home"
-            className="group flex items-center gap-3"
-          >
-            <span className="relative flex size-11 items-center justify-center overflow-hidden border border-[hsl(var(--primary)/.28)] bg-white shadow-sm transition-transform group-hover:-rotate-3">
-              <img
-                src={logo}
-                alt="MFMCF FUNAAB logo"
-                className="size-10 object-contain"
-                data-testid="img-header-logo"
-              />
-            </span>
-            <span className="hidden leading-none sm:block">
-              <span className="block text-sm font-bold tracking-[.16em] text-[hsl(var(--primary))]">
-                MFMCF
-              </span>
-              <span className="mt-1 block text-[10px] font-medium tracking-[.12em] text-[hsl(var(--muted-foreground))]">
-                FUNAAB CHAPTER
-              </span>
-            </span>
-          </Link>
-          <nav
-            className="hidden items-center gap-1 lg:flex"
-            aria-label="Primary navigation"
-          >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                className={`relative px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[.12em] transition-colors after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:origin-left after:scale-x-0 after:bg-[hsl(var(--primary))] after:transition-transform hover:text-[hsl(var(--primary))] hover:after:scale-x-100 ${
-                  location === item.href
-                    ? "text-[hsl(var(--primary))] after:scale-x-100"
-                    : "text-[hsl(var(--foreground)/.72)]"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
+      <header className="fixed inset-x-0 top-2 z-40 px-3 lg:top-3 lg:px-6">
+        <div className="mx-auto max-w-[1380px]">
+          <div className="flex items-center justify-between border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-4 py-3 sm:px-8 shadow-[4px_4px_0px_hsl(var(--foreground))] [clip-path:polygon(14px_0,100%_0,calc(100%-14px)_100%,0_100%)] sm:[clip-path:polygon(22px_0,100%_0,calc(100%-22px)_100%,0_100%)]">
             <Link
-              href="/contact"
-              data-testid="link-header-connect"
-              className="hidden border border-[hsl(var(--primary)/.32)] px-4 py-2 text-xs font-bold tracking-[.1em] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary))] hover:text-white sm:block"
+              href="/"
+              data-testid="link-logo-home"
+              className="group flex items-center gap-3"
             >
-              CONNECT <span aria-hidden="true">→</span>
+              <span className="relative flex size-11 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition-transform group-hover:-rotate-3">
+                <img
+                  src={logo}
+                  alt="MFMCF FUNAAB logo"
+                  className="size-10 object-contain"
+                  data-testid="img-header-logo"
+                />
+              </span>
+              <span className="hidden leading-none sm:block">
+                <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
+                  MFMCF
+                </span>
+                <span className="mt-1 block text-[10px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.75)]">
+                  FUNAAB CHAPTER
+                </span>
+              </span>
             </Link>
-            <button
-              type="button"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              data-testid="button-mobile-menu"
-              onClick={() => setMenuOpen((open) => !open)}
-              className="border border-[hsl(var(--foreground)/.14)] p-2 text-[hsl(var(--foreground))] lg:hidden"
+            <nav
+              className="hidden items-center gap-1 lg:flex"
+              aria-label="Primary navigation"
             >
-              {menuOpen ? (
-                <X className="size-5" />
-              ) : (
-                <Menu className="size-5" />
-              )}
-            </button>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
+                  className={`relative px-3.5 py-2 font-mono text-[11px] font-black uppercase tracking-[.14em] transition-colors hover:text-[hsl(var(--primary))] ${
+                    location === item.href
+                      ? "text-[hsl(var(--primary))] border-b-2 border-[hsl(var(--primary))]"
+                      : "text-[hsl(var(--foreground))]"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/contact"
+                data-testid="link-header-connect"
+                className="hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-5 py-2 text-xs font-black tracking-[.12em] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:block"
+              >
+                CONNECT <span aria-hidden="true">→</span>
+              </Link>
+              <button
+                type="button"
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+                data-testid="button-mobile-menu"
+                onClick={() => setMenuOpen((open) => !open)}
+                className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] lg:hidden"
+              >
+                {menuOpen ? (
+                  <X className="size-5" />
+                ) : (
+                  <Menu className="size-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-        {menuOpen && (
-          <nav
-            className="mx-auto mt-2 max-w-[1380px] rounded-lg border border-[hsl(var(--foreground)/.1)] border-t-2 border-t-[hsl(var(--accent))] bg-[hsl(var(--background)/.95)] p-3 shadow-md shadow-[hsl(var(--foreground)/.07)] backdrop-blur-md lg:hidden"
-            aria-label="Mobile navigation"
-          >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                data-testid={`link-mobile-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                className="flex items-center justify-between rounded-full px-4 py-3 text-sm font-semibold transition-colors hover:bg-[hsl(var(--secondary))] sm:px-5"
-              >
-                {item.label}
-                <ArrowUpRight className="size-4 text-[hsl(var(--primary))]" />
-              </Link>
-            ))}
-          </nav>
-        )}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.nav
+              key="mobile-nav-panel"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              className="mx-auto mt-2 max-w-[1380px] rounded-none border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-3 shadow-[4px_4px_0px_hsl(var(--foreground))] lg:hidden"
+              aria-label="Mobile navigation"
+            >
+              {navItems.map((item, index) => (
+                <motion.div
+                  key={item.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.03, duration: 0.15 }}
+                >
+                  <Link
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    data-testid={`link-mobile-${item.label.toLowerCase().replaceAll(" ", "-")}`}
+                    className="flex items-center justify-between rounded-none border-b border-[hsl(var(--foreground)/.1)] px-4 py-3 font-mono text-sm font-bold uppercase tracking-wider transition-colors hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] sm:px-5"
+                  >
+                    {item.label}
+                    <ArrowUpRight className="size-4 text-[hsl(var(--primary))]" />
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.nav>
+          )}
+        </AnimatePresence>
       </header>
       <main>{children}</main>
       <Footer />
@@ -177,7 +205,7 @@ function Footer() {
               Explore
             </p>
             <div className="mt-5 grid gap-3 text-sm text-white/70">
-              {navItems.slice(1, 5).map((item) => (
+              {navItems.slice(1).map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -187,6 +215,14 @@ function Footer() {
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href="/admin"
+                data-testid="link-footer-explore-admin"
+                className="w-fit inline-flex items-center gap-1.5 text-white/50 transition hover:text-white"
+              >
+                <Lock className="size-3 text-[hsl(var(--accent))]" />
+                Admin Portal
+              </Link>
             </div>
           </div>
           <div>
@@ -207,8 +243,19 @@ function Footer() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col justify-between gap-4 pt-6 text-xs text-white/45 sm:flex-row">
-          <p>© 2026 MFMCF FUNAAB. Family of Love.</p>
+        <div className="flex flex-col justify-between gap-4 pt-6 text-xs text-white/45 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center gap-3">
+            <p>© 2026 MFMCF FUNAAB. Family of Love.</p>
+            <span className="hidden sm:inline text-white/20">•</span>
+            <Link
+              href="/admin"
+              data-testid="link-footer-admin-bottom"
+              className="inline-flex items-center gap-1.5 text-white/50 transition hover:text-[hsl(var(--accent))]"
+            >
+              <Lock className="size-3" />
+              <span>Admin Studio</span>
+            </Link>
+          </div>
           <div className="flex gap-4">
             {socials.map((social) => {
               const Icon = social.icon;
@@ -216,6 +263,8 @@ function Footer() {
                 <a
                   key={social.label}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
                   data-testid={social.testId}
                   className="transition hover:text-white"

@@ -185,10 +185,7 @@
   to { transform: translateX(-2.5%); }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
   .photo-shift:hover { transform: none; }
   .gallery-card:not(.is-active) { opacity: .86; transform: none; }
-  /* Reduce, don't remove: reveals keep a short fade so content still
-     arrives with intent, minus movement and blur. */
-  .reveal-item { opacity: 1; transform: none; filter: none; transition: opacity .25s linear; }
+  .reveal-item { opacity: 1; transform: none; filter: none; }
 }

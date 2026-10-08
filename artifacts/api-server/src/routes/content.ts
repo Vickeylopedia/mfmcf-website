@@ -56,7 +56,7 @@ router.get("/gallery", async (_req, res, next) => {
     const rows = await db
       .select()
       .from(galleryItemsTable)
-      .orderBy(asc(galleryItemsTable.position), asc(galleryItemsTable.id));
+      .orderBy(desc(galleryItemsTable.id));
     res.json(rows);
   } catch (error) {
     next(error);
@@ -74,6 +74,14 @@ router.get("/files/*splat", async (req, res, next) => {
       res.status(400).json({ message: "Invalid file key" });
       return;
     }
+
+    if (process.env.R2_PUBLIC_URL) {
+      const publicBase = process.env.R2_PUBLIC_URL.replace(/\/+$/, "");
+      const downloadParam = req.query.download === "1" ? "?download=1" : "";
+      res.redirect(302, `${publicBase}/${key}${downloadParam}`);
+      return;
+    }
+
     const object = await getObject(key);
     if (!object) {
       res.status(404).json({ message: "File not found" });

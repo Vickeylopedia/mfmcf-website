@@ -1,162 +1,679 @@
-import { useState } from "react";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Sparkles,
+  Maximize2,
+  Clock3,
+  MapPin,
+  Play,
+  Pause,
+  ArrowUpRight,
+} from "lucide-react";
 import { Shell } from "@/components/layout/site-shell";
-import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
-import { PhotoFrame, SectionHeading } from "@/components/foundation";
-import { useGallery } from "@/lib/queries";
+import { SectionHeading } from "@/components/foundation";
+import { useGallery, type GalleryView } from "@/lib/queries";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { photos } from "@/lib/site";
 
+interface SpotlightItem {
+  id: number;
+  number: string;
+  tag: string;
+  category: string;
+  title: string;
+  desc: string;
+  time: string;
+  venue: string;
+  image: string;
+}
+
+const HERO_SPOTLIGHTS: SpotlightItem[] = [
+  {
+    id: -10,
+    number: "01",
+    tag: "SUNDAY CELEBRATION",
+    category: "Praise & Glory",
+    title: "Overflow of Joy",
+    desc: "Spirited praise, laughter, and an electric atmosphere where God’s tangible presence turns campus days into life-altering encounters.",
+    time: "Sundays · 9:00 AM",
+    venue: "New Lecture Theatre (NLT)",
+    image: photos.sundayPraise,
+  },
+  {
+    id: -11,
+    number: "02",
+    tag: "THE SECRET PLACE",
+    category: "Fervent Intercession",
+    title: "Hearts on Fire",
+    desc: "Students yielding their youth to unbroken, travailing prayer. A sacred sanctuary where quiet whispers turn to prevailing faith.",
+    time: "Wednesdays · 5:00 PM",
+    venue: "Family Rooms & Chapel",
+    image: photos.prayerFervent,
+  },
+  {
+    id: -12,
+    number: "03",
+    tag: "ONE BODY IN CHRIST",
+    category: "Covenant Community",
+    title: "United in One Accord",
+    desc: "Hand in hand across faculties, departments, and levels. Standing together as a real, protective campus family that refuses to let anyone walk alone.",
+    time: "Weekly Gatherings",
+    venue: "Campus Wide Fellowship",
+    image: photos.familyUnity,
+  },
+  {
+    id: -14,
+    number: "04",
+    tag: "THE SPOKEN WORD",
+    category: "Doctrine & Wisdom",
+    title: "Truth Unleashed",
+    desc: "Sound doctrine, unapologetic truth, and prophetic wisdom equipping student leaders to excel academically while dominating spiritually.",
+    time: "Every Meeting",
+    venue: "Apostolic Pulpit Ministry",
+    image: photos.preachingWord,
+  },
+  {
+    id: -13,
+    number: "05",
+    tag: "KOINONIA & LAUGHTER",
+    category: "Unconditional Love",
+    title: "Smiles That Heal",
+    desc: "Where barriers dissolve and every student feels truly known. Warm hugs, genuine sisterhood and brotherhood, and lifelong memories.",
+    time: "Fridays · 4:30 PM",
+    venue: "Fellowship Grounds",
+    image: photos.fellowshipJoy,
+  },
+];
+
+interface CollagePreset {
+  rotate: number;
+}
+
+const COLLAGE_PRESETS: CollagePreset[] = [
+  { rotate: -8.5 },
+  { rotate: 5.5 },
+  { rotate: -4.0 },
+  { rotate: 9.0 },
+  { rotate: -11.0 },
+  { rotate: 4.5 },
+  { rotate: -6.5 },
+  { rotate: 8.0 },
+  { rotate: -10.0 },
+  { rotate: 6.0 },
+  { rotate: -7.5 },
+  { rotate: 7.0 },
+  { rotate: -5.0 },
+  { rotate: 8.5 },
+  { rotate: -9.5 },
+  { rotate: 4.0 },
+];
+
+const SPOTLIGHT_INTERVAL_MS = 4200;
+
 function Gallery() {
+  useDocumentTitle("Photo Stories & Editorial Gallery");
   const [filter, setFilter] = useState("All");
-  const [active, setActive] = useState(0);
-  const { gallery, isLoading } = useGallery();
+  const [selectedPhoto, setSelectedPhoto] = useState<GalleryView | null>(null);
+  const { gallery } = useGallery();
+
+  // Spotlight Hero States
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const timerRef = useRef<number | null>(null);
+
   const filters = ["All", "Worship", "Community", "Teaching"];
-  const shown = gallery.filter(
+
+  // Combine fetched/store gallery with latest uploads
+  const sortedGallery = [...gallery].sort((a, b) => b.id - a.id);
+
+  const shown = sortedGallery.filter(
     (item) => filter === "All" || item.type === filter,
   );
-  const safeActive = active >= shown.length ? 0 : active;
-  const activeItem = shown[safeActive];
-  const move = (direction: number) =>
-    setActive(
-      (current) => (current + direction + shown.length) % shown.length,
+
+  const currentIndex = selectedPhoto
+    ? shown.findIndex((p) => p.id === selectedPhoto.id)
+    : -1;
+
+  const handlePrev = useCallback(() => {
+    if (shown.length === 0 || currentIndex === -1) return;
+    const nextIdx = (currentIndex - 1 + shown.length) % shown.length;
+    setSelectedPhoto(shown[nextIdx]);
+  }, [currentIndex, shown]);
+
+  const handleNext = useCallback(() => {
+    if (shown.length === 0 || currentIndex === -1) return;
+    const nextIdx = (currentIndex + 1) % shown.length;
+    setSelectedPhoto(shown[nextIdx]);
+  }, [currentIndex, shown]);
+
+  // Spotlight Auto-Cycling Engine (Automatic spotlight for phones & idle desktop)
+  useEffect(() => {
+    if (!isPlaying || isHovered) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    const stepMs = 50;
+    const increment = (stepMs / SPOTLIGHT_INTERVAL_MS) * 100;
+
+    timerRef.current = window.setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          setActiveIndex((current) => (current + 1) % HERO_SPOTLIGHTS.length);
+          return 0;
+        }
+        return prev + increment;
+      });
+    }, stepMs);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPlaying, isHovered]);
+
+  const selectSpotlight = (index: number) => {
+    setActiveIndex(index);
+    setProgress(0);
+  };
+
+  const handleSpotlightPrev = () => {
+    setActiveIndex(
+      (prev) => (prev - 1 + HERO_SPOTLIGHTS.length) % HERO_SPOTLIGHTS.length,
     );
+    setProgress(0);
+  };
+
+  const handleSpotlightNext = () => {
+    setActiveIndex((prev) => (prev + 1) % HERO_SPOTLIGHTS.length);
+    setProgress(0);
+  };
+
+  // Lock body scroll when full screen image is open
+  useEffect(() => {
+    if (!selectedPhoto) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [selectedPhoto]);
+
+  // Keyboard navigation for full screen view
+  useEffect(() => {
+    if (!selectedPhoto) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedPhoto(null);
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === "ArrowRight") handleNext();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedPhoto, handlePrev, handleNext]);
+
   return (
     <Shell>
-      <PageIntro
-        eyebrow="Life together"
-        ghost="FRAMES"
-        title={
-          <>
-            Small moments.
-            <br />
-            <em className="font-normal">Big belonging.</em>
-          </>
-        }
-        intro="A visual diary of the people, prayers, colour, and ordinary joy that make MFMCF FUNAAB feel like home."
-      />
-      <section className="gallery-cinema relative overflow-hidden bg-[hsl(var(--foreground))] px-5 py-14 text-white lg:px-10 lg:py-24">
+      {/* ─────────────────────────────────────────────────────────────
+          EDITORIAL HERO ACCORDION SPOTLIGHT (Inspired by Koinonia Global)
+          ───────────────────────────────────────────────────────────── */}
+      <section
+        className="relative overflow-hidden bg-[hsl(var(--foreground))] text-white border-b-2 border-black/20"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Atmospheric Glow Backdrops */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-24 -top-24 z-0 size-[26rem] rounded-full bg-[hsl(var(--accent)/.18)] blur-[120px]"
+          className="pointer-events-none absolute -right-32 -top-32 z-0 size-[32rem] rounded-full bg-[hsl(var(--accent)/.22)] blur-[140px]"
         />
-        <div className="relative z-10 mx-auto max-w-[1380px]">
-          <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
-            <Reveal variant="left">
-              <SectionHeading
-                eyebrow="The family, in frames"
-                eyebrowTone="accent"
-                title={
-                  <>
-                    Stay for the
-                    <br />
-                    <em className="font-normal text-[hsl(var(--accent))]">
-                      whole story.
-                    </em>
-                  </>
-                }
-                headingClassName="max-w-xl leading-[.92] tracking-[-.04em] sm:text-7xl"
-              />
-            </Reveal>
-            <div className="flex items-center gap-4">
-              <div className="hidden text-right sm:block">
-                <p className="mono-label text-[9px] text-white/45">
-                  Drag to explore
-                </p>
-                <p className="mt-1 text-xs text-white/60">
-                  <span className="text-[hsl(var(--accent))]">
-                    {String(safeActive + 1).padStart(2, "0")}
-                  </span>{" "}
-                  / {String(shown.length).padStart(2, "0")}
-                </p>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-32 bottom-0 z-0 size-[28rem] rounded-full bg-[hsl(var(--primary)/.2)] blur-[150px]"
+        />
+
+        <div className="relative z-10 mx-auto max-w-[1400px] px-4 pt-10 pb-12 sm:px-6 sm:pt-14 sm:pb-16 lg:px-10">
+          {/* Editorial Masthead Header */}
+          <div className="flex flex-col justify-between gap-6 border-b border-white/15 pb-8 sm:flex-row sm:items-end">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent))]/10 px-3.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
+                <Sparkles className="size-3 text-[hsl(var(--accent))]" />
+                EDITORIAL PORTFOLIO · KOINONIA CHRONICLES
               </div>
+              <h1 className="display-font mt-4 text-4xl font-bold tracking-[-0.03em] text-white sm:text-6xl lg:text-7xl leading-[0.94]">
+                Living Epistles.
+                <br />
+                <em className="font-normal italic text-[hsl(var(--accent))]">
+                  Writ in Light & Fellowship.
+                </em>
+              </h1>
+            </div>
+
+            <div className="max-w-md">
+              <p className="text-sm sm:text-base leading-relaxed text-white/80 font-normal">
+                An unscripted visual journey into worship, prevailing prayers,
+                and the radical warmth of the MFMCF FUNAAB family.
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-xs text-white/60">
+                <span className="inline-flex items-center gap-1.5 text-[hsl(var(--accent))] font-bold">
+                  <span className="size-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
+                  Auto-Spotlight Active
+                </span>
+                <span>·</span>
+                <span>Hover on desktop or tap on mobile to focus</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Ticker & Play/Pause Controls Bar */}
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <div className="flex flex-1 items-center gap-2 sm:gap-3">
+              {HERO_SPOTLIGHTS.map((item, i) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => selectSpotlight(i)}
+                  aria-label={`Jump to spotlight ${item.number}`}
+                  className="group relative h-1.5 flex-1 overflow-hidden rounded-full bg-white/20 transition-all hover:h-2"
+                >
+                  <div
+                    className="absolute inset-y-0 left-0 bg-[hsl(var(--accent))] transition-all duration-100 ease-linear"
+                    style={{
+                      width:
+                        i === activeIndex
+                          ? `${progress}%`
+                          : i < activeIndex
+                          ? "100%"
+                          : "0%",
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                aria-label="Previous photo story"
-                data-testid="button-gallery-previous"
-                onClick={() => move(-1)}
-                className="flex size-11 items-center justify-center border border-white/25 text-white transition hover:border-[hsl(var(--accent))] hover:text-[hsl(var(--accent))]"
+                onClick={handleSpotlightPrev}
+                aria-label="Previous spotlight slide"
+                className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
               >
-                <ArrowLeft className="size-4" />
+                <ChevronLeft className="size-4" />
               </button>
               <button
                 type="button"
-                aria-label="Next photo story"
-                data-testid="button-gallery-next"
-                onClick={() => move(1)}
-                className="flex size-11 items-center justify-center border border-white/25 text-white transition hover:border-[hsl(var(--accent))] hover:text-[hsl(var(--accent))]"
+                onClick={() => setIsPlaying((p) => !p)}
+                aria-label={isPlaying ? "Pause auto spotlight" : "Play auto spotlight"}
+                className="flex size-8 items-center justify-center rounded-full border border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent))]/15 text-[hsl(var(--accent))] backdrop-blur-md transition hover:bg-[hsl(var(--accent))] hover:text-black active:scale-95"
               >
-                <ArrowUpRight className="size-4" />
+                {isPlaying ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
+              </button>
+              <button
+                type="button"
+                onClick={handleSpotlightNext}
+                aria-label="Next spotlight slide"
+                className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
+              >
+                <ChevronRight className="size-4" />
               </button>
             </div>
           </div>
+
+          {/* ── DESKTOP HORIZONTAL EXPANDING ACCORDION (lg & up) ── */}
           <div
-            className="gallery-rail mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-5 pt-2"
-            aria-label="Photo stories"
+            className="mt-6 hidden lg:flex h-[580px] xl:h-[630px] w-full gap-2.5 overflow-hidden rounded-2xl border-2 border-[hsl(var(--foreground))] bg-black/70 p-2.5 shadow-2xl"
+            aria-label="Featured moments accordion"
           >
-            {shown.map((item, i) => (
-              <button
-                type="button"
-                key={item.title}
-                onClick={() => setActive(i)}
-                data-testid={`button-gallery-story-${i}`}
-                aria-label={`Show ${item.title}`}
-                className={`gallery-card group relative min-w-[82vw] snap-center overflow-hidden text-left sm:min-w-[510px] lg:min-w-[620px] ${
-                  i === safeActive ? "is-active" : ""
-                }`}
-              >
-                <PhotoFrame
-                  src={item.image}
-                  alt={item.title}
-                  frame="none"
-                  shift={false}
-                  className="gallery-card-image aspect-[1.18] bg-white/10 sm:aspect-[1.35]"
-                />
-                <div className="gallery-card-shade absolute inset-0" />
-                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                  <p className="mono-label text-[9px] text-[hsl(var(--accent))]">
-                    {item.type} · 2026
-                  </p>
-                  <h3 className="display-font mt-3 max-w-md text-3xl leading-none sm:text-5xl">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 max-w-sm text-sm leading-6 text-white/70">
-                    {item.desc}
-                  </p>
+            {HERO_SPOTLIGHTS.map((item, i) => {
+              const isActive = i === activeIndex;
+
+              return (
+                <div
+                  key={item.id}
+                  onMouseEnter={() => selectSpotlight(i)}
+                  onClick={() => selectSpotlight(i)}
+                  className={`group relative overflow-hidden rounded-xl cursor-pointer transition-[flex] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+                    isActive ? "flex-[4.6]" : "flex-1"
+                  }`}
+                >
+                  {/* Photo Background */}
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className={`absolute inset-0 size-full object-cover object-center transition-transform duration-1000 ease-out ${
+                      isActive
+                        ? "scale-105 filter-none"
+                        : "scale-100 brightness-[0.4] saturate-75 group-hover:brightness-[0.6] group-hover:scale-105"
+                    }`}
+                  />
+
+                  {/* Dual Layer Editorial Gradients */}
+                  <div
+                    aria-hidden="true"
+                    className={`absolute inset-0 transition-opacity duration-700 ${
+                      isActive
+                        ? "bg-gradient-to-t from-black/95 via-black/75 via-45% to-black/25 opacity-100"
+                        : "bg-black/60 opacity-90 group-hover:opacity-60"
+                    }`}
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-transparent to-transparent"
+                  />
+
+                  {/* COLLAPSED VIEW (When Inactive) */}
+                  {!isActive && (
+                    <div className="relative z-10 flex size-full flex-col justify-between p-4 py-6 text-center select-none">
+                      <span className="font-mono text-sm font-black text-white/50 group-hover:text-[hsl(var(--accent))] transition-colors">
+                        {item.number}
+                      </span>
+                      <div className="flex flex-1 items-center justify-center py-6">
+                        <span className="spine-text rotate-180 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/70 group-hover:text-white transition-colors whitespace-nowrap">
+                          {item.tag}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <span className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all group-hover:border-[hsl(var(--accent))] group-hover:bg-[hsl(var(--accent))] group-hover:text-black">
+                          <ArrowUpRight className="size-3.5" />
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EXPANDED VIEW (Active Spotlight) */}
+                  {isActive && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
+                      className="relative z-10 flex size-full flex-col justify-between p-7 sm:p-10 select-none"
+                    >
+                      {/* Top Bar */}
+                      <div className="flex items-start justify-between">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-3.5 py-1.5 backdrop-blur-md">
+                          <span className="size-2 rounded-full bg-[hsl(var(--accent))]" />
+                          <span className="font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--accent))]">
+                            {item.tag}
+                          </span>
+                          <span className="text-white/40">·</span>
+                          <span className="font-mono text-xs text-white/80">
+                            {item.category}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono text-sm font-black text-white/60">
+                            {item.number} / 05
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPhoto({
+                                id: item.id,
+                                title: item.title,
+                                type: item.category,
+                                desc: item.desc,
+                                image: item.image,
+                              });
+                            }}
+                            title="Inspect Frame Fullscreen"
+                            className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-black/50 text-white backdrop-blur-md transition-all hover:scale-110 hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))] hover:text-black"
+                          >
+                            <Maximize2 className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Bottom Editorial Content */}
+                      <div className="max-w-2xl">
+                        <p className="mono-label text-[11px] font-bold tracking-widest text-[hsl(var(--accent))]">
+                          Spotlight Narrative
+                        </p>
+                        <h2 className="display-font mt-2 text-4xl sm:text-5xl font-bold leading-tight text-white tracking-[-0.03em]">
+                          {item.title}
+                        </h2>
+                        <p className="mt-4 text-sm sm:text-base leading-relaxed text-white/90 font-medium">
+                          {item.desc}
+                        </p>
+
+                        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/20 pt-5 font-mono text-xs">
+                          <div className="flex flex-wrap items-center gap-4 text-white/90">
+                            <span className="flex items-center gap-1.5 text-[hsl(var(--accent))] font-bold">
+                              <Clock3 className="size-4" /> {item.time}
+                            </span>
+                            <span className="flex items-center gap-1.5 text-white/75">
+                              <MapPin className="size-3.5 text-white/60" />{" "}
+                              {item.venue}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPhoto({
+                                id: item.id,
+                                title: item.title,
+                                type: item.category,
+                                desc: item.desc,
+                                image: item.image,
+                              });
+                            }}
+                            className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-white px-4 py-2 font-mono text-xs font-black uppercase text-black transition-all hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))] active:scale-95"
+                          >
+                            <span>Inspect Frame</span>
+                            <ArrowUpRight className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
-                <span className="gallery-card-index absolute right-5 top-5 mono-label text-[9px] text-white/70">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-              </button>
-            ))}
+              );
+            })}
           </div>
-          <div className="mt-5 flex items-center gap-2" aria-live="polite">
-            {shown.map((item, i) => (
-              <button
-                type="button"
-                key={item.title}
-                aria-label={`Go to photo ${i + 1}`}
-                data-testid={`button-gallery-dot-${i}`}
-                onClick={() => setActive(i)}
-                className={`h-1 transition-all ${
-                  i === safeActive
-                    ? "w-10 bg-[hsl(var(--accent))]"
-                    : "w-3 bg-white/30 hover:bg-white/65"
-                }`}
+
+          {/* ── MOBILE RESPONSIVE AUTO-SPOTLIGHT ACCORDION (< lg) ── */}
+          <div
+            className="mt-6 flex flex-col gap-3 lg:hidden"
+            aria-label="Mobile featured moments spotlight"
+          >
+            {HERO_SPOTLIGHTS.map((item, i) => {
+              const isActive = i === activeIndex;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => selectSpotlight(i)}
+                  className={`relative w-full overflow-hidden rounded-xl border transition-all duration-500 cursor-pointer ${
+                    isActive
+                      ? "min-h-[440px] border-[hsl(var(--accent))] shadow-2xl bg-black"
+                      : "h-[74px] border-white/15 bg-black/60 hover:border-white/30"
+                  }`}
+                >
+                  {/* Background Photo */}
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className={`absolute inset-0 size-full object-cover object-center transition-all duration-700 ${
+                      isActive
+                        ? "scale-105 filter-none"
+                        : "scale-100 brightness-[0.4] saturate-50"
+                    }`}
+                  />
+
+                  {/* Gradient Overlay */}
+                  <div
+                    aria-hidden="true"
+                    className={`absolute inset-0 transition-opacity duration-500 ${
+                      isActive
+                        ? "bg-gradient-to-t from-black via-black/75 via-45% to-black/35 opacity-100"
+                        : "bg-black/60 opacity-80"
+                    }`}
+                  />
+
+                  {/* COLLAPSED MOBILE BAR */}
+                  {!isActive && (
+                    <div className="relative z-10 flex size-full items-center justify-between px-4 py-3 select-none">
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-8 items-center justify-center rounded-full bg-white/10 font-mono text-xs font-black text-[hsl(var(--accent))] border border-white/10">
+                          {item.number}
+                        </span>
+                        <div>
+                          <p className="mono-label text-[10px] font-bold text-white/60">
+                            {item.tag}
+                          </p>
+                          <p className="display-font text-base font-bold text-white truncate max-w-[200px] sm:max-w-[340px]">
+                            {item.title}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="flex size-8 items-center justify-center rounded-full bg-white/10 text-white/60">
+                        <ArrowUpRight className="size-4" />
+                      </span>
+                    </div>
+                  )}
+
+                  {/* EXPANDED MOBILE CARD */}
+                  {isActive && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.35 }}
+                      className="relative z-10 flex size-full min-h-[440px] flex-col justify-between p-5 sm:p-7 select-none"
+                    >
+                      {/* Top Bar */}
+                      <div className="flex items-start justify-between">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-wider text-[hsl(var(--accent))] backdrop-blur-md">
+                          <span className="size-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
+                          {item.tag}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPhoto({
+                              id: item.id,
+                              title: item.title,
+                              type: item.category,
+                              desc: item.desc,
+                              image: item.image,
+                            });
+                          }}
+                          className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md active:scale-95"
+                        >
+                          <Maximize2 className="size-4" />
+                        </button>
+                      </div>
+
+                      {/* Content */}
+                      <div className="mt-20">
+                        <p className="mono-label text-[10px] font-bold text-[hsl(var(--accent))]">
+                          Spotlight · {item.number} of 05
+                        </p>
+                        <h3 className="display-font mt-1 text-3xl font-bold leading-tight text-white">
+                          {item.title}
+                        </h3>
+                        <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-white/85">
+                          {item.desc}
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-3 font-mono text-[11px] text-white/90">
+                          <span className="flex items-center gap-1 text-[hsl(var(--accent))] font-bold">
+                            <Clock3 className="size-3.5" /> {item.time}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPhoto({
+                                id: item.id,
+                                title: item.title,
+                                type: item.category,
+                                desc: item.desc,
+                                image: item.image,
+                              });
+                            }}
+                            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent))] px-3 py-1 font-mono text-[10px] font-black uppercase text-black"
+                          >
+                            <span>Inspect</span>
+                            <ArrowUpRight className="size-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          THE ARCHIVE / POLAROID STORY PRINTS SECTION
+          ───────────────────────────────────────────────────────────── */}
+      <section className="gallery-cinema relative overflow-hidden bg-[hsl(var(--foreground))] px-3 py-12 text-white sm:px-6 lg:px-10 lg:py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-24 z-0 size-[26rem] rounded-full bg-[hsl(var(--accent)/.14)] blur-[120px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-24 bottom-12 z-0 size-[22rem] rounded-full bg-[hsl(var(--primary)/.15)] blur-[130px]"
+        />
+
+        <div className="relative z-10 mx-auto max-w-[1300px]">
+          {/* Section Heading */}
+          <div className="flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:items-end sm:text-left">
+            <Reveal variant="left">
+              <SectionHeading
+                eyebrow="The complete collection"
+                eyebrowTone="accent"
+                title={
+                  <>
+                    Memories scattered
+                    <br />
+                    <em className="font-normal text-[hsl(var(--accent))]">
+                      like prints on a table.
+                    </em>
+                  </>
+                }
+                headingClassName="max-w-xl leading-[.92] tracking-[-.04em] sm:text-6xl"
               />
-            ))}
+            </Reveal>
+
+            <div className="flex flex-col items-center gap-1 sm:items-end">
+              <p className="mono-label text-[10px] text-white/60">
+                Tap any photo print to expand full screen
+              </p>
+              <p className="font-mono text-xs text-white/40">
+                <span className="font-bold text-[hsl(var(--accent))]">
+                  {String(shown.length).padStart(2, "0")}
+                </span>{" "}
+                prints in collection
+              </p>
+            </div>
           </div>
-          <div className="mt-10 flex flex-wrap gap-2 border-t border-white/15 pt-7">
+
+          {/* Category Filter Pills */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-b border-white/15 pb-6 sm:justify-start">
+            <span className="mr-2 mono-label text-[9px] uppercase tracking-wider text-white/50">
+              Filter:
+            </span>
             {filters.map((item) => (
               <button
                 key={item}
                 type="button"
                 data-testid={`button-gallery-filter-${item.toLowerCase()}`}
-                onClick={() => {
-                  setFilter(item);
-                  setActive(0);
-                }}
-                className={`border px-4 py-2 text-xs font-bold transition ${
+                onClick={() => setFilter(item)}
+                className={`border px-3.5 py-1.5 text-xs font-bold transition ${
                   filter === item
                     ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent))] text-[hsl(var(--foreground))]"
                     : "border-white/20 text-white/70 hover:border-white hover:text-white"
@@ -166,11 +683,157 @@ function Gallery() {
               </button>
             ))}
           </div>
-          <p className="sr-only" aria-live="polite">
-            Showing {activeItem?.title}
-          </p>
+
+          {/* Joined-Together Scattered Polaroid Collage (No Grid) */}
+          <div
+            className="relative mx-auto mt-8 flex max-w-5xl flex-wrap items-center justify-center py-8 px-2 sm:px-4 md:px-6 overflow-visible"
+            aria-label="Photo story collage"
+          >
+            {shown.map((item, i) => {
+              const preset = COLLAGE_PRESETS[i % COLLAGE_PRESETS.length];
+
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.85, y: 20 }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    y: 0,
+                    rotate: preset.rotate,
+                    transition: {
+                      duration: 0.4,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay: Math.min(i * 0.04, 0.3),
+                    },
+                  }}
+                  whileHover={{
+                    scale: 1.15,
+                    rotate: 0,
+                    zIndex: 120,
+                    y: -10,
+                    transition: { type: "spring", stiffness: 420, damping: 24 },
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    zIndex: Math.max(1, (shown.length - i) * 2 + 5),
+                    transformOrigin: "center center",
+                  }}
+                  onClick={() => setSelectedPhoto(item)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedPhoto(item);
+                    }
+                  }}
+                  aria-label={`Open photo ${i + 1} full screen`}
+                  className={`group relative shrink-0 cursor-pointer select-none outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--accent))] w-[165px] sm:w-[220px] md:w-[260px] lg:w-[280px] -mx-3 -my-4 sm:-mx-6 sm:-my-8 md:-mx-8 md:-my-11 ${
+                    i % 2 === 1 ? "translate-y-2 sm:translate-y-4" : "-translate-y-2"
+                  } ${
+                    i % 3 === 1
+                      ? "-translate-x-2 sm:-translate-x-3"
+                      : "translate-x-2 sm:translate-x-3"
+                  }`}
+                >
+                  {/* Polaroid Frame Alone */}
+                  <div className="relative rounded-[2px] bg-white p-2 sm:p-2.5 pb-7 sm:pb-9 shadow-[0_14px_32px_-6px_rgba(0,0,0,0.55),0_6px_14px_rgba(0,0,0,0.3)] ring-1 ring-black/10 transition-shadow duration-300 group-hover:shadow-[0_28px_60px_-10px_rgba(0,0,0,0.75),0_12px_24px_rgba(0,0,0,0.4)]">
+                    <div className="relative aspect-square w-full overflow-hidden bg-neutral-900/10 shadow-inner">
+                      <img
+                        src={item.image}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20" />
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {shown.length === 0 && (
+            <div className="mt-16 text-center py-16 border border-dashed border-white/20">
+              <p className="mono-label text-sm text-white/60">
+                No photo stories found in "{filter}"
+              </p>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Full-Screen Lightbox Modal */}
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div
+            key="gallery-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setSelectedPhoto(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-2xl p-3 sm:p-6 md:p-8 select-none"
+            aria-modal="true"
+            role="dialog"
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setSelectedPhoto(null)}
+              aria-label="Close full screen view"
+              className="fixed right-4 top-4 sm:right-6 sm:top-6 z-[120] flex size-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/30 hover:scale-105 active:scale-95"
+            >
+              <X className="size-6" />
+            </button>
+
+            {/* Prev Arrow */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrev();
+              }}
+              aria-label="Previous photo"
+              className="fixed left-3 sm:left-6 top-1/2 -translate-y-1/2 z-[120] flex size-11 sm:size-13 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/30 hover:scale-105 active:scale-95"
+            >
+              <ChevronLeft className="size-6 sm:size-7" />
+            </button>
+
+            {/* Next Arrow */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNext();
+              }}
+              aria-label="Next photo"
+              className="fixed right-3 sm:right-6 top-1/2 -translate-y-1/2 z-[120] flex size-11 sm:size-13 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition hover:bg-white/30 hover:scale-105 active:scale-95"
+            >
+              <ChevronRight className="size-6 sm:size-7" />
+            </button>
+
+            {/* Lightbox Image with Smooth Spring */}
+            <motion.div
+              key={selectedPhoto.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 360, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative flex items-center justify-center max-h-[92vh] max-w-[94vw]"
+            >
+              <img
+                src={selectedPhoto.image}
+                alt={selectedPhoto.title || ""}
+                className="max-h-[90vh] max-w-[92vw] w-auto h-auto object-contain shadow-[0_25px_60px_rgba(0,0,0,0.85)] rounded-none pointer-events-auto"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Shell>
   );
 }
