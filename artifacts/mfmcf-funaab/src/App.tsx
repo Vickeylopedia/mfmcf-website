@@ -14,6 +14,7 @@ import NotFound from "@/pages/not-found";
 import Admin from "@/pages/admin";
 import SermonDetail from "@/pages/sermon-detail";
 import Sermons from "@/pages/sermons";
+import { SplashScreen } from "@/components/splash-screen";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000 } },
@@ -49,6 +50,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <SplashScreen />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Router />
         </WouterRouter>

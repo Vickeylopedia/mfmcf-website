@@ -43,17 +43,93 @@ const HERO_PHRASES = [
   },
 ];
 
+type TypingPhase =
+  | "typing-1"
+  | "typing-2"
+  | "hold"
+  | "erasing-2"
+  | "erasing-1"
+  | "pause-next";
+
 function HeroHeadline() {
   const [phraseIdx, setPhraseIdx] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setPhraseIdx((prev) => (prev + 1) % HERO_PHRASES.length);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, []);
+  const [phase, setPhase] = useState<TypingPhase>("typing-1");
+  const [charCount1, setCharCount1] = useState(0);
+  const [charCount2, setCharCount2] = useState(0);
 
   const current = HERO_PHRASES[phraseIdx];
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (phase === "typing-1") {
+      if (charCount1 < current.line1.length) {
+        timer = setTimeout(() => {
+          setCharCount1((prev) => prev + 1);
+        }, 90);
+      } else {
+        timer = setTimeout(() => {
+          setPhase("typing-2");
+        }, 110);
+      }
+    } else if (phase === "typing-2") {
+      if (charCount2 < current.line2.length) {
+        timer = setTimeout(() => {
+          setCharCount2((prev) => prev + 1);
+        }, 90);
+      } else {
+        timer = setTimeout(() => {
+          setPhase("hold");
+        }, 2800);
+      }
+    } else if (phase === "hold") {
+      timer = setTimeout(() => {
+        setPhase("erasing-2");
+      }, 400);
+    } else if (phase === "erasing-2") {
+      if (charCount2 > 0) {
+        timer = setTimeout(() => {
+          setCharCount2((prev) => prev - 1);
+        }, 45);
+      } else {
+        timer = setTimeout(() => {
+          setPhase("erasing-1");
+        }, 70);
+      }
+    } else if (phase === "erasing-1") {
+      if (charCount1 > 0) {
+        timer = setTimeout(() => {
+          setCharCount1((prev) => prev - 1);
+        }, 45);
+      } else {
+        timer = setTimeout(() => {
+          setPhase("pause-next");
+        }, 200);
+      }
+    } else if (phase === "pause-next") {
+      timer = setTimeout(() => {
+        setPhraseIdx((prev) => (prev + 1) % HERO_PHRASES.length);
+        setCharCount1(0);
+        setCharCount2(0);
+        setPhase("typing-1");
+      }, 300);
+    }
+
+    return () => clearTimeout(timer);
+  }, [phase, charCount1, charCount2, current.line1.length, current.line2.length]);
+
+  const displayedLine1 = current.line1.slice(0, charCount1);
+  const displayedLine2 = current.line2.slice(0, charCount2);
+
+  const showCursorOnLine1 =
+    phase === "typing-1" ||
+    phase === "erasing-1" ||
+    (phase === "typing-2" && charCount2 === 0);
+
+  const showCursorOnLine2 =
+    (phase === "typing-2" && charCount2 > 0) ||
+    phase === "hold" ||
+    phase === "erasing-2";
 
   return (
     <div className="mt-6 min-h-[170px] sm:min-h-[220px] lg:min-h-[280px]">
@@ -68,26 +144,26 @@ function HeroHeadline() {
         className="display-font text-[2.75rem] leading-[0.92] tracking-[-0.045em] sm:text-7xl lg:text-[7.2rem] select-none"
         aria-label="MFMCF FUNAAB — Sincerely we Love you"
       >
-        <motion.span
-          key={`line1-${phraseIdx}`}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="block text-white"
-        >
-          {current.line1}
-        </motion.span>
-        <motion.span
-          key={`line2-${phraseIdx}`}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.08, ease: "easeOut" }}
-          className="block mt-1 sm:mt-2"
-        >
+        <span className="block text-white">
+          {displayedLine1 || "\u00A0"}
+          {showCursorOnLine1 && (
+            <span
+              aria-hidden="true"
+              className="inline-block w-[3px] sm:w-[5px] lg:w-[6px] h-[0.82em] ml-1 bg-[hsl(var(--accent))] align-baseline animate-pulse shadow-[0_0_8px_hsl(var(--accent))]"
+            />
+          )}
+        </span>
+        <span className="block mt-1 sm:mt-2">
           <em className="font-normal text-[hsl(var(--accent))]">
-            {current.line2}
+            {displayedLine2 || "\u00A0"}
           </em>
-        </motion.span>
+          {showCursorOnLine2 && (
+            <span
+              aria-hidden="true"
+              className="inline-block w-[3px] sm:w-[5px] lg:w-[6px] h-[0.82em] ml-1 bg-[hsl(var(--accent))] align-baseline animate-pulse shadow-[0_0_8px_hsl(var(--accent))]"
+            />
+          )}
+        </span>
       </h1>
     </div>
   );
@@ -539,7 +615,7 @@ function Home() {
           className="dot-grid pointer-events-none absolute bottom-8 right-[8%] size-40 opacity-60"
         />
         <div className="relative z-10 mx-auto max-w-[1380px]">
-          <div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]">
+          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <Reveal variant="left">
               <div>
                 <SectionHeading
@@ -553,28 +629,27 @@ function Home() {
                   }
                   headingClassName="leading-[.94] tracking-[-.04em]"
                 />
-                <p className="mt-6 max-w-sm text-sm leading-6 text-[hsl(var(--muted-foreground))]">
+                <p className="mt-4 max-w-md text-sm leading-6 text-[hsl(var(--muted-foreground))]">
                   Catch up on a message you missed, or listen to what you need
                   today.
                 </p>
-                <Link
-                  href="/sermons"
-                  data-testid="link-home-sermon-archive"
-                  className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[hsl(var(--primary))]"
-                >
-                  Browse the sermon archive{" "}
-                  <ArrowUpRight className="size-4" />
-                </Link>
               </div>
             </Reveal>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Reveal variant="scale">
-                <SermonCard sermon={sermons[0]} />
-              </Reveal>
-              <Reveal variant="scale" delay={120}>
-                <SermonCard sermon={sermons[1]} />
-              </Reveal>
-            </div>
+            <Reveal variant="right" delay={100}>
+              <Link
+                href="/sermons"
+                data-testid="link-home-sermon-archive"
+                className="inline-flex items-center gap-2 text-sm font-bold text-[hsl(var(--primary))] transition hover:translate-x-1"
+              >
+                Browse the sermon archive{" "}
+                <ArrowUpRight className="size-4" />
+              </Link>
+            </Reveal>
+          </div>
+
+          {/* Non-stop horizontal scrolling carousel: only 4 latest sermons, horizontal on mobile */}
+          <div className="mt-10 sm:mt-12">
+            <SermonCarousel sermons={sermons} />
           </div>
         </div>
       </section>
@@ -712,30 +787,101 @@ function EventCard({
   );
 }
 
-function SermonCard({ sermon }: { sermon?: SermonView }) {
+function SermonCard({
+  sermon,
+  index = 0,
+}: {
+  sermon?: SermonView;
+  index?: number;
+}) {
   if (!sermon) return null;
   return (
     <Link
       href={`/sermons/${sermon.slug}`}
-      data-testid={`link-sermon-${sermon.title.toLowerCase().replaceAll(" ", "-")}`}
-      className="group block"
+      data-testid={`link-sermon-${sermon.title.toLowerCase().replaceAll(" ", "-")}-${index}`}
+      className="group block w-[260px] sm:w-[310px] shrink-0 select-none transition-transform duration-300 hover:-translate-y-1"
     >
-      <PhotoFrame
-        src={sermon.image}
-        alt=""
-        frame="none"
-        className="aspect-[1.28]"
-      />
-      <div className="border border-t-0 border-[hsl(var(--foreground)/.12)] bg-[hsl(var(--card))] p-5">
-        <p className="mono-label text-[9px] text-[hsl(var(--primary))]">
-          Sunday service · {sermon.scripture}
+      <div className="relative aspect-[16/10] overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))]">
+        <img
+          src={sermon.image}
+          alt={sermon.title}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = "/assets/image_1787353067577.png";
+          }}
+          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-black/25 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center">
+          <span className="flex size-11 items-center justify-center rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] shadow-lg">
+            <Play className="ml-0.5 size-4 fill-current" />
+          </span>
+        </div>
+      </div>
+      <div className="border-2 border-t-0 border-[hsl(var(--foreground))] bg-[hsl(var(--card))] p-4 sm:p-5 shadow-[3px_3px_0px_hsl(var(--foreground))]">
+        <p className="mono-label text-[9px] font-bold text-[hsl(var(--primary))] truncate">
+          {sermon.tag || "Sunday service"} · {sermon.scripture || sermon.date}
         </p>
-        <h3 className="mt-3 text-xl font-semibold">{sermon.title}</h3>
-        <span className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))]">
-          Listen now <Play className="size-3 fill-current" />
-        </span>
+        <h3 className="display-font mt-2 text-lg sm:text-xl font-bold leading-snug line-clamp-2 transition-colors duration-200 group-hover:text-[hsl(var(--primary))]">
+          {sermon.title}
+        </h3>
+        <p className="mt-1 text-xs font-medium text-[hsl(var(--muted-foreground))] truncate">
+          {sermon.speaker}
+        </p>
+        <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--foreground)/.12)] pt-3 text-xs font-bold text-[hsl(var(--primary))]">
+          <span>Listen now</span>
+          <span className="flex size-5 items-center justify-center bg-[hsl(var(--primary))] text-white transition-transform duration-200 group-hover:translate-x-1">
+            <Play className="ml-0.5 size-2.5 fill-current" />
+          </span>
+        </div>
       </div>
     </Link>
+  );
+}
+
+function SermonCarousel({ sermons }: { sermons: SermonView[] }) {
+  // Only four of the latest sermons should be displayed at the home screen
+  const latestSermons = sermons.slice(0, 4);
+  if (!latestSermons.length) return null;
+
+  // Duplicate items to create a continuous, non-stop seamless infinite loop
+  const base =
+    latestSermons.length >= 4
+      ? latestSermons
+      : [...latestSermons, ...latestSermons, ...latestSermons, ...latestSermons].slice(0, 4);
+  const loopItems = [...base, ...base];
+
+  return (
+    <div className="relative w-full overflow-hidden py-3">
+      {/* Editorial side edge gradient masks */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 sm:w-16 bg-gradient-to-r from-[hsl(var(--secondary))] to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 sm:w-16 bg-gradient-to-l from-[hsl(var(--secondary))] to-transparent"
+      />
+
+      {/* Non-stop horizontal scrolling track */}
+      <motion.div
+        className="flex flex-row flex-nowrap gap-4 sm:gap-6 will-change-transform"
+        animate={{
+          x: ["0%", "-50%"],
+        }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",
+          duration: 22,
+        }}
+      >
+        {loopItems.map((sermon, idx) => (
+          <SermonCard
+            key={`${sermon.slug}-${idx}`}
+            sermon={sermon}
+            index={idx}
+          />
+        ))}
+      </motion.div>
+    </div>
   );
 }
 

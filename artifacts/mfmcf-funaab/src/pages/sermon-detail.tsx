@@ -92,7 +92,7 @@ function SermonDetail() {
             </p>
           </div>
           </Reveal>
-          <Reveal delay={120}>
+          <Reveal delay={120} className="min-w-0 w-full">
             <AudioPlayer
               src={audioSrc}
               title={sermon.title}

@@ -152,16 +152,16 @@ export function AudioPlayer({
   const progress = duration > 0 ? Math.min(current / duration, 1) : 0;
 
   return (
-    <div className="border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--card))] p-6 sm:p-8 shadow-[6px_6px_0px_hsl(var(--foreground))]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[hsl(var(--foreground)/.12)] pb-4">
-        <div>
+    <div className="w-full max-w-full overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--card))] p-4 sm:p-7 shadow-[3px_3px_0px_hsl(var(--foreground))] sm:shadow-[6px_6px_0px_hsl(var(--foreground))]">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-[hsl(var(--foreground)/.12)] pb-3.5">
+        <div className="min-w-0 flex-1">
           <Eyebrow weight="bold">Official Sermon Audio</Eyebrow>
-          <p className="mt-1 font-mono text-[11px] font-bold text-[hsl(var(--muted-foreground))]">
+          <p className="mt-1 font-mono text-[10px] sm:text-[11px] font-bold text-[hsl(var(--muted-foreground))] truncate">
             {date || "MFMCF FUNAAB Archives"} {scripture && `· ${scripture}`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 border border-[hsl(var(--primary))] bg-[hsl(var(--secondary))] px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-wider text-[hsl(var(--primary))]">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="inline-flex items-center gap-1 border border-[hsl(var(--primary))] bg-[hsl(var(--secondary))] px-2 py-0.5 sm:px-2.5 sm:py-1 font-mono text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[hsl(var(--primary))]">
             <Headphones className="size-3" />
             Full Message
           </span>
@@ -169,9 +169,9 @@ export function AudioPlayer({
       </div>
 
       {/* Main Player Display */}
-      <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center">
+      <div className="mt-5 sm:mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
         {/* Cover Art Thumbnail with Play Status Indicator */}
-        <div className="relative size-24 shrink-0 overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))] shadow-[3px_3px_0px_hsl(var(--foreground))] sm:size-28">
+        <div className="relative size-20 sm:size-28 shrink-0 overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))] shadow-[2px_2px_0px_hsl(var(--foreground))] sm:shadow-[3px_3px_0px_hsl(var(--foreground))] mx-auto sm:mx-0">
           <img
             src={artworkUrl}
             alt={title}
@@ -191,19 +191,19 @@ export function AudioPlayer({
         </div>
 
         {/* Title, Speaker & Waveform */}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 text-center sm:text-left">
           <p className="mono-label text-[9px] text-[hsl(var(--muted-foreground))]">
             {playing ? "Now playing" : "Listen to the word"}
           </p>
-          <h3 className="display-font mt-1 truncate text-2xl font-bold leading-tight text-[hsl(var(--foreground))]">
+          <h3 className="display-font mt-1 text-xl sm:text-2xl font-bold leading-tight text-[hsl(var(--foreground))] break-words line-clamp-2">
             {title}
           </h3>
-          <p className="mt-0.5 truncate text-sm font-semibold text-[hsl(var(--muted-foreground))]">
+          <p className="mt-0.5 truncate text-xs sm:text-sm font-semibold text-[hsl(var(--muted-foreground))]">
             {speaker}
           </p>
 
           {/* Interactive Scrub Bar */}
-          <div className="mt-4">
+          <div className="mt-3 sm:mt-4">
             <div
               ref={barRef}
               onClick={seek}
@@ -233,16 +233,16 @@ export function AudioPlayer({
       </div>
 
       {/* Control Buttons */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-[hsl(var(--foreground)/.12)] pt-6">
-        <div className="flex items-center gap-3">
+      <div className="mt-5 sm:mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 border-t border-[hsl(var(--foreground)/.12)] pt-4 sm:pt-6">
+        <div className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-1.5 sm:flex sm:items-center sm:gap-3 w-full sm:w-auto">
           {/* Skip -10s */}
           <button
             type="button"
             onClick={() => skip(-10)}
             title="Rewind 10 seconds"
-            className="flex size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-[hsl(var(--secondary))]"
+            className="flex size-9 sm:size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-[hsl(var(--secondary))]"
           >
-            <RotateCcw className="size-4" />
+            <RotateCcw className="size-3.5 sm:size-4" />
           </button>
 
           {/* Play/Pause Button */}
@@ -251,17 +251,17 @@ export function AudioPlayer({
             onClick={togglePlay}
             aria-label={playing ? `Pause ${title}` : `Play ${title}`}
             data-testid="button-sermon-play-audio"
-            className="flex h-12 items-center gap-2.5 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--primary))] px-6 font-mono text-xs font-black uppercase tracking-wider text-white shadow-[3px_3px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))]"
+            className="flex h-10 sm:h-12 items-center justify-center gap-2 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--primary))] px-3 sm:px-6 font-mono text-xs font-black uppercase tracking-wider text-white shadow-[2px_2px_0px_hsl(var(--foreground))] sm:shadow-[3px_3px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))]"
           >
             {playing ? (
               <>
-                <Pause className="size-4 fill-current" />
+                <Pause className="size-3.5 sm:size-4 fill-current shrink-0" />
                 <span>Pause</span>
               </>
             ) : (
               <>
-                <Play className="size-4 fill-current" />
-                <span>Play Sermon</span>
+                <Play className="size-3.5 sm:size-4 fill-current shrink-0" />
+                <span className="truncate">Play Sermon</span>
               </>
             )}
           </button>
@@ -271,9 +271,9 @@ export function AudioPlayer({
             type="button"
             onClick={() => skip(10)}
             title="Forward 10 seconds"
-            className="flex size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-[hsl(var(--secondary))]"
+            className="flex size-9 sm:size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-[hsl(var(--secondary))]"
           >
-            <RotateCw className="size-4" />
+            <RotateCw className="size-3.5 sm:size-4" />
           </button>
 
           {/* Speed Selector */}
@@ -281,15 +281,15 @@ export function AudioPlayer({
             type="button"
             onClick={cycleSpeed}
             title="Change playback speed"
-            className="border-2 border-[hsl(var(--foreground))] bg-white px-2.5 py-2 font-mono text-[11px] font-bold text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--secondary))]"
+            className="flex h-9 sm:h-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white px-2 sm:px-2.5 font-mono text-[10px] sm:text-[11px] font-bold text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--secondary))]"
           >
             {playbackRate}x
           </button>
         </div>
 
         {/* Volume & Download Section */}
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="hidden items-center gap-2 sm:flex">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+          <div className="hidden items-center gap-2 lg:flex">
             <button
               type="button"
               onClick={toggleMute}
@@ -309,7 +309,7 @@ export function AudioPlayer({
               step={0.05}
               value={isMuted ? 0 : volume}
               onChange={handleVolumeChange}
-              className="h-1.5 w-20 cursor-pointer accent-[hsl(var(--primary))]"
+              className="h-1.5 w-16 xl:w-20 cursor-pointer accent-[hsl(var(--primary))]"
               aria-label="Volume slider"
             />
           </div>
@@ -320,7 +320,7 @@ export function AudioPlayer({
             onClick={handleDownload}
             disabled={downloading}
             data-testid="link-sermon-download"
-            className="group flex items-center gap-2 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-4 py-2.5 font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[3px_3px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-white"
+            className="group flex flex-1 sm:flex-initial items-center justify-center gap-2 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-3.5 sm:px-4 py-2 sm:py-2.5 font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] sm:shadow-[3px_3px_0px_hsl(var(--foreground))] transition hover:-translate-y-0.5 hover:bg-white disabled:opacity-60"
             title="Download full sermon MP3 with embedded cover artwork"
           >
             {downloading ? (
