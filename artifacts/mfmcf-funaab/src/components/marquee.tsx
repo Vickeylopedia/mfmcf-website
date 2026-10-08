@@ -46,17 +46,6 @@ export function Marquee({
       role="region"
       aria-label="Campus news ticker"
     >
-      {/* Lower third broadcast badge */}
-      <div className="relative z-10 flex shrink-0 items-center gap-2.5 border-r-2 border-current bg-inherit px-4 py-0.5 sm:px-6">
-        <span className="relative flex size-2.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-600 opacity-75" />
-          <span className="relative inline-flex size-2.5 rounded-full bg-red-600" />
-        </span>
-        <span className="mono-label text-[10px] font-black tracking-widest sm:text-xs">
-          BULLETIN
-        </span>
-      </div>
-
       <div className="flex w-full overflow-hidden">
         <motion.div
           className="flex shrink-0"

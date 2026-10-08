@@ -123,7 +123,6 @@
   .hero-photo-main { animation: hero-settle 1.1s cubic-bezier(.2,.8,.2,1) both; transform-origin: 70% 35%; }
   .hero-photo-secondary { animation: hero-settle 1.1s .16s cubic-bezier(.2,.8,.2,1) both; transform-origin: 30% 70%; }
   .hero-info-card { animation: float-in 1s .42s cubic-bezier(.2,.8,.2,1) both; }
-  .hero-spark { animation: pulse-dot 2.5s ease-in-out infinite; }
   .gallery-rail { scrollbar-width: thin; scrollbar-color: hsl(var(--accent) / .65) transparent; }
   .gallery-rail::-webkit-scrollbar { height: 4px; }
   .gallery-rail::-webkit-scrollbar-track { background: hsl(var(--foreground) / .18); }

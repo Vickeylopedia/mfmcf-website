@@ -336,16 +336,11 @@ export function AudioPlayer({
             ) : (
               <>
                 <Download className="size-4 transition-transform group-hover:translate-y-0.5" />
-                <span>Download Audio + Art</span>
+                <span>Download Audio</span>
               </>
             )}
           </button>
         </div>
-      </div>
-
-      <div className="mt-3 flex items-center justify-between border-t border-[hsl(var(--foreground)/.08)] pt-2 text-[10px] text-[hsl(var(--muted-foreground))]">
-        <span className="font-mono">✓ Embedded album artwork included in MP3</span>
-        <span className="font-mono font-bold text-[hsl(var(--primary))]">High Definition Audio</span>
       </div>
 
       {/* Hidden Native Audio Element */}

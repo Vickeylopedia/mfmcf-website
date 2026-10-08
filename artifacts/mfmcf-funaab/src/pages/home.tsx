@@ -30,7 +30,7 @@ import { getSermon } from "@/lib/sermons";
 import { useSermons, type SermonView } from "@/lib/queries";
 import { photos } from "@/lib/site";
 
-const TYPEWRITER_PHRASES = [
+const HERO_PHRASES = [
   {
     line1: "MFMCF",
     line2: "FUNAAB",
@@ -39,85 +39,28 @@ const TYPEWRITER_PHRASES = [
   {
     line1: "Sincerely we",
     line2: "Love you",
-    badge: "FROM OUR HEARTS",
+    badge: "FAMILY OF LOVE",
   },
 ];
 
-function LoopingTypewriter() {
+function HeroHeadline() {
   const [phraseIdx, setPhraseIdx] = useState(0);
-  const [charIdx, setCharIdx] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const currentPhrase = TYPEWRITER_PHRASES[phraseIdx];
-  const line1Length = currentPhrase.line1.length;
-  const line2Length = currentPhrase.line2.length;
-  const totalLength = line1Length + line2Length;
 
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
+    const timer = setInterval(() => {
+      setPhraseIdx((prev) => (prev + 1) % HERO_PHRASES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
 
-    if (!isDeleting) {
-      if (charIdx < totalLength) {
-        // Deliberate, rhythmic typing speed (135ms/char)
-        timeout = setTimeout(() => {
-          setCharIdx((prev) => prev + 1);
-        }, 135);
-      } else {
-        // Paused at full phrase: 2000ms pause so the text can be comfortably read
-        timeout = setTimeout(() => {
-          setIsDeleting(true);
-        }, 2000);
-      }
-    } else {
-      if (charIdx > 0) {
-        // Controlled, natural backspacing speed (65ms/char)
-        timeout = setTimeout(() => {
-          setCharIdx((prev) => prev - 1);
-        }, 65);
-      } else {
-        // Finished deleting: 500ms pause before starting the next phrase
-        timeout = setTimeout(() => {
-          setIsDeleting(false);
-          setPhraseIdx((prev) => (prev + 1) % TYPEWRITER_PHRASES.length);
-        }, 500);
-      }
-    }
-
-    return () => clearTimeout(timeout);
-  }, [charIdx, isDeleting, phraseIdx, totalLength]);
-
-  const currentLine1 = currentPhrase.line1.slice(0, Math.min(charIdx, line1Length));
-  const currentLine2 =
-    charIdx > line1Length
-      ? currentPhrase.line2.slice(0, charIdx - line1Length)
-      : "";
-
-  const isCursorOnLine1 = charIdx <= line1Length;
-
-  const cursor = (
-    <motion.span
-      animate={{ opacity: [1, 1, 0, 0, 1] }}
-      transition={{
-        repeat: Infinity,
-        duration: 0.75,
-        times: [0, 0.49, 0.5, 0.99, 1],
-        ease: "linear",
-      }}
-      className="ml-1.5 inline-block h-[0.78em] w-[3px] sm:w-[5px] align-baseline bg-[hsl(var(--accent))] shadow-[0_0_12px_hsl(var(--accent)/.9)]"
-      aria-hidden="true"
-    />
-  );
+  const current = HERO_PHRASES[phraseIdx];
 
   return (
     <div className="mt-6 min-h-[170px] sm:min-h-[220px] lg:min-h-[280px]">
-      {/* Editorial badge indicator */}
       <div className="mb-3 flex items-center gap-2.5">
         <span className="inline-flex items-center gap-1.5 border border-[hsl(var(--accent)/.4)] bg-[hsl(var(--accent)/.15)] px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[.18em] text-[hsl(var(--accent))]">
-          <span className="size-1.5 rounded-full bg-[hsl(var(--accent))] animate-ping" />
-          {currentPhrase.badge}
-        </span>
-        <span className="font-mono text-[9px] uppercase tracking-widest text-white/45">
-          {isDeleting ? "⌫ BACKSPACING..." : "⌨ TYPING..."}
+          <span className="size-1.5 rounded-full bg-[hsl(var(--accent))]" />
+          {current.badge}
         </span>
       </div>
 
@@ -125,37 +68,26 @@ function LoopingTypewriter() {
         className="display-font text-[2.75rem] leading-[0.92] tracking-[-0.045em] sm:text-7xl lg:text-[7.2rem] select-none"
         aria-label="MFMCF FUNAAB — Sincerely we Love you"
       >
-        {/* Line 1 */}
-        <span className="block text-white">
-          <span className="relative inline-block">
-            {currentLine1}
-            {phraseIdx === 0 && (
-              <motion.span
-                aria-hidden="true"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: currentLine1.length >= line1Length ? 1 : 0 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                style={{ originX: 0 }}
-                className="absolute -bottom-[.06em] -left-[2%] -z-10 h-[.16em] w-[104%] bg-[hsl(var(--accent)/.75)]"
-              />
-            )}
-          </span>
-          {isCursorOnLine1 && cursor}
-        </span>
-
-        {/* Line 2 (always on a separate line on both mobile & desktop) */}
-        <span className="block mt-1 sm:mt-2">
-          {phraseIdx === 0 ? (
-            <em className="font-normal text-[hsl(var(--accent))]">
-              {currentLine2}
-            </em>
-          ) : (
-            <em className="font-normal text-[hsl(var(--accent))] underline decoration-[hsl(var(--accent)/.4)] decoration-wavy underline-offset-8">
-              {currentLine2}
-            </em>
-          )}
-          {!isCursorOnLine1 && cursor}
-        </span>
+        <motion.span
+          key={`line1-${phraseIdx}`}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="block text-white"
+        >
+          {current.line1}
+        </motion.span>
+        <motion.span
+          key={`line2-${phraseIdx}`}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.08, ease: "easeOut" }}
+          className="block mt-1 sm:mt-2"
+        >
+          <em className="font-normal text-[hsl(var(--accent))]">
+            {current.line2}
+          </em>
+        </motion.span>
       </h1>
     </div>
   );
@@ -193,8 +125,8 @@ function SmoothSoundwaves() {
             transition={{
               repeat: Infinity,
               repeatType: "mirror",
-              duration: 1.2 + (i % 6) * 0.24,
-              delay: (i % 9) * 0.08,
+              duration: 5.2 + (i % 6) * 0.8,
+              delay: (i % 9) * 0.25,
               ease: "easeInOut",
             }}
           />
@@ -308,37 +240,13 @@ function HandDrawnAnnotation() {
 
 function HeroEditorialMarks() {
   return (
-    <>
-      {/* Top-left registration mark */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-5 top-5 z-20 hidden items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.25em] text-white/40 sm:flex"
-      >
-        <span className="size-2 rounded-full border border-white/40" />
-        <span>REG: 07°18&apos;N // 03°44&apos;E · MFMCF-FUNAAB</span>
-      </div>
-      {/* Top-right edition mark */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-6 top-5 z-20 hidden items-center gap-3 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/40 lg:flex"
-      >
-        <span className="border border-white/20 px-2 py-0.5">
-          VOL. 2026 // CHAPEL ISSUE 04
-        </span>
-        <span className="text-[hsl(var(--accent))]">⊕ PRESS READY</span>
-      </div>
-      {/* Sketched doodle star in background */}
-      <motion.div
-        aria-hidden="true"
-        animate={{ scale: [1, 1.25, 1], rotate: [0, 90, 180, 270, 360] }}
-        transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
-        className="pointer-events-none absolute left-[38%] top-[12%] z-0 hidden lg:block opacity-40 text-[hsl(var(--accent))]"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0L14 9L23 12L14 15L12 24L10 15L1 12L10 9Z" />
-        </svg>
-      </motion.div>
-    </>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute left-5 top-5 z-20 hidden items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.25em] text-white/40 sm:flex"
+    >
+      <span className="size-2 rounded-full border border-white/40" />
+      <span>MFMCF · FUNAAB CAMPUS FELLOWSHIP</span>
+    </div>
   );
 }
 
@@ -414,7 +322,7 @@ function Home() {
             >
               Mountain of Fire &amp; Miracles Campus Fellowship
             </Eyebrow>
-            <LoopingTypewriter />
+            <HeroHeadline />
             <p className="mt-8 max-w-md text-lg leading-7 text-white/75">
               A warm, growing fellowship for students at FUNAAB — where faith
               gets practical and no one has to walk campus alone.
@@ -487,14 +395,6 @@ function Home() {
                 New Lecture Theatre · 9:00 AM
               </p>
             </motion.div>
-            <motion.span
-              whileHover={{ scale: 1.25, rotate: 20 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 400, damping: 18 }}
-              className="hero-spark absolute left-[46%] top-[29%] flex size-12 cursor-pointer items-center justify-center rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] shadow-xl"
-            >
-              <Sparkles className="size-5" />
-            </motion.span>
           </div>
         </div>
       </section>
@@ -523,7 +423,7 @@ function Home() {
         <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 lg:grid-cols-[.8fr_1.2fr]">
           <Reveal variant="left">
             <SectionHeading
-              eyebrow="Our north star"
+              eyebrow="Who we are"
               title="A family that makes room."
               headingClassName="mt-5 max-w-md leading-[.96]"
             />
@@ -581,12 +481,12 @@ function Home() {
         <div className="relative z-10 mx-auto max-w-[1380px]">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <SectionHeading
-              eyebrow="A week with us"
+              eyebrow="Weekly meetings"
               title={
                 <>
-                  There’s a place
+                  Join us
                   <br />
-                  in the rhythm.
+                  this week.
                 </>
               }
               headingClassName="leading-none"
@@ -643,7 +543,7 @@ function Home() {
             <Reveal variant="left">
               <div>
                 <SectionHeading
-                  eyebrow="From the archive"
+                  eyebrow="Recent sermons"
                   title={
                     <>
                       God still
@@ -654,8 +554,8 @@ function Home() {
                   headingClassName="leading-[.94] tracking-[-.04em]"
                 />
                 <p className="mt-6 max-w-sm text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-                  Catch up on a word you missed, or press play on something you
-                  need today.
+                  Catch up on a message you missed, or listen to what you need
+                  today.
                 </p>
                 <Link
                   href="/sermons"
@@ -725,9 +625,9 @@ function Home() {
         <Reveal>
           <div className="mx-auto flex max-w-[1380px] flex-col justify-between gap-8 border-y border-[hsl(var(--foreground)/.14)] py-10 sm:flex-row sm:items-center">
             <div>
-              <Eyebrow>Keep in touch</Eyebrow>
+              <Eyebrow>Stay updated</Eyebrow>
               <h2 className="display-font mt-3 text-4xl tracking-[-.03em] sm:text-5xl">
-                The good stuff, occasionally.
+                Get updates from fellowship.
               </h2>
             </div>
             <NewsletterForm />

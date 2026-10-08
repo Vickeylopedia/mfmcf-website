@@ -35,10 +35,10 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
   {
     id: -10,
     number: "01",
-    tag: "SUNDAY CELEBRATION",
-    category: "Praise & Glory",
-    title: "Overflow of Joy",
-    desc: "Spirited praise, laughter, and an electric atmosphere where God’s tangible presence turns campus days into life-altering encounters.",
+    tag: "Sunday Service",
+    category: "Worship",
+    title: "Sunday Praise & Worship",
+    desc: "Sundays at the New Lecture Theatre are full of joy, energetic praise, and heartfelt worship as we start each week together.",
     time: "Sundays · 9:00 AM",
     venue: "New Lecture Theatre (NLT)",
     image: photos.sundayPraise,
@@ -46,10 +46,10 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
   {
     id: -11,
     number: "02",
-    tag: "THE SECRET PLACE",
-    category: "Fervent Intercession",
-    title: "Hearts on Fire",
-    desc: "Students yielding their youth to unbroken, travailing prayer. A sacred sanctuary where quiet whispers turn to prevailing faith.",
+    tag: "Midweek Prayer",
+    category: "Prayer",
+    title: "Midweek Prayers",
+    desc: "We gather every Wednesday to pray, commit our academic work into God's hands, and encourage each other through the semester.",
     time: "Wednesdays · 5:00 PM",
     venue: "Family Rooms & Chapel",
     image: photos.prayerFervent,
@@ -57,10 +57,10 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
   {
     id: -12,
     number: "03",
-    tag: "ONE BODY IN CHRIST",
-    category: "Covenant Community",
-    title: "United in One Accord",
-    desc: "Hand in hand across faculties, departments, and levels. Standing together as a real, protective campus family that refuses to let anyone walk alone.",
+    tag: "Campus Family",
+    category: "Community",
+    title: "Students Walking Together",
+    desc: "Students from different departments and levels supporting each other through exams, projects, and everyday campus life.",
     time: "Weekly Gatherings",
     venue: "Campus Wide Fellowship",
     image: photos.familyUnity,
@@ -68,21 +68,21 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
   {
     id: -14,
     number: "04",
-    tag: "THE SPOKEN WORD",
-    category: "Doctrine & Wisdom",
-    title: "Truth Unleashed",
-    desc: "Sound doctrine, unapologetic truth, and prophetic wisdom equipping student leaders to excel academically while dominating spiritually.",
+    tag: "Bible Study",
+    category: "Teaching",
+    title: "Learning God's Word",
+    desc: "Practical teachings from the scriptures that help you grow in faith and make wise choices in your studies and career.",
     time: "Every Meeting",
-    venue: "Apostolic Pulpit Ministry",
+    venue: "New Lecture Theatre",
     image: photos.preachingWord,
   },
   {
     id: -13,
     number: "05",
-    tag: "KOINONIA & LAUGHTER",
-    category: "Unconditional Love",
-    title: "Smiles That Heal",
-    desc: "Where barriers dissolve and every student feels truly known. Warm hugs, genuine sisterhood and brotherhood, and lifelong memories.",
+    tag: "Friday Hangout",
+    category: "Fellowship",
+    title: "Laughter & Connection",
+    desc: "Unwinding after lectures on Friday with games, good food, honest conversations, and new friends.",
     time: "Fridays · 4:30 PM",
     venue: "Fellowship Grounds",
     image: photos.fellowshipJoy,
@@ -120,12 +120,57 @@ function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryView | null>(null);
   const { gallery } = useGallery();
 
-  // Spotlight Hero States
+  // Desktop Spotlight Hero States
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<number | null>(null);
+
+  // Mobile Scroll-Driven Focus State (image expands on scroll focus)
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+  const mobileItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (typeof window === "undefined" || window.innerWidth >= 1024) return;
+      if (ticking) return;
+
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        ticking = false;
+        // Focus zone: upper-middle of screen (42% from top of viewport)
+        const focusZone = window.innerHeight * 0.42;
+        let closestIdx = 0;
+        let minDistance = Infinity;
+
+        mobileItemRefs.current.forEach((el, idx) => {
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          // Distance from card's visual center to the viewport focus zone
+          const cardCenter = rect.top + Math.min(rect.height, 220) / 2;
+          const dist = Math.abs(cardCenter - focusZone);
+
+          if (dist < minDistance) {
+            minDistance = dist;
+            closestIdx = idx;
+          }
+        });
+
+        setMobileActiveIndex((prev) => (prev !== closestIdx ? closestIdx : prev));
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Check initial position on mount
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const filters = ["All", "Worship", "Community", "Teaching"];
 
@@ -152,8 +197,14 @@ function Gallery() {
     setSelectedPhoto(shown[nextIdx]);
   }, [currentIndex, shown]);
 
-  // Spotlight Auto-Cycling Engine (Automatic spotlight for phones & idle desktop)
+  // Spotlight Auto-Cycling Engine (Desktop only)
   useEffect(() => {
+    // Disable auto-cycling on mobile so scroll purely controls focus
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
     if (!isPlaying || isHovered) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
@@ -240,32 +291,23 @@ function Gallery() {
           {/* Editorial Masthead Header */}
           <div className="flex flex-col justify-between gap-6 border-b border-white/15 pb-8 sm:flex-row sm:items-end">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent))]/10 px-3.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[hsl(var(--accent))]">
-                <Sparkles className="size-3 text-[hsl(var(--accent))]" />
-                EDITORIAL PORTFOLIO · KOINONIA CHRONICLES
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-white/90">
+                Moments & Memories
               </div>
               <h1 className="display-font mt-4 text-4xl font-bold tracking-[-0.03em] text-white sm:text-6xl lg:text-7xl leading-[0.94]">
-                Living Epistles.
+                Life in fellowship.
                 <br />
                 <em className="font-normal italic text-[hsl(var(--accent))]">
-                  Writ in Light & Fellowship.
+                  Moments we share.
                 </em>
               </h1>
             </div>
 
             <div className="max-w-md">
               <p className="text-sm sm:text-base leading-relaxed text-white/80 font-normal">
-                An unscripted visual journey into worship, prevailing prayers,
-                and the radical warmth of the MFMCF FUNAAB family.
+                Snapshots from our Sunday services, midweek prayers, and everyday life
+                on campus as one family in God.
               </p>
-              <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-xs text-white/60">
-                <span className="inline-flex items-center gap-1.5 text-[hsl(var(--accent))] font-bold">
-                  <span className="size-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
-                  Auto-Spotlight Active
-                </span>
-                <span>·</span>
-                <span>Hover on desktop or tap on mobile to focus</span>
-              </div>
             </div>
           </div>
 
@@ -308,7 +350,7 @@ function Gallery() {
                 type="button"
                 onClick={() => setIsPlaying((p) => !p)}
                 aria-label={isPlaying ? "Pause auto spotlight" : "Play auto spotlight"}
-                className="flex size-8 items-center justify-center rounded-full border border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent))]/15 text-[hsl(var(--accent))] backdrop-blur-md transition hover:bg-[hsl(var(--accent))] hover:text-black active:scale-95"
+                className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95"
               >
                 {isPlaying ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
               </button>
@@ -325,7 +367,7 @@ function Gallery() {
 
           {/* ── DESKTOP HORIZONTAL EXPANDING ACCORDION (lg & up) ── */}
           <div
-            className="mt-6 hidden lg:flex h-[580px] xl:h-[630px] w-full gap-2.5 overflow-hidden rounded-2xl border-2 border-[hsl(var(--foreground))] bg-black/70 p-2.5 shadow-2xl"
+            className="mt-6 hidden lg:flex h-[580px] xl:h-[630px] w-full gap-2.5 overflow-hidden rounded-2xl border border-white/15 bg-black/70 p-2.5 shadow-2xl"
             aria-label="Featured moments accordion"
           >
             {HERO_SPOTLIGHTS.map((item, i) => {
@@ -368,7 +410,7 @@ function Gallery() {
                   {/* COLLAPSED VIEW (When Inactive) */}
                   {!isActive && (
                     <div className="relative z-10 flex size-full flex-col justify-between p-4 py-6 text-center select-none">
-                      <span className="font-mono text-sm font-black text-white/50 group-hover:text-[hsl(var(--accent))] transition-colors">
+                      <span className="font-mono text-sm font-black text-white/50 group-hover:text-white transition-colors">
                         {item.number}
                       </span>
                       <div className="flex flex-1 items-center justify-center py-6">
@@ -377,7 +419,7 @@ function Gallery() {
                         </span>
                       </div>
                       <div className="flex items-center justify-center">
-                        <span className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all group-hover:border-[hsl(var(--accent))] group-hover:bg-[hsl(var(--accent))] group-hover:text-black">
+                        <span className="flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all group-hover:border-white/40 group-hover:bg-white/20">
                           <ArrowUpRight className="size-3.5" />
                         </span>
                       </div>
@@ -421,8 +463,8 @@ function Gallery() {
                                 image: item.image,
                               });
                             }}
-                            title="Inspect Frame Fullscreen"
-                            className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-black/50 text-white backdrop-blur-md transition-all hover:scale-110 hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))] hover:text-black"
+                            title="View Full Size"
+                            className="flex size-10 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white backdrop-blur-md transition-all hover:scale-110 hover:border-white/40 hover:bg-white/20"
                           >
                             <Maximize2 className="size-4" />
                           </button>
@@ -431,8 +473,8 @@ function Gallery() {
 
                       {/* Bottom Editorial Content */}
                       <div className="max-w-2xl">
-                        <p className="mono-label text-[11px] font-bold tracking-widest text-[hsl(var(--accent))]">
-                          Spotlight Narrative
+                        <p className="mono-label text-[11px] font-bold tracking-widest text-white/70">
+                          About this moment
                         </p>
                         <h2 className="display-font mt-2 text-4xl sm:text-5xl font-bold leading-tight text-white tracking-[-0.03em]">
                           {item.title}
@@ -464,9 +506,9 @@ function Gallery() {
                                 image: item.image,
                               });
                             }}
-                            className="inline-flex items-center gap-2 rounded-full border-2 border-white bg-white px-4 py-2 font-mono text-xs font-black uppercase text-black transition-all hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))] active:scale-95"
+                            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-mono text-xs font-bold uppercase text-white transition-all hover:bg-white/20 active:scale-95"
                           >
-                            <span>Inspect Frame</span>
+                            <span>View Full Size</span>
                             <ArrowUpRight className="size-4" />
                           </button>
                         </div>
@@ -478,22 +520,26 @@ function Gallery() {
             })}
           </div>
 
-          {/* ── MOBILE RESPONSIVE AUTO-SPOTLIGHT ACCORDION (< lg) ── */}
+          {/* ── MOBILE RESPONSIVE SCROLL-FOCUSED SPOTLIGHT (< lg) ── */}
           <div
             className="mt-6 flex flex-col gap-3 lg:hidden"
-            aria-label="Mobile featured moments spotlight"
+            aria-label="Mobile featured moments"
           >
             {HERO_SPOTLIGHTS.map((item, i) => {
-              const isActive = i === activeIndex;
+              const isActive = i === mobileActiveIndex;
 
               return (
                 <div
                   key={item.id}
-                  onClick={() => selectSpotlight(i)}
+                  ref={(el) => {
+                    mobileItemRefs.current[i] = el;
+                  }}
+                  data-index={i}
+                  onClick={() => setMobileActiveIndex(i)}
                   className={`relative w-full overflow-hidden rounded-xl border transition-all duration-500 cursor-pointer ${
                     isActive
-                      ? "min-h-[440px] border-[hsl(var(--accent))] shadow-2xl bg-black"
-                      : "h-[74px] border-white/15 bg-black/60 hover:border-white/30"
+                      ? "min-h-[440px] border-white/20 shadow-2xl bg-black"
+                      : "h-[74px] border-white/10 bg-black/60 hover:border-white/20"
                   }`}
                 >
                   {/* Background Photo */}
@@ -521,7 +567,7 @@ function Gallery() {
                   {!isActive && (
                     <div className="relative z-10 flex size-full items-center justify-between px-4 py-3 select-none">
                       <div className="flex items-center gap-3">
-                        <span className="flex size-8 items-center justify-center rounded-full bg-white/10 font-mono text-xs font-black text-[hsl(var(--accent))] border border-white/10">
+                        <span className="flex size-8 items-center justify-center rounded-full bg-white/10 font-mono text-xs font-black text-white/80 border border-white/10">
                           {item.number}
                         </span>
                         <div>
@@ -549,8 +595,8 @@ function Gallery() {
                     >
                       {/* Top Bar */}
                       <div className="flex items-start justify-between">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-wider text-[hsl(var(--accent))] backdrop-blur-md">
-                          <span className="size-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                          <span className="size-2 rounded-full bg-white/70" />
                           {item.tag}
                         </span>
 
@@ -574,8 +620,8 @@ function Gallery() {
 
                       {/* Content */}
                       <div className="mt-20">
-                        <p className="mono-label text-[10px] font-bold text-[hsl(var(--accent))]">
-                          Spotlight · {item.number} of 05
+                        <p className="mono-label text-[10px] font-bold text-white/60">
+                          Moment {item.number} of 05
                         </p>
                         <h3 className="display-font mt-1 text-3xl font-bold leading-tight text-white">
                           {item.title}
@@ -585,7 +631,7 @@ function Gallery() {
                         </p>
 
                         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-3 font-mono text-[11px] text-white/90">
-                          <span className="flex items-center gap-1 text-[hsl(var(--accent))] font-bold">
+                          <span className="flex items-center gap-1 text-white/80 font-bold">
                             <Clock3 className="size-3.5" /> {item.time}
                           </span>
                           <button
@@ -600,9 +646,9 @@ function Gallery() {
                                 image: item.image,
                               });
                             }}
-                            className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--accent))] px-3 py-1 font-mono text-[10px] font-black uppercase text-black"
+                            className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 font-mono text-[10px] font-bold uppercase text-white hover:bg-white/20"
                           >
-                            <span>Inspect</span>
+                            <span>View photo</span>
                             <ArrowUpRight className="size-3" />
                           </button>
                         </div>
@@ -634,14 +680,14 @@ function Gallery() {
           <div className="flex flex-col items-center justify-between gap-6 text-center sm:flex-row sm:items-end sm:text-left">
             <Reveal variant="left">
               <SectionHeading
-                eyebrow="The complete collection"
+                eyebrow="Photo collection"
                 eyebrowTone="accent"
                 title={
                   <>
-                    Memories scattered
+                    Memories from
                     <br />
                     <em className="font-normal text-[hsl(var(--accent))]">
-                      like prints on a table.
+                      our gatherings.
                     </em>
                   </>
                 }
@@ -651,13 +697,13 @@ function Gallery() {
 
             <div className="flex flex-col items-center gap-1 sm:items-end">
               <p className="mono-label text-[10px] text-white/60">
-                Tap any photo print to expand full screen
+                Tap any photo to view full size
               </p>
               <p className="font-mono text-xs text-white/40">
                 <span className="font-bold text-[hsl(var(--accent))]">
                   {String(shown.length).padStart(2, "0")}
                 </span>{" "}
-                prints in collection
+                photos
               </p>
             </div>
           </div>

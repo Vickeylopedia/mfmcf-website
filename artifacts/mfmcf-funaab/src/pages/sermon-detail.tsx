@@ -1,4 +1,4 @@
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { Shell } from "@/components/layout/site-shell";
 import { Reveal } from "@/components/reveal";
@@ -101,21 +101,6 @@ function SermonDetail() {
               scripture={sermon.scripture}
               date={sermon.date}
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <a
-                href={sermon.image}
-                download={`${sermon.title} - Artwork.jpg`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--primary))]"
-              >
-                <Download className="size-3.5" />
-                Save sermon cover flyer (HD)
-              </a>
-              <span className="font-mono text-[10px] text-[hsl(var(--muted-foreground)/.7)]">
-                Format: High Quality MP3 + Embedded Artwork
-              </span>
-            </div>
           </Reveal>
         </div>
       </section>
