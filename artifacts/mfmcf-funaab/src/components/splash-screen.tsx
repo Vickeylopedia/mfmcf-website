@@ -37,8 +37,6 @@ export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
     };
   }, [visible, minDuration]);
 
-  if (!visible) return null;
-
   return (
     <AnimatePresence>
       {visible && (

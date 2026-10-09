@@ -770,26 +770,10 @@ function HappeningsCarousel({ items }: { items: NewsView[] }) {
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
 
-  if (!items || !items.length) return null;
-
-  // If only one news is added as announcement on home screen, do NOT animate
-  if (items.length === 1) {
-    return (
-      <div className="py-2">
-        <div className="max-w-[340px]">
-          <AnnouncementCard item={items[0]} index={0} />
-        </div>
-      </div>
-    );
-  }
-
-  // Duplicate items to ensure a smooth, continuous seamless moving animation
-  const loopItems = [...items, ...items, ...items, ...items];
-
   // Continuous smooth auto-scrolling animation (pauses on hover, touch, or active drag)
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || items.length <= 1) return;
+    if (!el || !items || items.length <= 1) return;
 
     let animId: number;
     let lastTime = performance.now();
@@ -814,7 +798,7 @@ function HappeningsCarousel({ items }: { items: NewsView[] }) {
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [isPaused, items.length]);
+  }, [isPaused, items?.length]);
 
   const handlePrev = () => {
     const el = containerRef.current;
@@ -849,6 +833,22 @@ function HappeningsCarousel({ items }: { items: NewsView[] }) {
   const onMouseUpOrLeave = () => {
     isDragging.current = false;
   };
+
+  if (!items || !items.length) return null;
+
+  // If only one news is added as announcement on home screen, do NOT animate
+  if (items.length === 1) {
+    return (
+      <div className="py-2">
+        <div className="max-w-[340px]">
+          <AnnouncementCard item={items[0]} index={0} />
+        </div>
+      </div>
+    );
+  }
+
+  // Duplicate items to ensure a smooth, continuous seamless moving animation
+  const loopItems = [...items, ...items, ...items, ...items];
 
   return (
     <div
