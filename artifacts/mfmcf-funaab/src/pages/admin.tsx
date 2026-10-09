@@ -1,6 +1,21 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowUpRight, Check, Loader2, Lock, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Check,
+  Loader2,
+  Lock,
+  Trash2,
+  X,
+  Crown,
+  Sparkles,
+  BookOpen,
+  Quote,
+  GraduationCap,
+  Users,
+  Edit3,
+} from "lucide-react";
 import { Link } from "wouter";
 import { Eyebrow } from "@/components/foundation";
 import { useDocumentTitle } from "@/hooks/use-document-title";
@@ -18,9 +33,16 @@ import {
   updateNews,
   updateSermon,
 } from "@/lib/admin-api";
-import { useGallery, useNews, useSermons } from "@/lib/queries";
+import { useGallery, useNews, useSermons, useTenures, type Tenure, type Executive } from "@/lib/queries";
 import { withBase, resolveMediaUrl } from "@/lib/site";
-import { toggleAnnouncementId, getAnnouncementIds } from "@/lib/content-store";
+import {
+  toggleAnnouncementId,
+  getAnnouncementIds,
+  addLocalExecutive,
+  updateLocalExecutive,
+  deleteLocalExecutive,
+  type ExecutiveInput,
+} from "@/lib/content-store";
 
 /**
  * Admin studio: password-gated content management for sermons, news, and
@@ -174,7 +196,7 @@ function Admin() {
     };
   }, []);
 
-  const [tab, setTab] = useState<"sermons" | "news" | "gallery">("sermons");
+  const [tab, setTab] = useState<"sermons" | "news" | "gallery" | "alumni">("sermons");
   const session = useQuery({
     queryKey: ["admin-session"],
     queryFn: getSession,
@@ -225,17 +247,17 @@ function Admin() {
       </header>
       <main className="mx-auto max-w-[1100px] px-3.5 py-6 sm:px-6 sm:py-10 lg:px-10">
         <div className="flex flex-wrap gap-2 border-b border-[hsl(var(--foreground)/.12)] pb-4">
-          {(["sermons", "news", "gallery"] as const).map((key) => (
+          {(["sermons", "news", "gallery", "alumni"] as const).map((key) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`px-3.5 py-2 sm:px-4 sm:py-2 text-xs font-bold capitalize transition ${tab === key
+              className={`px-3.5 py-2 sm:px-4 sm:py-2 text-xs font-bold capitalize transition cursor-pointer ${tab === key
                   ? "bg-[hsl(var(--primary))] text-white shadow-sm"
                   : "border border-[hsl(var(--foreground)/.15)] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
                 }`}
             >
-              {key}
+              {key === "alumni" ? "Executives & Alumni" : key}
             </button>
           ))}
         </div>
@@ -243,6 +265,7 @@ function Admin() {
           {tab === "sermons" && <SermonsAdmin />}
           {tab === "news" && <NewsAdmin />}
           {tab === "gallery" && <GalleryAdmin />}
+          {tab === "alumni" && <AlumniAdmin />}
         </div>
       </main>
     </div>
@@ -1063,4 +1086,511 @@ function GalleryAdmin() {
   );
 }
 
+function AlumniAdmin() {
+  const { tenures, refetch } = useTenures();
+  const [selectedTenureId, setSelectedTenureId] = useState<string>("power-and-fire");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [isCentral, setIsCentral] = useState(false);
+  const [department, setDepartment] = useState("");
+  const [quote, setQuote] = useState("");
+  const [scripture, setScripture] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const activeTenure = tenures.find((t) => t.id === selectedTenureId) || tenures[0];
+
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setRole("");
+    setIsCentral(false);
+    setDepartment("");
+    setQuote("");
+    setScripture("");
+    setImageUrl("");
+    setImageFile(null);
+    setImagePreview(null);
+    setError(null);
+  };
+
+  const handleEdit = (exec: Executive) => {
+    setEditingId(exec.id);
+    setName(exec.name);
+    setRole(exec.role);
+    setIsCentral(exec.isCentral);
+    setDepartment(exec.department);
+    setQuote(exec.quote || "");
+    setScripture(exec.scripture || "");
+    setImageUrl(exec.image || "");
+    setImageFile(null);
+    setImagePreview(exec.image || null);
+    setError(null);
+
+    const formEl = document.getElementById("alumni-exec-form");
+    if (formEl) {
+      formEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleDelete = async (execId: string, execName: string) => {
+    if (!window.confirm(`Are you sure you want to remove ${execName}?`)) return;
+    try {
+      await deleteLocalExecutive(selectedTenureId, execId);
+      refetch();
+      if (editingId === execId) resetForm();
+      setSuccess("Executive removed successfully.");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to delete executive.");
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !role.trim() || !department.trim()) {
+      setError("Please fill in executive name, office served, and department.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const input: ExecutiveInput = {
+        name: name.trim(),
+        role: role.trim(),
+        isCentral,
+        department: department.trim(),
+        quote: quote.trim() || undefined,
+        scripture: scripture.trim() || undefined,
+        image: imageUrl.trim() || undefined,
+        imageFile,
+      };
+
+      if (editingId) {
+        await updateLocalExecutive(selectedTenureId, editingId, input);
+        setSuccess("Executive updated successfully.");
+      } else {
+        await addLocalExecutive(selectedTenureId, input);
+        setSuccess("New executive added successfully.");
+      }
+
+      refetch();
+      resetForm();
+      setTimeout(() => setSuccess(null), 3500);
+    } catch (err: any) {
+      setError(err.message || "Failed to save executive.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-12 lg:grid-cols-[1.1fr_.9fr]">
+      {/* ── FORM COLUMN ── */}
+      <div id="alumni-exec-form" className="space-y-6">
+        {/* Tenure Selector */}
+        <div className="border border-[hsl(var(--foreground)/.15)] bg-[hsl(var(--secondary)/.3)] p-4 sm:p-5">
+          <p className="mono-label text-[10px] text-[hsl(var(--primary))] font-bold">
+            Select Active Tenure to Edit
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2.5">
+            {tenures.map((t) => {
+              const isSelected = t.id === selectedTenureId;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTenureId(t.id);
+                    resetForm();
+                  }}
+                  className={`flex items-center gap-2 border px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                    isSelected
+                      ? "border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] text-white shadow-sm"
+                      : "border-[hsl(var(--foreground)/.2)] bg-white text-[hsl(var(--foreground))] hover:border-[hsl(var(--primary))]"
+                  }`}
+                >
+                  {t.id === "power-and-fire" ? (
+                    <Crown className="size-3.5 text-amber-400" />
+                  ) : (
+                    <Sparkles className="size-3.5 text-[hsl(var(--primary))]" />
+                  )}
+                  <span>{t.name}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-3 border-t border-[hsl(var(--foreground)/.1)] pt-2 text-[11px] text-[hsl(var(--muted-foreground))]">
+            <span>Current: </span>
+            <strong className="text-[hsl(var(--foreground))]">{activeTenure.name}</strong>
+            <span className="mx-1.5">•</span>
+            <span>{activeTenure.session}</span>
+          </div>
+        </div>
+
+        {/* Executive Editor Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="border border-[hsl(var(--foreground)/.15)] bg-white p-4 sm:p-6 lg:p-8 space-y-5"
+        >
+          <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.1)] pb-3">
+            <div>
+              <p className="mono-label text-[10px] text-[hsl(var(--primary))] font-bold">
+                {editingId ? "Edit Executive" : "Add Executive"}
+              </p>
+              <h2 className="display-font text-xl font-bold">
+                {editingId ? `Editing: ${name || "Executive"}` : `New Executive for ${activeTenure.name}`}
+              </h2>
+            </div>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="inline-flex items-center gap-1 text-xs text-[hsl(var(--primary))] font-bold hover:underline cursor-pointer"
+              >
+                <X className="size-3.5" /> Cancel edit
+              </button>
+            )}
+          </div>
+
+          <FormError message={error} />
+          {success && (
+            <div className="flex items-center gap-2 border border-green-300 bg-green-50 p-3 text-xs font-bold text-green-800">
+              <Check className="size-4 shrink-0 text-green-600" />
+              <span>{success}</span>
+            </div>
+          )}
+
+          {/* Central Executive Toggle */}
+          <div className="border border-[hsl(var(--foreground)/.18)] bg-[hsl(var(--secondary)/.4)] p-3.5">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isCentral}
+                onChange={(e) => setIsCentral(e.target.checked)}
+                className="mt-1 size-4 accent-[hsl(var(--primary))] cursor-pointer"
+              />
+              <div>
+                <span className="block text-xs font-bold text-[hsl(var(--foreground))]">
+                  ★ Central Executive (Featured in Spotlight Accordion)
+                </span>
+                <span className="block text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">
+                  Check this for President, Vice President, General Secretary, or Sisters Coordinator. Uncheck for Departmental Council Portfolios.
+                </span>
+              </div>
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Executive Name *">
+              <input
+                required
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Bro. Daniel Oluwasegun"
+                className={inputClass}
+              />
+            </Field>
+
+            <Field label="Office Served (Portfolio) *">
+              <input
+                required
+                type="text"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="President or Prayer Secretary"
+                className={inputClass}
+              />
+            </Field>
+          </div>
+
+          <Field label="Academic Department *">
+            <input
+              required
+              type="text"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="Computer Science, Soil Science, etc."
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Executive Quote / Word">
+            <textarea
+              rows={2}
+              value={quote}
+              onChange={(e) => setQuote(e.target.value)}
+              placeholder="A brief reflection, motto, or personal testimony"
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Favourite Bible Verse">
+            <input
+              type="text"
+              value={scripture}
+              onChange={(e) => setScripture(e.target.value)}
+              placeholder="Psalm 104:4 or Colossians 3:23"
+              className={inputClass}
+            />
+          </Field>
+
+          {/* Executive Picture Upload & Preview */}
+          <div className="space-y-3 border-t border-[hsl(var(--foreground)/.1)] pt-4">
+            <p className="text-sm font-semibold">Executive Picture</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <span className="mono-label block text-[9px] text-[hsl(var(--muted-foreground))] mb-1">
+                  Upload portrait photo
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    setImageFile(f);
+                    if (f) {
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setImagePreview(ev.target?.result as string);
+                      };
+                      reader.readAsDataURL(f);
+                    }
+                  }}
+                  className="block w-full text-xs text-[hsl(var(--muted-foreground))] file:mr-2 file:border-0 file:bg-[hsl(var(--primary))] file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white hover:file:bg-[hsl(var(--foreground))]"
+                />
+              </div>
+
+              <div>
+                <span className="mono-label block text-[9px] text-[hsl(var(--muted-foreground))] mb-1">
+                  Or Image Web URL
+                </span>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    if (e.target.value) setImagePreview(e.target.value);
+                  }}
+                  placeholder="https://... or /assets/..."
+                  className="w-full border border-[hsl(var(--foreground)/.16)] bg-transparent px-3 py-1.5 text-xs outline-none focus:border-[hsl(var(--primary))]"
+                />
+              </div>
+            </div>
+
+            {/* Thumbnail Preview */}
+            {imagePreview && (
+              <div className="mt-2 flex items-center gap-3 border border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--secondary)/.2)] p-2.5">
+                <div className="size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground))] bg-white">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        "/assets/image_1787352840643.png";
+                    }}
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[hsl(var(--foreground))]">
+                    Photo Preview Ready
+                  </p>
+                  <p className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                    This image will be stored and displayed on the Alumni Roll.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-3">
+            <AdminButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" /> Saving…
+                </>
+              ) : editingId ? (
+                "Update Executive Profile"
+              ) : (
+                "Add Executive to Council"
+              )}
+            </AdminButton>
+            {editingId && (
+              <AdminButton variant="ghost" onClick={resetForm}>
+                Cancel
+              </AdminButton>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* ── PUBLISHED EXECUTIVES LIST COLUMN ── */}
+      <div className="space-y-8">
+        <div>
+          <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.15)] pb-3">
+            <div>
+              <p className="mono-label text-[10px] text-[hsl(var(--primary))] font-bold">
+                Published Council Leaders
+              </p>
+              <h2 className="display-font text-xl font-bold">
+                {activeTenure.name}
+              </h2>
+            </div>
+            <span className="mono-label border border-[hsl(var(--foreground)/.2)] bg-white px-2.5 py-1 text-[10px] font-bold">
+              {activeTenure.centrals.length + activeTenure.executives.length} Total
+            </span>
+          </div>
+
+          {/* Section 1: Central Executives */}
+          <div className="mt-6 space-y-3">
+            <div className="flex items-center gap-2 border-b border-[hsl(var(--foreground)/.1)] pb-2">
+              <Crown className="size-3.5 text-amber-500" />
+              <h3 className="mono-label text-xs font-bold text-[hsl(var(--foreground))]">
+                Central Executives ({activeTenure.centrals.length})
+              </h3>
+              <span className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                — Spotlight Accordion
+              </span>
+            </div>
+
+            {activeTenure.centrals.length === 0 ? (
+              <p className="text-xs text-[hsl(var(--muted-foreground))] py-3 italic">
+                No central executives added for this tenure yet.
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {activeTenure.centrals.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col gap-3 border border-[hsl(var(--foreground)/.15)] bg-white p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative size-12 shrink-0 overflow-hidden border border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))]">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              "/assets/image_1787352840643.png";
+                          }}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="border border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-1.5 py-0.2 font-mono text-[8px] font-black uppercase text-[hsl(var(--foreground))]">
+                            ★ Central
+                          </span>
+                          <span className="font-mono text-[10px] font-bold text-[hsl(var(--primary))] uppercase">
+                            {item.role}
+                          </span>
+                        </div>
+                        <p className="font-bold text-sm leading-snug truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] text-[hsl(var(--muted-foreground))] truncate">
+                          {item.department}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <AdminButton variant="ghost" onClick={() => handleEdit(item)}>
+                        Edit
+                      </AdminButton>
+                      <AdminButton
+                        variant="danger"
+                        onClick={() => handleDelete(item.id, item.name)}
+                      >
+                        Delete
+                      </AdminButton>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Departmental Council Portfolios */}
+          <div className="mt-8 space-y-3">
+            <div className="flex items-center gap-2 border-b border-[hsl(var(--foreground)/.1)] pb-2">
+              <Users className="size-3.5 text-[hsl(var(--primary))]" />
+              <h3 className="mono-label text-xs font-bold text-[hsl(var(--foreground))]">
+                Departmental Council ({activeTenure.executives.length})
+              </h3>
+              <span className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                — 2 per line on mobile
+              </span>
+            </div>
+
+            {activeTenure.executives.length === 0 ? (
+              <p className="text-xs text-[hsl(var(--muted-foreground))] py-3 italic">
+                No council executives added for this tenure yet.
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {activeTenure.executives.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col gap-3 border border-[hsl(var(--foreground)/.15)] bg-white p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative size-12 shrink-0 overflow-hidden border border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))]">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              "/assets/image_1787352840643.png";
+                          }}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-mono text-[10px] font-bold text-[hsl(var(--primary))] uppercase block">
+                          {item.role}
+                        </span>
+                        <p className="font-bold text-sm leading-snug truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] text-[hsl(var(--muted-foreground))] truncate">
+                          {item.department}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <AdminButton variant="ghost" onClick={() => handleEdit(item)}>
+                        Edit
+                      </AdminButton>
+                      <AdminButton
+                        variant="danger"
+                        onClick={() => handleDelete(item.id, item.name)}
+                      >
+                        Delete
+                      </AdminButton>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default Admin;
+

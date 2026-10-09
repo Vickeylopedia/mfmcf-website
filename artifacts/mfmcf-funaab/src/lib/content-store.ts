@@ -1,6 +1,7 @@
 import { photos, withBase } from "./site";
 import { sermons as staticSermons } from "./sermons";
 import type { SermonInput, NewsInput, GalleryInput } from "./admin-api";
+import { tenures as initialTenures, type Tenure, type Executive } from "@/data/executives";
 
 export type SermonView = {
   id: number;
@@ -635,3 +636,162 @@ export async function deleteLocalGalleryItem(id: number): Promise<void> {
   const updated = current.filter((g) => g.id !== id);
   saveLocalGallery(updated);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXECUTIVES & TENURES STORAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const STORAGE_TENURES = "mfmcf_tenures_store_v1";
+
+export interface ExecutiveInput {
+  name: string;
+  role: string;
+  isCentral: boolean;
+  department: string;
+  image?: string;
+  imageFile?: File | null;
+  quote?: string;
+  scripture?: string;
+}
+
+export function getLocalTenures(): Tenure[] {
+  if (typeof window === "undefined") return initialTenures;
+  try {
+    const raw = localStorage.getItem(STORAGE_TENURES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (err) {
+    console.warn("Failed to load local tenures from storage", err);
+  }
+  return initialTenures;
+}
+
+export function saveLocalTenures(tenuresList: Tenure[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_TENURES, JSON.stringify(tenuresList));
+    window.dispatchEvent(
+      new CustomEvent("mfmcf-tenures-changed", { detail: tenuresList }),
+    );
+  } catch (err) {
+    console.warn("Failed to save local tenures to storage", err);
+  }
+}
+
+export async function addLocalExecutive(
+  tenureId: string,
+  input: ExecutiveInput,
+): Promise<Executive> {
+  const currentTenures = getLocalTenures();
+  const tIndex = currentTenures.findIndex((t) => t.id === tenureId);
+  if (tIndex === -1) {
+    throw new Error(`Tenure ${tenureId} not found`);
+  }
+
+  let finalImage = input.image || "/assets/image_1787352840643.png";
+  if (input.imageFile) {
+    try {
+      finalImage = await fileToDataUrl(input.imageFile);
+    } catch {
+      // keep fallback
+    }
+  }
+
+  const newExec: Executive = {
+    id: `exec-${Date.now()}`,
+    name: input.name,
+    role: input.role,
+    isCentral: Boolean(input.isCentral),
+    department: input.department,
+    image: finalImage,
+    quote: input.quote,
+    scripture: input.scripture,
+  };
+
+  const tenure = { ...currentTenures[tIndex] };
+  if (newExec.isCentral) {
+    tenure.centrals = [newExec, ...tenure.centrals];
+  } else {
+    tenure.executives = [newExec, ...tenure.executives];
+  }
+
+  currentTenures[tIndex] = tenure;
+  saveLocalTenures([...currentTenures]);
+  return newExec;
+}
+
+export async function updateLocalExecutive(
+  tenureId: string,
+  execId: string,
+  input: ExecutiveInput,
+): Promise<Executive> {
+  const currentTenures = getLocalTenures();
+  const tIndex = currentTenures.findIndex((t) => t.id === tenureId);
+  if (tIndex === -1) {
+    throw new Error(`Tenure ${tenureId} not found`);
+  }
+
+  const tenure = { ...currentTenures[tIndex] };
+  // Find whether currently in centrals or executives
+  const inCentrals = tenure.centrals.find((e) => e.id === execId);
+  const inExecutives = tenure.executives.find((e) => e.id === execId);
+  const existing = inCentrals || inExecutives;
+
+  if (!existing) {
+    throw new Error(`Executive ${execId} not found in tenure ${tenureId}`);
+  }
+
+  let finalImage = input.image || existing.image;
+  if (input.imageFile) {
+    try {
+      finalImage = await fileToDataUrl(input.imageFile);
+    } catch {
+      // keep existing
+    }
+  }
+
+  const updatedExec: Executive = {
+    ...existing,
+    name: input.name,
+    role: input.role,
+    isCentral: Boolean(input.isCentral),
+    department: input.department,
+    image: finalImage,
+    quote: input.quote,
+    scripture: input.scripture,
+  };
+
+  // Remove from both lists first
+  tenure.centrals = tenure.centrals.filter((e) => e.id !== execId);
+  tenure.executives = tenure.executives.filter((e) => e.id !== execId);
+
+  // Place in appropriate list based on new isCentral status
+  if (updatedExec.isCentral) {
+    tenure.centrals = [...tenure.centrals, updatedExec];
+  } else {
+    tenure.executives = [...tenure.executives, updatedExec];
+  }
+
+  currentTenures[tIndex] = tenure;
+  saveLocalTenures([...currentTenures]);
+  return updatedExec;
+}
+
+export async function deleteLocalExecutive(
+  tenureId: string,
+  execId: string,
+): Promise<void> {
+  const currentTenures = getLocalTenures();
+  const tIndex = currentTenures.findIndex((t) => t.id === tenureId);
+  if (tIndex === -1) return;
+
+  const tenure = { ...currentTenures[tIndex] };
+  tenure.centrals = tenure.centrals.filter((e) => e.id !== execId);
+  tenure.executives = tenure.executives.filter((e) => e.id !== execId);
+
+  currentTenures[tIndex] = tenure;
+  saveLocalTenures([...currentTenures]);
+}
+

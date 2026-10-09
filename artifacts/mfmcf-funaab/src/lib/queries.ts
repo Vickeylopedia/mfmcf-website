@@ -8,10 +8,12 @@ import {
   type SermonDto,
 } from "@workspace/api-client-react";
 import { withBase, photos, resolveMediaUrl } from "@/lib/site";
+import { useState, useEffect } from "react";
 import {
   getLocalSermons,
   getLocalNews,
   getLocalGallery,
+  getLocalTenures,
   getAnnouncementIds,
   fallbackSermons,
   fallbackNews,
@@ -20,8 +22,9 @@ import {
   type NewsView,
   type GalleryView,
 } from "./content-store";
+import type { Tenure, Executive } from "@/data/executives";
 
-export type { SermonView, NewsView, GalleryView };
+export type { SermonView, NewsView, GalleryView, Tenure, Executive };
 export { fallbackSermons, fallbackNews, fallbackGallery };
 
 const FALLBACK_ART = [
@@ -117,5 +120,28 @@ export function useGallery() {
     raw: data,
     isLoading,
     live: validData !== null,
+  };
+}
+
+export function useTenures() {
+  const [tenuresList, setTenuresList] = useState<Tenure[]>(() =>
+    getLocalTenures(),
+  );
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setTenuresList(getLocalTenures());
+    };
+    window.addEventListener("mfmcf-tenures-changed", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("mfmcf-tenures-changed", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, []);
+
+  return {
+    tenures: tenuresList,
+    refetch: () => setTenuresList(getLocalTenures()),
   };
 }
