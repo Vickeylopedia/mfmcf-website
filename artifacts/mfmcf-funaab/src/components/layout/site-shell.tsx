@@ -318,16 +318,16 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* ── 6. NAVIGATION DRAWER (OPENS WHEN MENU IS CLICKED) ── */}
+        {/* ── 6. EXPANDED MENU MODAL (RESTORED TO PREVIOUS DESIGN) ── */}
         <AnimatePresence>
           {menuOpen && (
             <motion.div
-              key="site-nav-drawer"
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              key="header-maximized"
+              initial={{ opacity: 0, y: -12, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="mx-auto mt-2 max-w-[1380px] pointer-events-auto border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 sm:p-6 shadow-[6px_6px_0px_hsl(var(--foreground))]"
+              exit={{ opacity: 0, y: -12, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              className="mx-auto mt-2 max-w-[820px] w-full pointer-events-auto border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 sm:p-6 shadow-[6px_6px_0px_hsl(var(--foreground))]"
             >
               <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.15)] pb-3">
                 <Link
@@ -356,8 +356,7 @@ export function Shell({ children }: { children: ReactNode }) {
                   <X className="size-4" />
                 </button>
               </div>
-
-              <nav className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" aria-label="Expanded menu navigation">
+              <nav className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Maximized navigation">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
@@ -375,16 +374,12 @@ export function Shell({ children }: { children: ReactNode }) {
                   </Link>
                 ))}
               </nav>
-
-              <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[hsl(var(--foreground)/.12)] pt-4">
-                <p className="font-mono text-[11px] text-[hsl(var(--muted-foreground))]">
-                  Federal University of Agriculture, Abeokuta
-                </p>
+              <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--foreground)/.12)] pt-3">
                 <Link
                   href="/contact"
                   onClick={() => setMenuOpen(false)}
                   data-testid="link-drawer-connect"
-                  className="w-full sm:w-auto text-center border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-6 py-2.5 font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
+                  className="w-full text-center border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] py-2.5 font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
                 >
                   Connect with us <span aria-hidden="true">→</span>
                 </Link>

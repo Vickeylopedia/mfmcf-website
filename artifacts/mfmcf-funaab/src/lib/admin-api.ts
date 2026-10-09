@@ -162,6 +162,7 @@ export type NewsInput = {
   body: string;
   full: string;
   artwork?: File | null;
+  isAnnouncement?: boolean;
 };
 
 export type GalleryInput = {
@@ -192,6 +193,9 @@ function newsForm(input: NewsInput): FormData {
   form.set("body", input.body);
   form.set("full", input.full);
   if (input.artwork) form.set("artwork", input.artwork);
+  if (input.isAnnouncement !== undefined) {
+    form.set("isAnnouncement", String(input.isAnnouncement));
+  }
   return form;
 }
 

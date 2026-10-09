@@ -195,11 +195,10 @@ function SmoothSoundwaves() {
         return (
           <motion.span
             key={i}
-            className={`origin-bottom rounded-t-sm ${
-              isGold
+            className={`origin-bottom rounded-t-sm ${isGold
                 ? "bg-[hsl(var(--accent))] w-1 sm:w-1.5 shadow-[0_0_8px_hsl(var(--accent)/.4)]"
                 : "bg-white/40 w-0.5 sm:w-1"
-            }`}
+              }`}
             style={{ height: `${height * 0.75}%` }}
             animate={{
               scaleY: isTall ? [0.35, 1.3, 0.55, 1.1, 0.35] : [0.3, 1.15, 0.5, 0.95, 0.3],
@@ -518,22 +517,22 @@ function Home() {
                 Making room · since day one
               </span>
               <p className="text-2xl leading-snug text-[hsl(var(--foreground))] sm:text-3xl">
-              “Family of Love” is not a line on a banner. It is how we choose
-              to show up, with open seats, honest questions, deep prayer,
-              and the kind of care that remembers your exam timetable.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <span className="border border-[hsl(var(--primary)/.25)] px-4 py-2 text-sm text-[hsl(var(--primary))]">
-                Faith with room to grow
-              </span>
-              <span className="border border-[hsl(var(--primary)/.25)] px-4 py-2 text-sm text-[hsl(var(--primary))]">
-                People before performance
-              </span>
-              <span className="border border-[hsl(var(--primary)/.25)] px-4 py-2 text-sm text-[hsl(var(--primary))]">
-                A home on campus
-              </span>
+                “Family of Love” is not a line on a banner. It is how we choose
+                to show up, with open seats, honest questions, deep prayer,
+                and the kind of care that remembers your exam timetable.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <span className="border border-[hsl(var(--primary)/.25)] px-4 py-2 text-sm text-[hsl(var(--primary))]">
+                  Faith with room to grow
+                </span>
+                <span className="border border-[hsl(var(--primary)/.25)] px-4 py-2 text-sm text-[hsl(var(--primary))]">
+                  People before performance
+                </span>
+                <span className="border border-[hsl(var(--primary)/.25)] px-4 py-2 text-sm text-[hsl(var(--primary))]">
+                  A home on campus
+                </span>
+              </div>
             </div>
-          </div>
           </Reveal>
         </div>
       </section>

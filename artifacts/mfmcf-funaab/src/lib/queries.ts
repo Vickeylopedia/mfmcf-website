@@ -12,6 +12,7 @@ import {
   getLocalSermons,
   getLocalNews,
   getLocalGallery,
+  getAnnouncementIds,
   fallbackSermons,
   fallbackNews,
   fallbackGallery,
@@ -71,6 +72,10 @@ export const mapNews = (dto: NewsPostDto): NewsView => ({
   body: dto.body,
   full: dto.full,
   artwork: dto.artworkUrl ? resolveMediaUrl(dto.artworkUrl) : null,
+  isAnnouncement:
+    (dto as any).isAnnouncement !== undefined
+      ? Boolean((dto as any).isAnnouncement)
+      : getAnnouncementIds().includes(dto.id),
 });
 
 export function useNews() {

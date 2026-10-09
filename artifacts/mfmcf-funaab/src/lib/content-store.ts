@@ -25,6 +25,7 @@ export type NewsView = {
   body: string;
   full: string;
   artwork: string | null;
+  isAnnouncement?: boolean;
 };
 
 export type GalleryView = {
@@ -39,6 +40,7 @@ export const fallbackSermons: SermonView[] = staticSermons.map((sermon, i) => ({
   ...sermon,
   id: -(i + 1),
   audio: null,
+  isAnnouncement: false,
 }));
 
 export const fallbackNews: NewsView[] = [
@@ -51,6 +53,7 @@ export const fallbackNews: NewsView[] = [
     body: "Whether it is your first Sunday or your fiftieth, there is an open seat and a familiar face waiting at the Fellowship Auditorium.",
     full: "Doors open from 7:00 AM, and the welcome team will be outside to walk you in if it is your first time. Come as you are, whether jeans, hostel wear, or Sunday best, nobody is keeping score. After the service, stay back for a few minutes so we can meet you properly. That is the whole point of family.",
     artwork: null,
+    isAnnouncement: true,
   },
   {
     id: -2,
@@ -61,6 +64,7 @@ export const fallbackNews: NewsView[] = [
     body: "We are keeping the family rooms open through exams. Come study, pray, breathe, or simply sit with people who understand.",
     full: "From Monday to Friday, 10 AM to 4 PM, one of the family rooms stays open as a quiet study space with power outlets, quiet playlists, and someone to pray with when a paper goes badly. There is also a short prayer walk every evening at 6 PM for anyone who wants to end the study day with peace instead of panic.",
     artwork: null,
+    isAnnouncement: true,
   },
   {
     id: -3,
@@ -71,6 +75,7 @@ export const fallbackNews: NewsView[] = [
     body: "Midweek Recharge now meets every Wednesday at 5:00 PM. Short teaching, open prayer, honest conversation.",
     full: "We heard the family clearly: Sundays carry the celebration, but the middle of the week needs somewhere to land. So Midweek Recharge is now weekly with thirty minutes of teaching that connects to real campus life, then open prayer and honest conversation until nobody needs to talk anymore. Bring your questions, bring your friend who has questions.",
     artwork: null,
+    isAnnouncement: false,
   },
 ];
 
@@ -347,20 +352,70 @@ export async function deleteLocalSermon(id: number): Promise<void> {
   saveLocalSermons(updated);
 }
 
-// --- NEWS ---
+// --- NEWS & HOME ANNOUNCEMENTS ---
+
+const STORAGE_ANNOUNCEMENTS = "mfmcf_home_announcement_ids";
+
+export function getAnnouncementIds(): number[] {
+  if (typeof window === "undefined") return [-1, -2];
+  try {
+    const raw = localStorage.getItem(STORAGE_ANNOUNCEMENTS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {
+    console.warn("Failed to load announcement IDs", err);
+  }
+  return [-1, -2];
+}
+
+export function saveAnnouncementIds(ids: number[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_ANNOUNCEMENTS, JSON.stringify(ids));
+  } catch (err) {
+    console.warn("Failed to save announcement IDs", err);
+  }
+}
+
+export function toggleAnnouncementId(id: number): boolean {
+  const current = getAnnouncementIds();
+  const exists = current.includes(id);
+  const next = exists ? current.filter((x) => x !== id) : [...current, id];
+  saveAnnouncementIds(next);
+  return !exists;
+}
 
 export function getLocalNews(): NewsView[] {
-  if (typeof window === "undefined") return fallbackNews;
+  const announcementIds = getAnnouncementIds();
+  if (typeof window === "undefined") {
+    return fallbackNews.map((n) => ({
+      ...n,
+      isAnnouncement: announcementIds.includes(n.id) || Boolean(n.isAnnouncement),
+    }));
+  }
   try {
     const raw = localStorage.getItem(STORAGE_NEWS);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((n: NewsView) => ({
+          ...n,
+          isAnnouncement:
+            n.isAnnouncement !== undefined
+              ? n.isAnnouncement
+              : announcementIds.includes(n.id),
+        }));
+      }
     }
   } catch (err) {
     console.warn("Failed to load local news from storage", err);
   }
-  return fallbackNews;
+  return fallbackNews.map((n) => ({
+    ...n,
+    isAnnouncement: announcementIds.includes(n.id) || Boolean(n.isAnnouncement),
+  }));
 }
 
 function saveLocalNews(news: NewsView[]) {
@@ -383,8 +438,17 @@ export async function addLocalNews(input: NewsInput): Promise<NewsView> {
     }
   }
 
+  const id = Date.now();
+  const isAnnouncement = input.isAnnouncement ?? false;
+  if (isAnnouncement) {
+    const currentAnnouncements = getAnnouncementIds();
+    if (!currentAnnouncements.includes(id)) {
+      saveAnnouncementIds([...currentAnnouncements, id]);
+    }
+  }
+
   const newPost: NewsView = {
-    id: Date.now(),
+    id,
     title: input.title,
     iso: input.iso,
     date: displayNewsDate(input.iso),
@@ -392,6 +456,7 @@ export async function addLocalNews(input: NewsInput): Promise<NewsView> {
     body: input.body,
     full: input.full,
     artwork: artworkUrl,
+    isAnnouncement,
   };
 
   const updated = [newPost, ...current];
@@ -419,6 +484,18 @@ export async function updateLocalNews(
     }
   }
 
+  const isAnnouncement =
+    input.isAnnouncement !== undefined
+      ? input.isAnnouncement
+      : Boolean(existing.isAnnouncement);
+
+  const currentAnnouncements = getAnnouncementIds();
+  if (isAnnouncement && !currentAnnouncements.includes(id)) {
+    saveAnnouncementIds([...currentAnnouncements, id]);
+  } else if (!isAnnouncement && currentAnnouncements.includes(id)) {
+    saveAnnouncementIds(currentAnnouncements.filter((x) => x !== id));
+  }
+
   const updatedPost: NewsView = {
     ...existing,
     title: input.title,
@@ -428,6 +505,7 @@ export async function updateLocalNews(
     body: input.body,
     full: input.full,
     artwork: artworkUrl,
+    isAnnouncement,
   };
 
   current[index] = updatedPost;
@@ -439,6 +517,10 @@ export async function deleteLocalNews(id: number): Promise<void> {
   const current = getLocalNews();
   const updated = current.filter((n) => n.id !== id);
   saveLocalNews(updated);
+  const currentAnnouncements = getAnnouncementIds();
+  if (currentAnnouncements.includes(id)) {
+    saveAnnouncementIds(currentAnnouncements.filter((x) => x !== id));
+  }
 }
 
 // --- GALLERY ---

@@ -20,6 +20,7 @@ import {
 } from "@/lib/admin-api";
 import { useGallery, useNews, useSermons } from "@/lib/queries";
 import { withBase, resolveMediaUrl } from "@/lib/site";
+import { toggleAnnouncementId } from "@/lib/content-store";
 
 /**
  * Admin studio: password-gated content management for sermons, news, and
@@ -229,11 +230,10 @@ function Admin() {
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`px-4 py-2 text-xs font-bold capitalize transition ${
-                tab === key
+              className={`px-4 py-2 text-xs font-bold capitalize transition ${tab === key
                   ? "bg-[hsl(var(--primary))] text-white"
                   : "border border-[hsl(var(--foreground)/.15)] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
-              }`}
+                }`}
             >
               {key}
             </button>
@@ -754,7 +754,7 @@ function GalleryAdmin() {
     try {
       const stored = localStorage.getItem("mfmcf_gallery_custom_categories");
       if (stored) return JSON.parse(stored);
-    } catch {}
+    } catch { }
     return ["Fellowship", "Gatherings", "Outreach", "Bible Study"];
   });
 
@@ -773,7 +773,7 @@ function GalleryAdmin() {
         const merged = Array.from(new Set([...prev, ...fromItems]));
         try {
           localStorage.setItem("mfmcf_gallery_custom_categories", JSON.stringify(merged));
-        } catch {}
+        } catch { }
         return merged;
       });
     }
@@ -800,7 +800,7 @@ function GalleryAdmin() {
         const updated = Array.from(new Set([...prev, categoryToUse]));
         try {
           localStorage.setItem("mfmcf_gallery_custom_categories", JSON.stringify(updated));
-        } catch {}
+        } catch { }
         return updated;
       });
 

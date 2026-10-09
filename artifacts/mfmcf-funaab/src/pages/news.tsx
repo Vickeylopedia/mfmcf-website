@@ -52,38 +52,38 @@ function News() {
                       {item.date}
                     </p>
                   </div>
-                <div>
-                  <h2 className="display-font text-3xl leading-none sm:text-4xl">
-                    {item.title}
-                  </h2>
-                  <p className="mt-4 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-                    {item.body}
-                  </p>
-                  {open && (
-                    <p
-                      data-testid={`text-news-full-${i}`}
-                      className="reveal mt-4 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]"
-                    >
-                      {item.full}
+                  <div>
+                    <h2 className="display-font text-3xl leading-none sm:text-4xl">
+                      {item.title}
+                    </h2>
+                    <p className="mt-4 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">
+                      {item.body}
                     </p>
-                  )}
-                  <button
-                    type="button"
-                    aria-expanded={open}
-                    data-testid={`button-read-news-${i}`}
-                    onClick={() => setOpenIndex(open ? null : i)}
-                    className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))]"
-                  >
-                    {open ? "Close note" : "Read note"}{" "}
-                    <ArrowUpRight
-                      className={`size-4 transition-transform ${open ? "rotate-90" : ""}`}
-                    />
-                  </button>
-                </div>
-                <p className="text-right text-xs font-semibold text-[hsl(var(--muted-foreground))] sm:pt-2">
-                  {item.tag}
-                </p>
-              </article>
+                    {open && (
+                      <p
+                        data-testid={`text-news-full-${i}`}
+                        className="reveal mt-4 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]"
+                      >
+                        {item.full}
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      data-testid={`button-read-news-${i}`}
+                      onClick={() => setOpenIndex(open ? null : i)}
+                      className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))]"
+                    >
+                      {open ? "Close note" : "Read note"}{" "}
+                      <ArrowUpRight
+                        className={`size-4 transition-transform ${open ? "rotate-90" : ""}`}
+                      />
+                    </button>
+                  </div>
+                  <p className="text-right text-xs font-semibold text-[hsl(var(--muted-foreground))] sm:pt-2">
+                    {item.tag}
+                  </p>
+                </article>
               </Reveal>
             );
           })}
