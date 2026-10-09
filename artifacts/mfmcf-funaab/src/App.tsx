@@ -6,6 +6,7 @@ import { ScrollToTop } from "@/components/layout/site-shell";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import About from "@/pages/about";
+import Alumni from "@/pages/alumni";
 import Contact from "@/pages/contact";
 import Gallery from "@/pages/gallery";
 import Home from "@/pages/home";
@@ -34,6 +35,7 @@ function Router() {
         <Route path="/gallery" component={Gallery} />
         <Route path="/news/:id" component={News} />
         <Route path="/news" component={News} />
+        <Route path="/alumni" component={Alumni} />
         <Route path="/contact" component={Contact} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />

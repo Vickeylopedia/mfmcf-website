@@ -52,6 +52,7 @@ export const navItems = [
   { href: "/sermons", label: "Sermons" },
   { href: "/gallery", label: "Gallery" },
   { href: "/news", label: "News" },
+  { href: "/alumni", label: "Alumni" },
   { href: "/contact", label: "Contact" },
 ];
 
