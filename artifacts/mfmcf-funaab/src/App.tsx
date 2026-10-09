@@ -32,6 +32,7 @@ function Router() {
         <Route path="/sermons" component={Sermons} />
         <Route path="/sermons/:slug" component={SermonDetail} />
         <Route path="/gallery" component={Gallery} />
+        <Route path="/news/:id" component={News} />
         <Route path="/news" component={News} />
         <Route path="/contact" component={Contact} />
         <Route path="/admin" component={Admin} />

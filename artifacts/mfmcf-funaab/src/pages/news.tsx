@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useParams } from "wouter";
 import { Shell, ButtonLink } from "@/components/layout/site-shell";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Reveal } from "@/components/reveal";
@@ -8,8 +9,39 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function News() {
   useDocumentTitle("Notes & Updates");
+  const params = useParams<{ id?: string }>();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [highlightId, setHighlightId] = useState<number | null>(null);
   const { news, isLoading } = useNews();
+  const scrolledOnce = useRef(false);
+
+  useEffect(() => {
+    if (isLoading || !news.length || scrolledOnce.current) return;
+
+    // Check route parameter /news/:id or query parameter /news?id=123
+    const searchParams =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : null;
+    const targetIdStr = params?.id || searchParams?.get("id");
+
+    if (targetIdStr) {
+      const targetId = Number(targetIdStr);
+      const index = news.findIndex((n) => n.id === targetId);
+      if (index !== -1) {
+        scrolledOnce.current = true;
+        setOpenIndex(index);
+        setHighlightId(targetId);
+
+        setTimeout(() => {
+          const el = document.getElementById(`news-item-${targetId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 180);
+      }
+    }
+  }, [params?.id, news, isLoading]);
 
   return (
     <Shell>
@@ -32,9 +64,15 @@ function News() {
           )}
           {news.map((item, i) => {
             const open = openIndex === i;
+            const isHighlighted = highlightId === item.id;
             return (
               <Reveal key={item.title} delay={Math.min(i, 2) * 100}>
-                <article className="grid gap-5 border-t border-[hsl(var(--foreground)/.18)] py-8 sm:grid-cols-[.28fr_1fr_.25fr] sm:gap-10">
+                <article
+                  id={`news-item-${item.id}`}
+                  className={`grid gap-5 border-t border-[hsl(var(--foreground)/.18)] py-8 sm:grid-cols-[.28fr_1fr_.25fr] sm:gap-10 transition-colors duration-700 ${
+                    isHighlighted ? "bg-[hsl(var(--accent)/.12)] -mx-3 px-3 rounded" : ""
+                  }`}
+                >
                   <div>
                     {item.artwork && (
                       <div className="mb-3 aspect-square w-16 overflow-hidden border border-[hsl(var(--foreground)/.15)] bg-[hsl(var(--secondary))] sm:w-full">

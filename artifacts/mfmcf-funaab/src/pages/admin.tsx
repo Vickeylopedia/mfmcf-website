@@ -562,6 +562,7 @@ function NewsAdmin() {
     tag: "Family",
     body: "",
     full: "",
+    isAnnouncement: false,
   });
   const [artwork, setArtwork] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -581,7 +582,7 @@ function NewsAdmin() {
       setUploadProgress(null);
       setError(null);
       setEditing(null);
-      setForm({ title: "", iso: "", tag: "Family", body: "", full: "" });
+      setForm({ title: "", iso: "", tag: "Family", body: "", full: "", isAnnouncement: false });
       setArtwork(null);
       await invalidate();
     },
@@ -605,6 +606,7 @@ function NewsAdmin() {
       tag: post.tag,
       body: post.body,
       full: post.full,
+      isAnnouncement: Boolean(post.isAnnouncement),
     });
     setArtwork(null);
     window.scrollTo({ top: 0 });
@@ -677,6 +679,25 @@ function NewsAdmin() {
             />
             <FileHint file={artwork} hint="jpg, png, webp or gif" />
           </Field>
+
+          {/* Option to add it as announcement on the home screen */}
+          <label className="flex items-start gap-3 border border-[hsl(var(--foreground)/.16)] bg-[hsl(var(--background))] p-3.5 cursor-pointer hover:border-[hsl(var(--primary))] transition">
+            <input
+              type="checkbox"
+              checked={form.isAnnouncement}
+              onChange={(e) => setForm({ ...form, isAnnouncement: e.target.checked })}
+              className="mt-0.5 size-4 accent-[hsl(var(--primary))] cursor-pointer"
+            />
+            <div>
+              <span className="block text-xs font-bold text-[hsl(var(--foreground))]">
+                Show as Announcement on Home Screen
+              </span>
+              <span className="block font-mono text-[10px] text-[hsl(var(--muted-foreground))]">
+                Adds this note to the Campus Happenings section carousel on the home screen
+              </span>
+            </div>
+          </label>
+
           <FormError message={error} />
           {uploadProgress !== null && (
             <UploadProgress
@@ -698,7 +719,7 @@ function NewsAdmin() {
                 variant="ghost"
                 onClick={() => {
                   setEditing(null);
-                  setForm({ title: "", iso: "", tag: "Family", body: "", full: "" });
+                  setForm({ title: "", iso: "", tag: "Family", body: "", full: "", isAnnouncement: false });
                   setArtwork(null);
                 }}
               >
@@ -727,6 +748,24 @@ function NewsAdmin() {
                   {post.date} · {post.tag}
                 </p>
               </div>
+
+              {/* One-click toggle button to add/remove announcement on home screen */}
+              <button
+                type="button"
+                onClick={async () => {
+                  toggleAnnouncementId(post.id);
+                  await invalidate();
+                }}
+                title={post.isAnnouncement ? "Remove from home screen announcements" : "Show on home screen announcements"}
+                className={`shrink-0 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
+                  post.isAnnouncement
+                    ? "border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))]"
+                    : "border border-dashed border-[hsl(var(--foreground)/.35)] text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
+                }`}
+              >
+                {post.isAnnouncement ? "★ Announcement" : "+ Add to Home"}
+              </button>
+
               <AdminButton variant="ghost" onClick={() => startEdit(post.id)}>
                 Edit
               </AdminButton>

@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { useSubscribeNewsletter } from "@workspace/api-client-react";
 import { useParallax } from "@/hooks/use-parallax";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
   ArrowDownRight,
+  ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
   Asterisk,
   CalendarDays,
@@ -337,6 +339,12 @@ function Home() {
   const heroCollage = useParallax(72);
   const { sermons } = useSermons();
   const { news } = useNews();
+
+  // News items configured as home screen announcements in admin portal (or fallback to latest)
+  const announcementItems = useMemo(() => {
+    const flagged = news.filter((n) => n.isAnnouncement);
+    return flagged.length > 0 ? flagged : news.slice(0, 3);
+  }, [news]);
   return (
     <Shell>
       <section className="home-hero grain relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
@@ -582,9 +590,9 @@ function Home() {
               Browse all stories & updates <ArrowUpRight className="size-4" />
             </Link>
           </div>
-          {/* Continuous scrolling marquee animation driven by admin news items */}
+          {/* Continuous scrolling moving carousel driven by admin news announcements */}
           <div className="mt-10 sm:mt-12">
-            <HappeningsCarousel items={news} />
+            <HappeningsCarousel items={announcementItems} />
           </div>
         </div>
       </section>
@@ -696,12 +704,12 @@ function Home() {
   );
 }
 
-function HappeningCard({
+function AnnouncementCard({
   item,
-  index,
+  index = 0,
 }: {
   item: NewsView;
-  index: number;
+  index?: number;
 }) {
   const fallbackImages = [
     photos.gathering,
@@ -714,59 +722,40 @@ function HappeningCard({
 
   return (
     <Link
-      href="/news"
-      className="group relative flex h-full min-h-[420px] w-[290px] sm:w-[350px] shrink-0 flex-col justify-between overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--foreground))] p-6 sm:p-7 shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-500 hover:-translate-y-2 hover:shadow-[8px_8px_0px_hsl(var(--foreground))] select-none block cursor-pointer"
+      href={`/news?id=${item.id}`}
+      data-testid={`link-announcement-${item.id}-${index}`}
+      className="group block w-[280px] sm:w-[330px] shrink-0 select-none transition-transform duration-300 hover:-translate-y-1"
     >
-      {/* Background Photo with smooth zoom */}
-      <img
-        src={image}
-        alt={item.title}
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = photos.gathering;
-        }}
-        className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-108"
-      />
-
-      {/* Top Vignette */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/60 via-black/25 to-transparent"
-      />
-
-      {/* Deep Gradient for Crisp Text Legibility */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-[hsl(263_45%_6%)] via-[hsl(263_38%_9%)/.92] via-45% to-[hsl(263_32%_14%)/.25] transition-colors duration-500 group-hover:from-[hsl(263_50%_5%)] group-hover:via-[hsl(278_54%_12%)/.94]"
-      />
-
-      {/* Top Tag & Interactive Arrow */}
-      <div className="relative z-10 flex items-start justify-between">
-        <span className="inline-flex items-center gap-1.5 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-3 py-1 font-mono text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_white]">
-          <CalendarDays className="size-3.5" />
-          {item.tag || "Campus Update"}
-        </span>
-        <span className="flex size-9 items-center justify-center border border-white/25 bg-black/40 text-white backdrop-blur-md transition-all duration-300 group-hover:border-[hsl(var(--accent))] group-hover:bg-[hsl(var(--accent))] group-hover:text-[hsl(var(--foreground))] group-hover:rotate-45">
-          <ArrowUpRight className="size-4" />
-        </span>
+      <div className="relative aspect-[16/10] overflow-hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--secondary))]">
+        <img
+          src={image}
+          alt={item.title}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = photos.gathering;
+          }}
+          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute top-2.5 left-2.5">
+          <span className="inline-flex items-center gap-1 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-2.5 py-0.5 font-mono text-[10px] font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))]">
+            <CalendarDays className="size-3" />
+            {item.tag || "Update"}
+          </span>
+        </div>
       </div>
-
-      {/* Bottom Content */}
-      <div className="relative z-10 mt-24">
-        <p className="mono-label text-[10px] tracking-widest text-[hsl(var(--accent))] font-bold">
-          {item.date || "Latest Update"}
+      <div className="border-2 border-t-0 border-[hsl(var(--foreground))] bg-[hsl(var(--card))] p-4 sm:p-5 shadow-[3px_3px_0px_hsl(var(--foreground))]">
+        <p className="mono-label text-[9px] font-bold text-[hsl(var(--primary))] truncate">
+          {item.date || "Latest update"}
         </p>
-        <h3 className="display-font mt-1 text-2xl sm:text-3xl font-bold leading-tight text-white tracking-[-0.02em] transition-colors duration-300 group-hover:text-[hsl(var(--accent))] line-clamp-2">
+        <h3 className="display-font mt-2 text-lg sm:text-xl font-bold leading-snug line-clamp-2 transition-colors duration-200 group-hover:text-[hsl(var(--primary))]">
           {item.title}
         </h3>
-        <p className="mt-3 text-xs sm:text-sm leading-relaxed text-white/90 font-medium line-clamp-3">
+        <p className="mt-2 text-xs font-medium text-[hsl(var(--muted-foreground))] line-clamp-2">
           {item.body}
         </p>
-        <div className="mt-5 flex items-center justify-between border-t border-white/20 pt-4 font-mono text-xs font-bold text-white/95">
-          <span className="flex items-center gap-1.5 text-[hsl(var(--accent))]">
-            Read update <ArrowUpRight className="size-3.5" />
-          </span>
-          <span className="text-white/70 text-[11px]">
-            MFMCF FUNAAB
+        <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--foreground)/.12)] pt-3 text-xs font-bold text-[hsl(var(--primary))]">
+          <span>Read more</span>
+          <span className="flex size-5 items-center justify-center bg-[hsl(var(--primary))] text-white transition-transform duration-200 group-hover:translate-x-1">
+            <ArrowUpRight className="size-3" />
           </span>
         </div>
       </div>
@@ -775,47 +764,140 @@ function HappeningCard({
 }
 
 function HappeningsCarousel({ items }: { items: NewsView[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+
   if (!items || !items.length) return null;
 
-  // Duplicate items to create a continuous, non-stop seamless infinite loop
-  const base =
-    items.length >= 4
-      ? items
-      : [...items, ...items, ...items, ...items].slice(0, 6);
-  const loopItems = [...base, ...base];
+  // If only one news is added as announcement on home screen, do NOT animate
+  if (items.length === 1) {
+    return (
+      <div className="py-2">
+        <div className="max-w-[340px]">
+          <AnnouncementCard item={items[0]} index={0} />
+        </div>
+      </div>
+    );
+  }
+
+  // Duplicate items to ensure a smooth, continuous seamless moving animation
+  const loopItems = [...items, ...items, ...items, ...items];
+
+  // Continuous smooth auto-scrolling animation (pauses on hover, touch, or active drag)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || items.length <= 1) return;
+
+    let animId: number;
+    let lastTime = performance.now();
+
+    const tick = (time: number) => {
+      const delta = time - lastTime;
+      lastTime = time;
+
+      if (!isPaused && !isDragging.current && el) {
+        // Continuous smooth advancement (~35px/s)
+        el.scrollLeft += delta * 0.035;
+
+        const halfWidth = el.scrollWidth / 2;
+        if (el.scrollLeft >= halfWidth) {
+          el.scrollLeft -= halfWidth;
+        } else if (el.scrollLeft <= 0) {
+          el.scrollLeft += halfWidth;
+        }
+      }
+      animId = requestAnimationFrame(tick);
+    };
+
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, [isPaused, items.length]);
+
+  const handlePrev = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: -320, behavior: "smooth" });
+  };
+
+  const handleNext = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.scrollBy({ left: 320, behavior: "smooth" });
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    const el = containerRef.current;
+    if (!el) return;
+    isDragging.current = true;
+    startX.current = e.pageX - el.offsetLeft;
+    scrollLeftStart.current = el.scrollLeft;
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const el = containerRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    el.scrollLeft = scrollLeftStart.current - walk;
+  };
+
+  const onMouseUpOrLeave = () => {
+    isDragging.current = false;
+  };
 
   return (
-    <div className="relative w-full overflow-hidden py-3">
-      {/* Editorial side edge gradient masks */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 sm:w-16 bg-gradient-to-r from-[hsl(var(--background))] to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 sm:w-16 bg-gradient-to-l from-[hsl(var(--background))] to-transparent"
-      />
+    <div
+      className="relative w-full"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => {
+        setIsPaused(false);
+        onMouseUpOrLeave();
+      }}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
+      {/* Side Prev/Next manual navigation buttons */}
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={handlePrev}
+          aria-label="Previous announcement"
+          className="flex size-9 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] active:translate-y-0.5 cursor-pointer"
+        >
+          <ArrowLeft className="size-4 text-[hsl(var(--foreground))]" />
+        </button>
+        <button
+          type="button"
+          onClick={handleNext}
+          aria-label="Next announcement"
+          className="flex size-9 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] active:translate-y-0.5 cursor-pointer"
+        >
+          <ArrowRight className="size-4 text-[hsl(var(--foreground))]" />
+        </button>
+      </div>
 
-      {/* Non-stop horizontal scrolling track */}
-      <motion.div
-        className="flex flex-row flex-nowrap gap-5 sm:gap-6 will-change-transform"
-        animate={{
-          x: ["0%", "-50%"],
-        }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",
-          duration: 25,
-        }}
+      {/* Horizontally scrollable & draggable track with NO soft edge blur masks */}
+      <div
+        ref={containerRef}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUpOrLeave}
+        className="flex flex-row flex-nowrap gap-5 sm:gap-6 overflow-x-auto pb-4 pt-1 select-none scrollbar-none cursor-grab active:cursor-grabbing"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {loopItems.map((item, idx) => (
-          <HappeningCard
+          <AnnouncementCard
             key={`${item.id}-${idx}`}
             item={item}
             index={idx}
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

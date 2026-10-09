@@ -297,14 +297,14 @@ export function Shell({ children }: { children: ReactNode }) {
               CONNECT <span aria-hidden="true">→</span>
             </Link>
 
-            {/* Menu button pinned at far right in normal position */}
+            {/* Menu button: shown on mobile/tablet only (hidden on desktop where nav links are already visible) */}
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               data-testid="button-site-menu"
               onClick={() => setMenuOpen((open) => !open)}
-              className="border-2 border-[hsl(var(--foreground))] bg-white px-3 py-2 text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
+              className="border-2 border-[hsl(var(--foreground))] bg-white px-3 py-2 text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] active:translate-y-0.5 cursor-pointer flex items-center gap-1.5 lg:hidden"
             >
               {menuOpen ? (
                 <X className="size-4 text-[hsl(var(--primary))]" />
@@ -318,73 +318,48 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* ── 6. EXPANDED MENU MODAL (RESTORED TO PREVIOUS DESIGN) ── */}
+        {/* ── 6. EXPANDED MOBILE NAVIGATION (NO REDUNDANT LOGO/CLOSE, CLEAN PREVIOUS UI) ── */}
         <AnimatePresence>
           {menuOpen && (
-            <motion.div
-              key="header-maximized"
-              initial={{ opacity: 0, y: -12, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
-              className="mx-auto mt-2 max-w-[820px] w-full pointer-events-auto border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 sm:p-6 shadow-[6px_6px_0px_hsl(var(--foreground))]"
+            <motion.nav
+              key="mobile-nav-panel"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto mt-2 max-w-[1380px] pointer-events-auto rounded-none border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 shadow-[4px_4px_0px_hsl(var(--foreground))] lg:hidden"
+              aria-label="Mobile navigation"
             >
-              <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.15)] pb-3">
-                <Link
-                  href="/"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3"
-                >
-                  <span className="flex size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))]">
-                    <img src={logo} alt="MFMCF logo" className="size-9 object-contain" />
-                  </span>
-                  <div>
-                    <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
-                      MFMCF FUNAAB
-                    </span>
-                    <span className="block font-mono text-[9px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.7)]">
-                      FAMILY OF LOVE, WORD AND POWER
-                    </span>
-                  </div>
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(false)}
-                  aria-label="Close menu"
-                  className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] cursor-pointer"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-              <nav className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Maximized navigation">
-                {navItems.map((item) => (
+              <div className="grid gap-1">
+                {navItems.map((item, index) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setMenuOpen(false)}
-                    data-testid={`link-drawer-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                    className={`flex items-center justify-between border border-[hsl(var(--foreground)/.18)] p-3 font-mono text-xs font-black uppercase tracking-wider transition hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] ${
+                    data-testid={`link-mobile-${item.label.toLowerCase().replaceAll(" ", "-")}`}
+                    className={`flex items-center justify-between border-b border-[hsl(var(--foreground)/.08)] py-3 px-2 font-mono text-xs font-bold uppercase tracking-widest transition-colors hover:bg-[hsl(var(--accent)/.2)] ${
                       location === item.href
-                        ? "bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]"
-                        : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                        ? "text-[hsl(var(--primary))] font-black bg-[hsl(var(--accent)/.15)]"
+                        : "text-[hsl(var(--foreground))]"
                     }`}
                   >
                     <span>{item.label}</span>
-                    <ArrowUpRight className="size-3.5" />
+                    <span className="mono-label text-[10px] text-[hsl(var(--muted-foreground))]">
+                      0{index + 1}
+                    </span>
                   </Link>
                 ))}
-              </nav>
-              <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--foreground)/.12)] pt-3">
+              </div>
+              <div className="pt-4">
                 <Link
                   href="/contact"
                   onClick={() => setMenuOpen(false)}
-                  data-testid="link-drawer-connect"
-                  className="w-full text-center border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] py-2.5 font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
+                  className="block w-full border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] py-3 text-center font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
                 >
-                  Connect with us <span aria-hidden="true">→</span>
+                  Connect with us →
                 </Link>
               </div>
-            </motion.div>
+            </motion.nav>
           )}
         </AnimatePresence>
       </header>
