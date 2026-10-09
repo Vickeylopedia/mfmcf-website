@@ -48,8 +48,8 @@ export const fallbackNews: NewsView[] = [
     date: "22 MAY 2026",
     iso: "2026-05-22",
     tag: "Welcome",
-    body: "Whether it is your first Sunday or your fiftieth, there is an open seat and a familiar face waiting at the New Lecture Theatre.",
-    full: "Doors open from 8:30 AM, and the welcome team will be outside to walk you in if it is your first time. Come as you are — jeans, hostel wear, Sunday best; nobody is keeping score. After the service, stay back for a few minutes so we can meet you properly. That is the whole point of family.",
+    body: "Whether it is your first Sunday or your fiftieth, there is an open seat and a familiar face waiting at the Fellowship Auditorium.",
+    full: "Doors open from 8:30 AM, and the welcome team will be outside to walk you in if it is your first time. Come as you are, whether jeans, hostel wear, or Sunday best, nobody is keeping score. After the service, stay back for a few minutes so we can meet you properly. That is the whole point of family.",
     artwork: null,
   },
   {
@@ -59,7 +59,7 @@ export const fallbackNews: NewsView[] = [
     iso: "2026-05-16",
     tag: "Community",
     body: "We are keeping the family rooms open through exams. Come study, pray, breathe, or simply sit with people who understand.",
-    full: "From Monday to Friday, 10 AM to 4 PM, one of the family rooms stays open as a quiet study space — power points, quiet playlists, and someone to pray with when a paper goes badly. There is also a short prayer walk every evening at 6 PM for anyone who wants to end the study day with peace instead of panic.",
+    full: "From Monday to Friday, 10 AM to 4 PM, one of the family rooms stays open as a quiet study space with power outlets, quiet playlists, and someone to pray with when a paper goes badly. There is also a short prayer walk every evening at 6 PM for anyone who wants to end the study day with peace instead of panic.",
     artwork: null,
   },
   {
@@ -69,7 +69,7 @@ export const fallbackNews: NewsView[] = [
     iso: "2026-05-03",
     tag: "Gatherings",
     body: "Midweek Recharge now meets every Wednesday at 5:00 PM. Short teaching, open prayer, honest conversation.",
-    full: "We heard the family clearly: Sundays carry the celebration, but the middle of the week needs somewhere to land. So Midweek Recharge is now weekly — thirty minutes of teaching that connects to real campus life, then open prayer and honest conversation until nobody needs to talk anymore. Bring your questions; bring your friend who has questions.",
+    full: "We heard the family clearly: Sundays carry the celebration, but the middle of the week needs somewhere to land. So Midweek Recharge is now weekly with thirty minutes of teaching that connects to real campus life, then open prayer and honest conversation until nobody needs to talk anymore. Bring your questions, bring your friend who has questions.",
     artwork: null,
   },
 ];
@@ -149,14 +149,14 @@ export const fallbackGallery: GalleryView[] = [
     id: -6,
     title: "The whole family, gathered",
     type: "Community",
-    desc: "Full rooms, full hearts — the chapter in one frame.",
+    desc: "Full rooms, full hearts, the family in one frame.",
     image: photos.community,
   },
   {
     id: -7,
     title: "Every voice welcome",
     type: "Worship",
-    desc: "Loud or quiet, off-key or on — it all counts as praise here.",
+    desc: "Loud or quiet, off-key or on, it all counts as praise here.",
     image: photos.fellowshipWorship,
   },
 ];

@@ -7,7 +7,7 @@ import { useNews } from "@/lib/queries";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function News() {
-  useDocumentTitle("Notes & Announcements");
+  useDocumentTitle("Notes & Updates");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { news, isLoading } = useNews();
 
@@ -23,7 +23,7 @@ function News() {
             <em className="font-normal">around here.</em>
           </>
         }
-        intro="Announcements, reflections, and the little updates that help us stay close between Sundays."
+        intro="Reflections, gatherings, and the little updates that help us stay close between Sundays."
       />
       <section className="px-5 py-16 lg:px-10 lg:py-24">
         <div className="mx-auto max-w-[1100px]">

@@ -2,11 +2,25 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { logo } from "@/lib/site";
 
+const SPLASH_SESSION_KEY = "mfmcf_splash_viewed";
+
 export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
-  const [visible, setVisible] = useState(true);
+  // Only show when the page is opened for the first time in a tab, not on reload
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return !sessionStorage.getItem(SPLASH_SESSION_KEY);
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     if (!visible) return;
+
+    try {
+      sessionStorage.setItem(SPLASH_SESSION_KEY, "true");
+    } catch {}
 
     const timer = setTimeout(() => {
       setVisible(false);
@@ -23,177 +37,132 @@ export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
     };
   }, [visible, minDuration]);
 
-  const titleWords = [
-    { text: "M", accent: false },
-    { text: "F", accent: false },
-    { text: "M", accent: false },
-    { text: "C", accent: false },
-    { text: "F", accent: false },
-    { text: " ", accent: false },
-    { text: "F", accent: true },
-    { text: "U", accent: true },
-    { text: "N", accent: true },
-    { text: "A", accent: true },
-    { text: "A", accent: true },
-    { text: "B", accent: true },
-  ];
+  if (!visible) return null;
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          key="mfmcf-splash"
+          key="mfmcf-editorial-splash"
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.025,
-            transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+            scale: 0.99,
+            transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
           }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#24103a] via-[#160826] to-[#0c0414] text-white select-none cursor-pointer"
+          className="fixed inset-0 z-[9999] flex flex-col justify-between overflow-hidden bg-white text-[hsl(var(--foreground))] select-none cursor-pointer p-6 sm:p-10 lg:p-14"
           onClick={() => setVisible(false)}
           role="dialog"
           aria-label="Welcome to MFMCF FUNAAB"
         >
-          {/* Website Royal Purple & Gold Radial Glows */}
+          {/* Subtle Corner Ambient Stylization (Far from text area) */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(168,85,247,0.25),transparent_65%)]"
+            className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-gradient-to-br from-[hsl(var(--accent)/.12)] to-[hsl(var(--primary)/.06)] blur-3xl"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -left-28 -top-28 size-[34rem] rounded-full bg-[hsl(var(--primary)/.35)] blur-[140px]"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-28 -right-28 size-[32rem] rounded-full bg-[hsl(var(--accent)/.22)] blur-[150px]"
+            className="pointer-events-none absolute -bottom-32 -left-32 size-96 rounded-full bg-gradient-to-tr from-[hsl(var(--primary)/.08)] to-[hsl(var(--accent)/.05)] blur-3xl"
           />
 
-          {/* Editorial Framing Border & Subtle Corner Accents */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-4 sm:inset-8 border border-white/10"
-          >
-            <div className="absolute left-3 top-3 font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.28em] text-white/50 sm:left-4 sm:top-4">
-              MFMCF · FUNAAB
-            </div>
-            <div className="absolute right-3 top-3 font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.24em] text-[hsl(var(--accent))] sm:right-4 sm:top-4">
-              FAMILY OF LOVE
-            </div>
-            <div className="absolute bottom-3 left-3 font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.22em] text-white/50 sm:bottom-4 sm:left-4">
-              CAMPUS FELLOWSHIP
-            </div>
-            <div className="absolute bottom-3 right-3 font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.22em] text-white/50 sm:bottom-4 sm:right-4">
-              WELCOME
-            </div>
+          {/* ── TOP EDITORIAL HEADER BAR ── */}
+          <div className="relative z-10 w-full flex items-center justify-between border-b border-[hsl(var(--foreground)/.1)] pb-4">
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--muted-foreground))] font-bold">
+              MFMCF · FUNAAB CHAPTER
+            </span>
+            <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--accent))] font-bold">
+              EST. 1999
+            </span>
           </div>
 
-          {/* Central Content */}
-          <div className="relative z-10 flex flex-col items-center px-6 text-center">
-            {/* Logo Container with Luminous Contrast Backdrop */}
+          {/* ── CENTER EDITORIAL CONTENT ── */}
+          <div className="relative z-10 my-auto flex flex-col items-center justify-center text-center">
+            {/* Logo in clean editorial presentation */}
             <motion.div
-              initial={{ scale: 0.75, opacity: 0, y: 18 }}
+              initial={{ scale: 0.85, opacity: 0, y: 12 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-              className="relative size-32 sm:size-40 flex items-center justify-center"
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="relative size-20 sm:size-24 flex items-center justify-center mb-6"
             >
-              {/* Luminous Light Halo directly behind the purple logo for maximum contrast */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.15, 1],
-                  opacity: [0.92, 1, 0.92],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 3,
-                  ease: "easeInOut",
-                }}
-                className="absolute inset-0 -m-3 sm:-m-5 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.96)_0%,rgba(255,250,240,0.88)_40%,rgba(253,240,215,0.45)_68%,transparent_100%)] shadow-[0_0_70px_rgba(255,255,255,0.85),0_0_110px_hsl(var(--accent)/0.5)] -z-10"
-              />
-
               <img
                 src={logo}
-                alt="MFMCF FUNAAB Logo"
-                className="size-full object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.45)]"
+                alt="MFMCF FUNAAB Emblem"
+                className="size-full object-contain drop-shadow-sm"
               />
             </motion.div>
 
-            {/* Typography Section Underneath Logo */}
-            <div className="mt-8">
-              {/* Mountain of Fire & Miracles Ministries - Pure White, No Box */}
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35, duration: 0.6, ease: "easeOut" }}
-                className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.26em] text-white drop-shadow-sm"
-              >
-                Mountain of Fire &amp; Miracles Ministries
-              </motion.p>
+            {/* Editorial Hairline Divider */}
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "80px", opacity: 1 }}
+              transition={{ delay: 0.25, duration: 0.6 }}
+              className="h-[1.5px] bg-[hsl(var(--primary))] mb-5"
+            />
 
-              {/* Animated "MFMCF FUNAAB" title */}
-              <motion.h1
-                className="display-font mt-3 text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[0.95] flex items-center justify-center gap-0.5"
-                aria-label="MFMCF FUNAAB"
-              >
-                {titleWords.map((item, idx) => (
-                  <motion.span
-                    key={idx}
-                    initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    transition={{
-                      delay: 0.5 + idx * 0.04,
-                      duration: 0.5,
-                      ease: [0.2, 0.8, 0.2, 1],
-                    }}
-                    className={item.accent ? "italic text-[hsl(var(--accent))]" : "text-white"}
-                  >
-                    {item.text === " " ? "\u00A0" : item.text}
-                  </motion.span>
-                ))}
-              </motion.h1>
+            {/* Main Title: Just "MFMCF FUNAAB" with smaller, sophisticated typography */}
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="font-mono text-xl sm:text-2xl lg:text-3xl font-extrabold uppercase tracking-[0.22em] text-[hsl(var(--foreground))]"
+            >
+              MFMCF FUNAAB
+            </motion.h1>
 
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0, duration: 0.6, ease: "easeOut" }}
-                className="mt-2.5 font-mono text-[9px] sm:text-xs uppercase tracking-[0.28em] text-white/70"
-              >
-                Family of Love · Campus Fellowship
-              </motion.p>
-            </div>
+            {/* Sub-label under title */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="mt-2 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--muted-foreground))]"
+            >
+              Campus Christian Fellowship
+            </motion.p>
 
-            {/* ── THREE DOT ANIMATED LOADER (Non-Circle) ── */}
+            {/* ── ANIMATED THREE DOT LOADER ── */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.15, duration: 0.5 }}
-              className="mt-10 flex items-center justify-center gap-3"
+              transition={{ delay: 0.8, duration: 0.4 }}
+              className="mt-8 flex items-center justify-center gap-2"
               aria-label="Loading..."
             >
               {[0, 1, 2].map((i) => (
                 <motion.span
                   key={i}
                   animate={{
-                    y: [-6, 6, -6],
-                    scale: [0.85, 1.35, 0.85],
-                    opacity: [0.4, 1, 0.4],
+                    y: [-4, 4, -4],
+                    scale: [0.9, 1.25, 0.9],
+                    opacity: [0.35, 1, 0.35],
                   }}
                   transition={{
                     repeat: Infinity,
-                    duration: 1.15,
-                    delay: i * 0.2,
+                    duration: 1.1,
+                    delay: i * 0.18,
                     ease: "easeInOut",
                   }}
-                  className="size-2.5 sm:size-3 rounded-full bg-gradient-to-tr from-[hsl(var(--accent))] via-[#fce6a2] to-[hsl(var(--accent))] shadow-[0_0_14px_hsl(var(--accent)/0.95)]"
+                  className="size-2 rounded-full bg-[hsl(var(--primary))]"
                 />
               ))}
             </motion.div>
+          </div>
 
-            {/* Dismiss Hint */}
+          {/* ── BOTTOM EDITORIAL FOOTER: Family of love, word and power ── */}
+          <div className="relative z-10 w-full border-t border-[hsl(var(--foreground)/.1)] pt-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[hsl(var(--primary))]"
+            >
+              Family of love, word and power
+            </motion.p>
+
             <motion.span
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              transition={{ delay: 1.5, duration: 0.5 }}
-              className="mt-6 font-mono text-[9px] uppercase tracking-widest text-white/50"
+              animate={{ opacity: 0.6 }}
+              transition={{ delay: 1.1, duration: 0.5 }}
+              className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]"
             >
               Tap anywhere to enter
             </motion.span>
@@ -203,5 +172,3 @@ export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
     </AnimatePresence>
   );
 }
-
-

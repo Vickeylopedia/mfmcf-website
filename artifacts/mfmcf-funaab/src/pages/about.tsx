@@ -9,15 +9,15 @@ function About() {
   return (
     <Shell>
       <PageIntro
-        eyebrow="Who we are"
+        eyebrow="Who we are through God"
         ghost="FAMILY"
-        title={<>The kind of faith you can bring to class.</>}
-        intro="MFMCF FUNAAB is a campus Christian family — rooted in prayer, honest about the journey, and convinced that nobody should have to do university life alone."
+        title={<>We are a Family of Love, Word and Power.</>}
+        intro="Here on campus, we are more than just students who meet on Sundays. We are a family drawn together by God's tender love, guided by the living truth of His Word, and empowered by the Holy Spirit each day. You never have to walk through university life alone, there is always an open seat, warm prayer, and a caring heart waiting for you here."
       >
         <div className="mt-12 grid gap-5 sm:grid-cols-3">
-          <Stat number="01" label="One family" />
-          <Stat number="24/7" label="A listening ear" />
-          <Stat number="∞" label="Room to grow" />
+          <Stat number="Love" label="A home where you are genuinely accepted and known" />
+          <Stat number="Word" label="Living truth that guides your steps and studies" />
+          <Stat number="Power" label="Holy Spirit strength for daily victory on campus" />
         </div>
       </PageIntro>
       <section className="relative overflow-hidden px-5 py-16 lg:px-10 lg:py-24">
@@ -46,7 +46,7 @@ function About() {
                   />
                 </div>
                 <p className="mono-label px-1 pb-1 pt-3 text-[9px] text-[hsl(var(--muted-foreground))]">
-                  A Sunday with the family
+                  Joyful times with the family
                 </p>
               </div>
               <div className="sticker absolute -bottom-0 right-0 z-10 w-[48%] rotate-[4deg] border-8 border-[hsl(var(--primary))] bg-white">
@@ -63,24 +63,17 @@ function About() {
           <Reveal variant="right" delay={100}>
             <div className="lg:pt-8">
               <p className="mono-label text-[10px] text-[hsl(var(--primary))]">
-                Our story, still unfolding
+                Our heartbeat
               </p>
               <h2 className="display-font mt-5 max-w-2xl text-5xl leading-[.96] tracking-[-.04em] sm:text-7xl">
-                A fellowship that feels like a front room.
+                A home where love, truth and power meet.
               </h2>
               <div className="mt-8 max-w-xl space-y-5 text-base leading-7 text-[hsl(var(--muted-foreground))]">
                 <p>
-                  On a busy campus, it is easy to become a face in a crowd. We
-                  gather to make something different possible: a community where
-                  you can worship freely, ask the difficult question, find a
-                  prayer partner, and be remembered when the semester gets heavy.
+                  On a bustling campus like FUNAAB, it is easy to feel lost in lectures and schedules. That is why we gather: to build a safe, loving haven where you can worship with joy, ask honest questions, pray without fear, and find friends who truly look out for your spiritual and academic life.
                 </p>
                 <p>
-                  We are part of the Mountain of Fire and Miracles Ministries
-                  Campus Fellowship family, serving students of the Federal
-                  University of Agriculture, Abeokuta. Our expression is joyful,
-                  prayerful, practical, and very much shaped by the people who
-                  walk through our doors.
+                  We are the Mountain of Fire and Miracles Ministries Campus Fellowship at the Federal University of Agriculture, Abeokuta. Our heartbeat is simple: walking in Christ's love, growing deep in the scriptures, and seeing God's miraculous power transform students into carriers of His light.
                 </p>
               </div>
               <ButtonLink href="/contact">Come and see</ButtonLink>
@@ -103,22 +96,22 @@ function About() {
             <Reveal>
               <Value
                 n="01"
-                title="Presence over polish"
-                body="We make space for real worship, real questions, and real people. No performance required."
+                title="Family of Love"
+                body="We look out for one another in lectures, hostels, and beyond. We check on you, pray with you, and share laughter and honest encouragement through every semester."
               />
             </Reveal>
             <Reveal delay={120}>
               <Value
                 n="02"
-                title="Love with sleeves rolled up"
-                body="Our faith shows up in check-ins, shared meals, study support, and prayers that keep going."
+                title="Rooted in the Word"
+                body="God's Word is our anchor. Through teaching and personal study, we discover practical wisdom that strengthens our faith and guides our career ambitions."
               />
             </Reveal>
             <Reveal delay={240}>
               <Value
                 n="03"
-                title="Growing on purpose"
-                body="Through the Word and one another, we are becoming students who carry light beyond campus."
+                title="Walking in Power"
+                body="Prayer changes things. We believe in the active power of the Holy Spirit to bring peace, overcome pressure, and help every student fulfill their divine destiny."
               />
             </Reveal>
           </div>
@@ -131,8 +124,8 @@ function About() {
 function Stat({ number, label }: { number: string; label: string }) {
   return (
     <div className="border-t border-[hsl(var(--foreground)/.2)] pt-4">
-      <p className="display-font text-4xl text-[hsl(var(--primary))]">{number}</p>
-      <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">{label}</p>
+      <p className="display-font text-3xl sm:text-4xl text-[hsl(var(--primary))] font-bold">{number}</p>
+      <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))] leading-snug">{label}</p>
     </div>
   );
 }

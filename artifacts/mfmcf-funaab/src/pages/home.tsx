@@ -39,9 +39,14 @@ const HERO_PHRASES = [
     badge: "FELLOWSHIP ON CAMPUS",
   },
   {
+    line1: "Family of Love,",
+    line2: "Word & Power",
+    badge: "OUR MOTTO",
+  },
+  {
     line1: "Sincerely we",
     line2: "Love you",
-    badge: "FAMILY OF LOVE",
+    badge: "A HOME FOR EVERYONE",
   },
 ];
 
@@ -144,7 +149,7 @@ function HeroHeadline() {
 
       <h1
         className="display-font text-[2.75rem] leading-[0.92] tracking-[-0.045em] sm:text-7xl lg:text-[7.2rem] select-none"
-        aria-label="MFMCF FUNAAB — Sincerely we Love you"
+        aria-label="MFMCF FUNAAB, Sincerely we Love you"
       >
         <span className="block text-white">
           {displayedLine1 || "\u00A0"}
@@ -403,7 +408,7 @@ function Home() {
             </Eyebrow>
             <HeroHeadline />
             <p className="mt-8 max-w-md text-lg leading-7 text-white/75">
-              A warm, growing fellowship for students at FUNAAB — where faith
+              A warm, growing fellowship for students at FUNAAB, where faith
               gets practical and no one has to walk campus alone.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -471,7 +476,7 @@ function Home() {
               </Eyebrow>
               <p className="mt-1 font-semibold">Word · Worship · Welcome</p>
               <p className="mt-1 text-xs text-white/60">
-                New Lecture Theatre · 9:00 AM
+                Fellowship Auditorium · 9:00 AM
               </p>
             </motion.div>
           </div>
@@ -480,10 +485,10 @@ function Home() {
       <Marquee
         items={[
           "Family of Love",
-          "Word",
-          "Worship",
-          "Welcome",
+          "Word and Power",
           "Prayer",
+          "Worship",
+          "Fellowship",
           "Community",
           "FUNAAB Campus",
         ]}
@@ -514,7 +519,7 @@ function Home() {
               </span>
               <p className="text-2xl leading-snug text-[hsl(var(--foreground))] sm:text-3xl">
               “Family of Love” is not a line on a banner. It is how we choose
-              to show up — with open seats, honest questions, loud worship,
+              to show up, with open seats, honest questions, deep prayer,
               and the kind of care that remembers your exam timetable.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -655,7 +660,7 @@ function Home() {
                 You do not have to have it all together before you belong.
               </p>
               <p className="mt-8 text-sm text-white/55">
-                — A note from one of our family meetings
+                A shared truth from our family gatherings
               </p>
             </div>
           </Reveal>

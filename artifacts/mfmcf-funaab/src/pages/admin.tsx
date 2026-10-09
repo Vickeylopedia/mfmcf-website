@@ -471,7 +471,7 @@ function SermonsAdmin() {
               className={`${inputClass} file:mr-3 file:border-0 file:bg-[hsl(var(--secondary))] file:px-3 file:py-1.5 file:text-xs file:font-bold`}
               onChange={(e) => setArtwork(e.target.files?.[0] ?? null)}
             />
-            <FileHint file={artwork} hint="jpg, png, webp or gif — square works best" />
+            <FileHint file={artwork} hint="jpg, png, webp or gif (square works best)" />
           </Field>
           <Field label="Audio file">
             <input
@@ -480,7 +480,7 @@ function SermonsAdmin() {
               className={`${inputClass} file:mr-3 file:border-0 file:bg-[hsl(var(--secondary))] file:px-3 file:py-1.5 file:text-xs file:font-bold`}
               onChange={(e) => setAudio(e.target.files?.[0] ?? null)}
             />
-            <FileHint file={audio} hint="mp3, m4a, aac, ogg or wav — up to 60MB" />
+            <FileHint file={audio} hint="mp3, m4a, aac, ogg or wav (up to 60MB)" />
           </Field>
           <FormError message={error} />
           {uploadProgress !== null && (

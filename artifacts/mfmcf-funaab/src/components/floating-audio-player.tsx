@@ -112,7 +112,7 @@ export function FloatingAudioPlayer() {
             whileTap={{ scale: 0.94 }}
             exit={{ scale: 0.7, opacity: 0 }}
             className="group relative flex size-15 sm:size-16 items-center justify-center rounded-full border-2 border-[hsl(var(--accent))] bg-[hsl(var(--foreground)/.85)] p-1 text-white shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300"
-            title={`Now playing: ${track.title} — Tap to expand controls`}
+            title={`Now playing: ${track.title} | Tap to expand controls`}
             aria-label="Open mini sermon player"
           >
             {/* Pulsing Accent Glow Ring */}

@@ -50,6 +50,21 @@ export function ScrollToTop() {
 export function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 45);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close menu on location change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
 
   // Close menu on Escape key press
   useEffect(() => {
@@ -63,84 +78,201 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-[100dvh] overflow-x-clip">
-      <header className="fixed inset-x-0 top-2 z-40 px-3 lg:top-3 lg:px-6">
-        <div className="mx-auto max-w-[1380px]">
-          <div className="flex items-center justify-between border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-4 py-3 sm:px-8 shadow-[4px_4px_0px_hsl(var(--foreground))]">
-            <Link
-              href="/"
-              data-testid="link-logo-home"
-              className="group flex items-center gap-3"
-            >
-              <span className="relative flex size-11 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition-transform group-hover:-rotate-3">
-                <img
-                  src={logo}
-                  alt="MFMCF FUNAAB logo"
-                  className="size-10 object-contain"
-                  data-testid="img-header-logo"
-                />
-              </span>
-              <span className="hidden leading-none sm:block">
-                <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
-                  MFMCF
-                </span>
-                <span className="mt-1 block text-[10px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.75)]">
-                  FUNAAB CHAPTER
-                </span>
-              </span>
-            </Link>
-            <nav
-              className="hidden items-center gap-1 lg:flex"
-              aria-label="Primary navigation"
-            >
-              {navItems.map((item) => (
+      <header className="fixed inset-x-0 top-2 z-40 px-3 lg:top-3 lg:px-6 pointer-events-none">
+        <div className="mx-auto max-w-[1380px] pointer-events-auto">
+          <AnimatePresence mode="wait">
+            {!isScrolled ? (
+              /* ── NORMAL FULL TOP BAR (AT TOP OF PAGE) ── */
+              <motion.div
+                key="header-normal"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.25 }}
+                className="flex items-center justify-between border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-4 py-3 sm:px-8 shadow-[4px_4px_0px_hsl(var(--foreground))]"
+              >
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                  className={`relative px-3.5 py-2 font-mono text-[11px] font-black uppercase tracking-[.14em] transition-colors hover:text-[hsl(var(--primary))] ${
-                    location === item.href
-                      ? "text-[hsl(var(--primary))] border-b-2 border-[hsl(var(--primary))]"
-                      : "text-[hsl(var(--foreground))]"
-                  }`}
+                  href="/"
+                  data-testid="link-logo-home"
+                  className="group flex items-center gap-3"
                 >
-                  {item.label}
+                  <span className="relative flex size-11 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition-transform group-hover:-rotate-3">
+                    <img
+                      src={logo}
+                      alt="MFMCF FUNAAB logo"
+                      className="size-10 object-contain"
+                      data-testid="img-header-logo"
+                    />
+                  </span>
+                  <span className="hidden leading-none sm:block">
+                    <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
+                      MFMCF
+                    </span>
+                    <span className="mt-1 block text-[10px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.75)]">
+                      FUNAAB CHAPTER
+                    </span>
+                  </span>
                 </Link>
-              ))}
-            </nav>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/contact"
-                data-testid="link-header-connect"
-                className="hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-5 py-2 text-xs font-black tracking-[.12em] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:block"
+                <nav
+                  className="hidden items-center gap-1 lg:flex"
+                  aria-label="Primary navigation"
+                >
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
+                      className={`relative px-3.5 py-2 font-mono text-[11px] font-black uppercase tracking-[.14em] transition-colors hover:text-[hsl(var(--primary))] ${
+                        location === item.href
+                          ? "text-[hsl(var(--primary))] border-b-2 border-[hsl(var(--primary))]"
+                          : "text-[hsl(var(--foreground))]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/contact"
+                    data-testid="link-header-connect"
+                    className="hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-5 py-2 text-xs font-black tracking-[.12em] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:block"
+                  >
+                    CONNECT <span aria-hidden="true">→</span>
+                  </Link>
+                  <button
+                    type="button"
+                    aria-label={menuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={menuOpen}
+                    data-testid="button-mobile-menu"
+                    onClick={() => setMenuOpen((open) => !open)}
+                    className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] lg:hidden cursor-pointer"
+                  >
+                    {menuOpen ? (
+                      <X className="size-5" />
+                    ) : (
+                      <Menu className="size-5" />
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            ) : !menuOpen ? (
+              /* ── MINIMIZED FLOATING DOCK (SCROLLED AWAY FROM TOP) ── */
+              <motion.div
+                key="header-minimized"
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                className="mx-auto w-fit border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-3.5 py-2 shadow-[4px_4px_0px_hsl(var(--foreground))]"
               >
-                CONNECT <span aria-hidden="true">→</span>
-              </Link>
-              <button
-                type="button"
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={menuOpen}
-                data-testid="button-mobile-menu"
-                onClick={() => setMenuOpen((open) => !open)}
-                className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] lg:hidden"
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/"
+                    data-testid="link-logo-minimized"
+                    className="group flex items-center gap-2"
+                  >
+                    <span className="relative flex size-9 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[1px_1px_0px_hsl(var(--foreground))] transition-transform group-hover:-rotate-3">
+                      <img
+                        src={logo}
+                        alt="MFMCF FUNAAB logo"
+                        className="size-8 object-contain"
+                      />
+                    </span>
+                    <span className="font-mono text-xs font-black tracking-widest text-[hsl(var(--primary))] hidden sm:inline">
+                      MFMCF
+                    </span>
+                  </Link>
+                  <div className="h-5 w-[1.5px] bg-[hsl(var(--foreground)/.2)]" />
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen(true)}
+                    aria-label="Open menu"
+                    className="inline-flex items-center gap-1.5 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-3 py-1 font-mono text-[11px] font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white active:translate-y-0.5 cursor-pointer"
+                  >
+                    <Menu className="size-3.5" />
+                    <span>Menu</span>
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              /* ── MAXIMIZED ANIMATED CONTAINER (WHEN MINIMIZED MENU IS CLICKED) ── */
+              <motion.div
+                key="header-maximized"
+                initial={{ opacity: 0, y: -12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                className="mx-auto max-w-[820px] w-full border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 sm:p-6 shadow-[6px_6px_0px_hsl(var(--foreground))]"
               >
-                {menuOpen ? (
-                  <X className="size-5" />
-                ) : (
-                  <Menu className="size-5" />
-                )}
-              </button>
-            </div>
-          </div>
+                <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.15)] pb-3">
+                  <Link
+                    href="/"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3"
+                  >
+                    <span className="flex size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))]">
+                      <img src={logo} alt="MFMCF logo" className="size-9 object-contain" />
+                    </span>
+                    <div>
+                      <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
+                        MFMCF FUNAAB
+                      </span>
+                      <span className="block font-mono text-[9px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.7)]">
+                        FAMILY OF LOVE, WORD AND POWER
+                      </span>
+                    </div>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen(false)}
+                    aria-label="Close menu"
+                    className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] cursor-pointer"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+                <nav className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Maximized navigation">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`flex items-center justify-between border border-[hsl(var(--foreground)/.18)] p-3 font-mono text-xs font-black uppercase tracking-wider transition hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] ${
+                        location === item.href
+                          ? "bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]"
+                          : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ArrowUpRight className="size-3.5" />
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--foreground)/.12)] pt-3">
+                  <Link
+                    href="/contact"
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full text-center border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] py-2.5 font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
+                  >
+                    Connect with us <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Regular Mobile dropdown when at the top and hamburger is open */}
         <AnimatePresence>
-          {menuOpen && (
+          {!isScrolled && menuOpen && (
             <motion.nav
-              key="mobile-nav-panel"
+              key="mobile-nav-panel-top"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-              className="mx-auto mt-2 max-w-[1380px] rounded-none border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-3 shadow-[4px_4px_0px_hsl(var(--foreground))] lg:hidden"
+              className="mx-auto mt-2 max-w-[1380px] pointer-events-auto rounded-none border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-3 shadow-[4px_4px_0px_hsl(var(--foreground))] lg:hidden"
               aria-label="Mobile navigation"
             >
               {navItems.map((item, index) => (
@@ -245,7 +377,7 @@ function Footer() {
         </div>
         <div className="flex flex-col justify-between gap-4 pt-6 text-xs text-white/45 sm:flex-row sm:items-center">
           <div className="flex flex-wrap items-center gap-3">
-            <p>© 2026 MFMCF FUNAAB. Family of Love.</p>
+            <p>© 2026 MFMCF FUNAAB. Family of Love, Word and Power.</p>
             <span className="hidden sm:inline text-white/20">•</span>
             <Link
               href="/admin"

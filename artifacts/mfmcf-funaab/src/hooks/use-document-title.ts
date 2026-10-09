@@ -10,9 +10,9 @@ export function useDocumentTitle(title?: string) {
   useEffect(() => {
     const previousTitle = document.title;
     if (title) {
-      document.title = `${title} — ${SITE_TITLE_SUFFIX}`;
+      document.title = `${title} | ${SITE_TITLE_SUFFIX}`;
     } else {
-      document.title = `${SITE_TITLE_SUFFIX} — Family of Love`;
+      document.title = `${SITE_TITLE_SUFFIX} | Family of Love, Word and Power`;
     }
     return () => {
       document.title = previousTitle;

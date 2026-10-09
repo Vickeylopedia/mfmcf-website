@@ -57,7 +57,7 @@ function Contact() {
                   title="Find us"
                   body={
                     <>
-                      New Lecture Theatre
+                      Fellowship Auditorium
                       <br />
                       Federal University of Agriculture, Abeokuta
                     </>
@@ -205,7 +205,7 @@ function Contact() {
                   Fellowship location on campus.
                 </h2>
                 <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-                  Federal University of Agriculture, Abeokuta (FUNAAB) · New Lecture Theatre &amp; Chapel Grounds
+                  Federal University of Agriculture, Abeokuta (FUNAAB) · Fellowship Auditorium &amp; Chapel Grounds
                 </p>
               </div>
               <a

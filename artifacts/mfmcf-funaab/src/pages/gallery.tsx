@@ -38,9 +38,9 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
     tag: "Sunday Service",
     category: "Worship",
     title: "Sunday Praise & Worship",
-    desc: "Sundays at the New Lecture Theatre are full of joy, energetic praise, and heartfelt worship as we start each week together.",
+    desc: "Sundays at the Fellowship Auditorium are full of joy, energetic praise, and heartfelt worship as we start each week together.",
     time: "Sundays · 9:00 AM",
-    venue: "New Lecture Theatre (NLT)",
+    venue: "Fellowship Auditorium",
     image: photos.sundayPraise,
   },
   {
@@ -73,7 +73,7 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
     title: "Learning God's Word",
     desc: "Practical teachings from the scriptures that help you grow in faith and make wise choices in your studies and career.",
     time: "Every Meeting",
-    venue: "New Lecture Theatre",
+    venue: "Fellowship Auditorium",
     image: photos.preachingWord,
   },
   {
