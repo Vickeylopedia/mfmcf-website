@@ -49,7 +49,7 @@ export const fallbackNews: NewsView[] = [
     iso: "2026-05-22",
     tag: "Welcome",
     body: "Whether it is your first Sunday or your fiftieth, there is an open seat and a familiar face waiting at the Fellowship Auditorium.",
-    full: "Doors open from 8:30 AM, and the welcome team will be outside to walk you in if it is your first time. Come as you are, whether jeans, hostel wear, or Sunday best, nobody is keeping score. After the service, stay back for a few minutes so we can meet you properly. That is the whole point of family.",
+    full: "Doors open from 7:00 AM, and the welcome team will be outside to walk you in if it is your first time. Come as you are, whether jeans, hostel wear, or Sunday best, nobody is keeping score. After the service, stay back for a few minutes so we can meet you properly. That is the whole point of family.",
     artwork: null,
   },
   {

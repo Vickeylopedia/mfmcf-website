@@ -39,7 +39,7 @@ const HERO_SPOTLIGHTS: SpotlightItem[] = [
     category: "Worship",
     title: "Sunday Praise & Worship",
     desc: "Sundays at the Fellowship Auditorium are full of joy, energetic praise, and heartfelt worship as we start each week together.",
-    time: "Sundays · 9:00 AM",
+    time: "Sundays · 7:30 AM",
     venue: "Fellowship Auditorium",
     image: photos.sundayPraise,
   },

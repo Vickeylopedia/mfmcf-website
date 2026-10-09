@@ -476,7 +476,7 @@ function Home() {
               </Eyebrow>
               <p className="mt-1 font-semibold">Word · Worship · Welcome</p>
               <p className="mt-1 text-xs text-white/60">
-                Fellowship Auditorium · 9:00 AM
+                Fellowship Auditorium · 7:30 AM
               </p>
             </motion.div>
           </div>

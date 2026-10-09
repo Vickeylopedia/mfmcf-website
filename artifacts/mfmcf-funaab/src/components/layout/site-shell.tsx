@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -47,6 +47,14 @@ export function ScrollToTop() {
   return null;
 }
 
+type HeaderBoxState =
+  | "expanded"
+  | "shrinking-width"
+  | "shrinking-square"
+  | "minimized"
+  | "emerging-square"
+  | "lengthening-width";
+
 export function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,224 +84,312 @@ export function Shell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [menuOpen]);
 
+  const isExpandedTarget = !isScrolled || menuOpen;
+  const [boxState, setBoxState] = useState<HeaderBoxState>(() =>
+    typeof window !== "undefined" && window.scrollY > 45 ? "minimized" : "expanded"
+  );
+  const animTimeouts = useRef<number[]>([]);
+  const isFirstMount = useRef(true);
+
+  const clearTimeouts = () => {
+    animTimeouts.current.forEach((t) => window.clearTimeout(t));
+    animTimeouts.current = [];
+  };
+
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
+    clearTimeouts();
+
+    if (!isExpandedTarget) {
+      // ── MINIMIZING ANIMATION ──
+      // 1. Shrink width ONLY from the menu side to the logo
+      setBoxState("shrinking-width");
+
+      const t1 = window.setTimeout(() => {
+        // 2. When it forms a perfect square (68px) around the logo,
+        // shrink all sides at the same time to the back of the logo till invisible
+        setBoxState("shrinking-square");
+
+        const t2 = window.setTimeout(() => {
+          setBoxState("minimized");
+        }, 220);
+        animTimeouts.current.push(t2);
+      }, 380);
+      animTimeouts.current.push(t1);
+    } else {
+      // ── MAXIMIZING ANIMATION ──
+      if (boxState === "shrinking-width") {
+        // If it was only partially shrinking its width, lengthen back to full
+        setBoxState("lengthening-width");
+        const t = window.setTimeout(() => {
+          setBoxState("expanded");
+        }, 380);
+        animTimeouts.current.push(t);
+      } else {
+        // 1. Come out from the back of the logo, forming the same square (68px)
+        setBoxState("emerging-square");
+
+        const t1 = window.setTimeout(() => {
+          // 2. Lengthen right side back to the menu side forming normal length
+          setBoxState("lengthening-width");
+
+          const t2 = window.setTimeout(() => {
+            setBoxState("expanded");
+          }, 380);
+          animTimeouts.current.push(t2);
+        }, 220);
+        animTimeouts.current.push(t1);
+      }
+    }
+
+    return clearTimeouts;
+  }, [isExpandedTarget]);
+
+  const getBoxStyle = (state: HeaderBoxState): CSSProperties => {
+    const base: CSSProperties = {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      height: "68px",
+      transformOrigin: "34px 34px",
+      boxSizing: "border-box",
+    };
+
+    switch (state) {
+      case "expanded":
+        return {
+          ...base,
+          width: "100%",
+          transform: "scale(1)",
+          opacity: 1,
+        };
+      case "shrinking-width":
+        return {
+          ...base,
+          width: "68px",
+          transform: "scale(1)",
+          opacity: 1,
+          transition: "width 380ms cubic-bezier(0.4, 0, 0.2, 1)",
+        };
+      case "shrinking-square":
+        return {
+          ...base,
+          width: "68px",
+          transform: "scale(0)",
+          opacity: 0,
+          transition:
+            "transform 220ms cubic-bezier(0.4, 0, 0.2, 1), opacity 220ms ease",
+        };
+      case "minimized":
+        return {
+          ...base,
+          width: "68px",
+          transform: "scale(0)",
+          opacity: 0,
+          pointerEvents: "none",
+        };
+      case "emerging-square":
+        return {
+          ...base,
+          width: "68px",
+          transform: "scale(1)",
+          opacity: 1,
+          transition:
+            "transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease",
+        };
+      case "lengthening-width":
+        return {
+          ...base,
+          width: "100%",
+          transform: "scale(1)",
+          opacity: 1,
+          transition: "width 380ms cubic-bezier(0.16, 1, 0.3, 1)",
+        };
+    }
+  };
+
   return (
     <div className="min-h-[100dvh] overflow-x-clip">
       <header className="fixed inset-x-0 top-2 z-40 px-3 lg:top-3 lg:px-6 pointer-events-none">
-        <div className="mx-auto max-w-[1380px] pointer-events-auto">
-          <AnimatePresence mode="wait">
-            {!isScrolled ? (
-              /* ── NORMAL FULL TOP BAR (AT TOP OF PAGE) ── */
-              <motion.div
-                key="header-normal"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.25 }}
-                className="flex items-center justify-between border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-4 py-3 sm:px-8 shadow-[4px_4px_0px_hsl(var(--foreground))]"
-              >
+        <div className="mx-auto max-w-[1380px] pointer-events-auto relative h-[68px]">
+          {/* ── 1. ANIMATED HEADER BOX (SHRINKS MENU->LOGO SQUARE, THEN INTO BACK OF LOGO) ── */}
+          <div
+            aria-hidden="true"
+            style={getBoxStyle(boxState)}
+            className="border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] shadow-[4px_4px_0px_hsl(var(--foreground))]"
+          />
+
+          {/* ── 2. LOGO (PINNED AT FAR LEFT IN NORMAL POSITION, NEVER MOVES TO MIDDLE) ── */}
+          <div className="absolute left-0 top-0 h-[68px] w-[68px] z-20 flex items-center justify-center">
+            <Link
+              href="/"
+              data-testid="link-logo-home"
+              className="group flex size-11 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition-transform hover:-rotate-3 active:scale-95"
+            >
+              <img
+                src={logo}
+                alt="MFMCF FUNAAB logo"
+                className="size-10 object-contain"
+                data-testid="img-header-logo"
+              />
+            </Link>
+          </div>
+
+          {/* ── 3. LOGO TEXT BRANDING (FADES OUT WHEN MINIMIZING) ── */}
+          <div
+            className={`absolute left-[70px] top-0 h-[68px] z-20 hidden sm:flex flex-col justify-center leading-none transition-opacity duration-200 ${
+              isExpandedTarget && boxState === "expanded"
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <Link href="/" className="group">
+              <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
+                MFMCF
+              </span>
+              <span className="mt-1 block text-[10px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.75)]">
+                FUNAAB CHAPTER
+              </span>
+            </Link>
+          </div>
+
+          {/* ── 4. DESKTOP NAV LINKS (CENTERED, FADES OUT WHEN MINIMIZING) ── */}
+          <div
+            className={`absolute inset-x-[220px] top-0 h-[68px] z-20 hidden lg:flex items-center justify-center transition-opacity duration-200 ${
+              isExpandedTarget && boxState === "expanded"
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <nav className="flex items-center gap-1" aria-label="Primary navigation">
+              {navItems.map((item) => (
                 <Link
-                  href="/"
-                  data-testid="link-logo-home"
-                  className="group flex items-center gap-3"
+                  key={item.href}
+                  href={item.href}
+                  data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
+                  className={`relative px-3.5 py-2 font-mono text-[11px] font-black uppercase tracking-[.14em] transition-colors hover:text-[hsl(var(--primary))] ${
+                    location === item.href
+                      ? "text-[hsl(var(--primary))] border-b-2 border-[hsl(var(--primary))]"
+                      : "text-[hsl(var(--foreground))]"
+                  }`}
                 >
-                  <span className="relative flex size-11 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))] transition-transform group-hover:-rotate-3">
-                    <img
-                      src={logo}
-                      alt="MFMCF FUNAAB logo"
-                      className="size-10 object-contain"
-                      data-testid="img-header-logo"
-                    />
-                  </span>
-                  <span className="hidden leading-none sm:block">
-                    <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
-                      MFMCF
-                    </span>
-                    <span className="mt-1 block text-[10px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.75)]">
-                      FUNAAB CHAPTER
-                    </span>
-                  </span>
+                  {item.label}
                 </Link>
-                <nav
-                  className="hidden items-center gap-1 lg:flex"
-                  aria-label="Primary navigation"
-                >
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      data-testid={`link-nav-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                      className={`relative px-3.5 py-2 font-mono text-[11px] font-black uppercase tracking-[.14em] transition-colors hover:text-[hsl(var(--primary))] ${
-                        location === item.href
-                          ? "text-[hsl(var(--primary))] border-b-2 border-[hsl(var(--primary))]"
-                          : "text-[hsl(var(--foreground))]"
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/contact"
-                    data-testid="link-header-connect"
-                    className="hidden border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-5 py-2 text-xs font-black tracking-[.12em] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:block"
-                  >
-                    CONNECT <span aria-hidden="true">→</span>
-                  </Link>
-                  <button
-                    type="button"
-                    aria-label={menuOpen ? "Close menu" : "Open menu"}
-                    aria-expanded={menuOpen}
-                    data-testid="button-mobile-menu"
-                    onClick={() => setMenuOpen((open) => !open)}
-                    className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] lg:hidden cursor-pointer"
-                  >
-                    {menuOpen ? (
-                      <X className="size-5" />
-                    ) : (
-                      <Menu className="size-5" />
-                    )}
-                  </button>
-                </div>
-              </motion.div>
-            ) : !menuOpen ? (
-              /* ── MINIMIZED FLOATING DOCK (SCROLLED AWAY FROM TOP) ── */
-              <motion.div
-                key="header-minimized"
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                className="mx-auto w-fit border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] px-3.5 py-2 shadow-[4px_4px_0px_hsl(var(--foreground))]"
-              >
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/"
-                    data-testid="link-logo-minimized"
-                    className="group flex items-center gap-2"
-                  >
-                    <span className="relative flex size-9 items-center justify-center overflow-hidden border-2 border-[hsl(var(--foreground))] bg-white shadow-[1px_1px_0px_hsl(var(--foreground))] transition-transform group-hover:-rotate-3">
-                      <img
-                        src={logo}
-                        alt="MFMCF FUNAAB logo"
-                        className="size-8 object-contain"
-                      />
-                    </span>
-                    <span className="font-mono text-xs font-black tracking-widest text-[hsl(var(--primary))] hidden sm:inline">
-                      MFMCF
-                    </span>
-                  </Link>
-                  <div className="h-5 w-[1.5px] bg-[hsl(var(--foreground)/.2)]" />
-                  <button
-                    type="button"
-                    onClick={() => setMenuOpen(true)}
-                    aria-label="Open menu"
-                    className="inline-flex items-center gap-1.5 border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-3 py-1 font-mono text-[11px] font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white active:translate-y-0.5 cursor-pointer"
-                  >
-                    <Menu className="size-3.5" />
-                    <span>Menu</span>
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              /* ── MAXIMIZED ANIMATED CONTAINER (WHEN MINIMIZED MENU IS CLICKED) ── */
-              <motion.div
-                key="header-maximized"
-                initial={{ opacity: 0, y: -12, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -12, scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                className="mx-auto max-w-[820px] w-full border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 sm:p-6 shadow-[6px_6px_0px_hsl(var(--foreground))]"
-              >
-                <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.15)] pb-3">
-                  <Link
-                    href="/"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="flex size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))]">
-                      <img src={logo} alt="MFMCF logo" className="size-9 object-contain" />
-                    </span>
-                    <div>
-                      <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
-                        MFMCF FUNAAB
-                      </span>
-                      <span className="block font-mono text-[9px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.7)]">
-                        FAMILY OF LOVE, WORD AND POWER
-                      </span>
-                    </div>
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setMenuOpen(false)}
-                    aria-label="Close menu"
-                    className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] cursor-pointer"
-                  >
-                    <X className="size-4" />
-                  </button>
-                </div>
-                <nav className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Maximized navigation">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      className={`flex items-center justify-between border border-[hsl(var(--foreground)/.18)] p-3 font-mono text-xs font-black uppercase tracking-wider transition hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] ${
-                        location === item.href
-                          ? "bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]"
-                          : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
-                      }`}
-                    >
-                      <span>{item.label}</span>
-                      <ArrowUpRight className="size-3.5" />
-                    </Link>
-                  ))}
-                </nav>
-                <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--foreground)/.12)] pt-3">
-                  <Link
-                    href="/contact"
-                    onClick={() => setMenuOpen(false)}
-                    className="w-full text-center border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] py-2.5 font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
-                  >
-                    Connect with us <span aria-hidden="true">→</span>
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              ))}
+            </nav>
+          </div>
+
+          {/* ── 5. RIGHT SIDE ACTIONS: CONNECT BUTTON & PINNED MENU BUTTON ── */}
+          <div className="absolute right-0 top-0 h-[68px] z-20 flex items-center pr-2 sm:pr-4 gap-2.5">
+            <Link
+              href="/contact"
+              data-testid="link-header-connect"
+              className={`hidden sm:inline-flex border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-4 py-2 text-xs font-black tracking-[.12em] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-opacity duration-200 ${
+                isExpandedTarget && boxState === "expanded"
+                  ? "opacity-100"
+                  : "opacity-0 pointer-events-none"
+              }`}
+            >
+              CONNECT <span aria-hidden="true">→</span>
+            </Link>
+
+            {/* Menu button pinned at far right in normal position */}
+            <button
+              type="button"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              data-testid="button-site-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+              className="border-2 border-[hsl(var(--foreground))] bg-white px-3 py-2 text-xs font-black uppercase tracking-wider text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] active:translate-y-0.5 cursor-pointer flex items-center gap-1.5"
+            >
+              {menuOpen ? (
+                <X className="size-4 text-[hsl(var(--primary))]" />
+              ) : (
+                <Menu className="size-4" />
+              )}
+              <span className="font-mono text-xs font-black tracking-wider uppercase">
+                {menuOpen ? "Close" : "Menu"}
+              </span>
+            </button>
+          </div>
         </div>
 
-        {/* Regular Mobile dropdown when at the top and hamburger is open */}
+        {/* ── 6. NAVIGATION DRAWER (OPENS WHEN MENU IS CLICKED) ── */}
         <AnimatePresence>
-          {!isScrolled && menuOpen && (
-            <motion.nav
-              key="mobile-nav-panel-top"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-              className="mx-auto mt-2 max-w-[1380px] pointer-events-auto rounded-none border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-3 shadow-[4px_4px_0px_hsl(var(--foreground))] lg:hidden"
-              aria-label="Mobile navigation"
+          {menuOpen && (
+            <motion.div
+              key="site-nav-drawer"
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto mt-2 max-w-[1380px] pointer-events-auto border-2 border-[hsl(var(--foreground))] border-t-4 border-t-[hsl(var(--accent))] bg-[hsl(var(--card))] p-4 sm:p-6 shadow-[6px_6px_0px_hsl(var(--foreground))]"
             >
-              {navItems.map((item, index) => (
-                <motion.div
-                  key={item.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.03, duration: 0.15 }}
+              <div className="flex items-center justify-between border-b border-[hsl(var(--foreground)/.15)] pb-3">
+                <Link
+                  href="/"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3"
                 >
+                  <span className="flex size-10 items-center justify-center border-2 border-[hsl(var(--foreground))] bg-white shadow-[2px_2px_0px_hsl(var(--foreground))]">
+                    <img src={logo} alt="MFMCF logo" className="size-9 object-contain" />
+                  </span>
+                  <div>
+                    <span className="block text-sm font-black tracking-[.18em] text-[hsl(var(--primary))]">
+                      MFMCF FUNAAB
+                    </span>
+                    <span className="block font-mono text-[9px] font-bold tracking-[.14em] text-[hsl(var(--foreground)/.7)]">
+                      FAMILY OF LOVE, WORD AND POWER
+                    </span>
+                  </div>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Close menu"
+                  className="border-2 border-[hsl(var(--foreground))] bg-white p-2 text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-[hsl(var(--accent))] cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              <nav className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" aria-label="Expanded menu navigation">
+                {navItems.map((item) => (
                   <Link
+                    key={item.href}
                     href={item.href}
                     onClick={() => setMenuOpen(false)}
-                    data-testid={`link-mobile-${item.label.toLowerCase().replaceAll(" ", "-")}`}
-                    className="flex items-center justify-between rounded-none border-b border-[hsl(var(--foreground)/.1)] px-4 py-3 font-mono text-sm font-bold uppercase tracking-wider transition-colors hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] sm:px-5"
+                    data-testid={`link-drawer-${item.label.toLowerCase().replaceAll(" ", "-")}`}
+                    className={`flex items-center justify-between border border-[hsl(var(--foreground)/.18)] p-3 font-mono text-xs font-black uppercase tracking-wider transition hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--foreground))] ${
+                      location === item.href
+                        ? "bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]"
+                        : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))]"
+                    }`}
                   >
-                    {item.label}
-                    <ArrowUpRight className="size-4 text-[hsl(var(--primary))]" />
+                    <span>{item.label}</span>
+                    <ArrowUpRight className="size-3.5" />
                   </Link>
-                </motion.div>
-              ))}
-            </motion.nav>
+                ))}
+              </nav>
+
+              <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[hsl(var(--foreground)/.12)] pt-4">
+                <p className="font-mono text-[11px] text-[hsl(var(--muted-foreground))]">
+                  Federal University of Agriculture, Abeokuta
+                </p>
+                <Link
+                  href="/contact"
+                  onClick={() => setMenuOpen(false)}
+                  data-testid="link-drawer-connect"
+                  className="w-full sm:w-auto text-center border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] px-6 py-2.5 font-mono text-xs font-black uppercase tracking-widest text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))] transition hover:bg-white"
+                >
+                  Connect with us <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </header>

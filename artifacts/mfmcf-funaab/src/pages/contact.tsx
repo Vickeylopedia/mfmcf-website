@@ -68,7 +68,7 @@ function Contact() {
                   title="Gather with us"
                   body={
                     <>
-                      Sundays at 9:00 AM
+                      Sundays at 7:30 AM
                       <br />
                       Wednesdays at 5:00 PM
                     </>

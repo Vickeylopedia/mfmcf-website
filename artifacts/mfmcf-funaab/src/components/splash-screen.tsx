@@ -55,25 +55,44 @@ export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
           role="dialog"
           aria-label="Welcome to MFMCF FUNAAB"
         >
-          {/* Subtle Corner Ambient Stylization (Far from text area) */}
+          {/* ── SUBTLE INTERSECTING ARCHITECTURAL GRID LINES (TINY DARK LINES) ── */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-gradient-to-br from-[hsl(var(--accent)/.12)] to-[hsl(var(--primary)/.06)] blur-3xl"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-32 -left-32 size-96 rounded-full bg-gradient-to-tr from-[hsl(var(--primary)/.08)] to-[hsl(var(--accent)/.05)] blur-3xl"
-          />
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+          >
+            {/* Vertical lines */}
+            <div className="absolute top-0 bottom-0 left-[12%] sm:left-[16%] w-[1px] bg-black/[0.06]" />
+            <div className="absolute top-0 bottom-0 left-[34%] w-[1px] bg-black/[0.04]" />
+            <div className="absolute top-0 bottom-0 right-[34%] w-[1px] bg-black/[0.04]" />
+            <div className="absolute top-0 bottom-0 right-[12%] sm:right-[16%] w-[1px] bg-black/[0.06]" />
 
-          {/* ── TOP EDITORIAL HEADER BAR ── */}
-          <div className="relative z-10 w-full flex items-center justify-between border-b border-[hsl(var(--foreground)/.1)] pb-4">
-            <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--muted-foreground))] font-bold">
-              MFMCF · FUNAAB CHAPTER
+            {/* Horizontal lines */}
+            <div className="absolute left-0 right-0 top-[15%] sm:top-[18%] h-[1px] bg-black/[0.06]" />
+            <div className="absolute left-0 right-0 top-[38%] h-[1px] bg-black/[0.04]" />
+            <div className="absolute left-0 right-0 bottom-[38%] h-[1px] bg-black/[0.04]" />
+            <div className="absolute left-0 right-0 bottom-[15%] sm:bottom-[18%] h-[1px] bg-black/[0.06]" />
+
+            {/* Subtle intersection cross markers */}
+            <span className="absolute left-[12%] sm:left-[16%] top-[15%] sm:top-[18%] -translate-x-1/2 -translate-y-1/2 font-mono text-[9px] text-black/25">
+              +
             </span>
-            <span className="font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--accent))] font-bold">
-              EST. 1999
+            <span className="absolute right-[12%] sm:right-[16%] top-[15%] sm:top-[18%] translate-x-1/2 -translate-y-1/2 font-mono text-[9px] text-black/25">
+              +
             </span>
+            <span className="absolute left-[12%] sm:left-[16%] bottom-[15%] sm:bottom-[18%] -translate-x-1/2 translate-y-1/2 font-mono text-[9px] text-black/25">
+              +
+            </span>
+            <span className="absolute right-[12%] sm:right-[16%] bottom-[15%] sm:bottom-[18%] translate-x-1/2 translate-y-1/2 font-mono text-[9px] text-black/25">
+              +
+            </span>
+
+            {/* Subtle Ambient Corner Glows (Distant from text) */}
+            <div className="absolute -top-32 -right-32 size-96 rounded-full bg-gradient-to-br from-[hsl(var(--accent)/.1)] to-[hsl(var(--primary)/.05)] blur-3xl" />
+            <div className="absolute -bottom-32 -left-32 size-96 rounded-full bg-gradient-to-tr from-[hsl(var(--primary)/.07)] to-[hsl(var(--accent)/.04)] blur-3xl" />
           </div>
+
+          {/* Top spacer (clean, top write-up removed as requested) */}
+          <div className="relative z-10 w-full h-4" />
 
           {/* ── CENTER EDITORIAL CONTENT ── */}
           <div className="relative z-10 my-auto flex flex-col items-center justify-center text-center">
@@ -99,7 +118,7 @@ export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
               className="h-[1.5px] bg-[hsl(var(--primary))] mb-5"
             />
 
-            {/* Main Title: Just "MFMCF FUNAAB" with smaller, sophisticated typography */}
+            {/* Main Title: Just "MFMCF FUNAAB" */}
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -109,14 +128,14 @@ export function SplashScreen({ minDuration = 4000 }: { minDuration?: number }) {
               MFMCF FUNAAB
             </motion.h1>
 
-            {/* Sub-label under title */}
+            {/* Sub-label under title: Mountain of fire and Miracle ministries */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="mt-2 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--muted-foreground))]"
+              className="mt-2.5 font-mono text-[9px] sm:text-[10.5px] uppercase tracking-[0.22em] text-[hsl(var(--muted-foreground))] font-semibold"
             >
-              Campus Christian Fellowship
+              Mountain of fire and Miracle ministries
             </motion.p>
 
             {/* ── ANIMATED THREE DOT LOADER ── */}
