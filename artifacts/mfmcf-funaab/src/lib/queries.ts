@@ -63,20 +63,21 @@ export function useSermons() {
   };
 }
 
-export const mapNews = (dto: NewsPostDto): NewsView => ({
-  id: dto.id,
-  title: dto.title,
-  date: dto.date,
-  iso: dto.iso,
-  tag: dto.tag,
-  body: dto.body,
-  full: dto.full,
-  artwork: dto.artworkUrl ? resolveMediaUrl(dto.artworkUrl) : null,
-  isAnnouncement:
-    (dto as any).isAnnouncement !== undefined
-      ? Boolean((dto as any).isAnnouncement)
-      : getAnnouncementIds().includes(dto.id),
-});
+export const mapNews = (dto: NewsPostDto): NewsView => {
+  const announcementIds = getAnnouncementIds();
+  return {
+    id: dto.id,
+    title: dto.title,
+    date: dto.date,
+    iso: dto.iso,
+    tag: dto.tag,
+    body: dto.body,
+    full: dto.full,
+    artwork: dto.artworkUrl ? resolveMediaUrl(dto.artworkUrl) : null,
+    isAnnouncement:
+      (dto as any).isAnnouncement === true || announcementIds.includes(dto.id),
+  };
+};
 
 export function useNews() {
   const { data, isLoading } = useQuery({

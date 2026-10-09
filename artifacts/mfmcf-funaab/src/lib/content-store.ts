@@ -384,6 +384,32 @@ export function toggleAnnouncementId(id: number): boolean {
   const exists = current.includes(id);
   const next = exists ? current.filter((x) => x !== id) : [...current, id];
   saveAnnouncementIds(next);
+
+  // Sync state into STORAGE_NEWS directly if it exists
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem(STORAGE_NEWS);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const updated = parsed.map((n: NewsView) => ({
+            ...n,
+            isAnnouncement: next.includes(n.id),
+          }));
+          localStorage.setItem(STORAGE_NEWS, JSON.stringify(updated));
+        }
+      }
+    } catch {}
+
+    // Dispatch global events for instant reactive UI updates across all components
+    try {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(
+        new CustomEvent("mfmcf-announcements-changed", { detail: next })
+      );
+    } catch {}
+  }
+
   return !exists;
 }
 
@@ -392,7 +418,7 @@ export function getLocalNews(): NewsView[] {
   if (typeof window === "undefined") {
     return fallbackNews.map((n) => ({
       ...n,
-      isAnnouncement: announcementIds.includes(n.id) || Boolean(n.isAnnouncement),
+      isAnnouncement: announcementIds.includes(n.id),
     }));
   }
   try {
@@ -402,10 +428,7 @@ export function getLocalNews(): NewsView[] {
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed.map((n: NewsView) => ({
           ...n,
-          isAnnouncement:
-            n.isAnnouncement !== undefined
-              ? n.isAnnouncement
-              : announcementIds.includes(n.id),
+          isAnnouncement: announcementIds.includes(n.id),
         }));
       }
     }
@@ -414,7 +437,7 @@ export function getLocalNews(): NewsView[] {
   }
   return fallbackNews.map((n) => ({
     ...n,
-    isAnnouncement: announcementIds.includes(n.id) || Boolean(n.isAnnouncement),
+    isAnnouncement: announcementIds.includes(n.id),
   }));
 }
 

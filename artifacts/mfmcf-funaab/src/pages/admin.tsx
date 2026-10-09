@@ -20,7 +20,7 @@ import {
 } from "@/lib/admin-api";
 import { useGallery, useNews, useSermons } from "@/lib/queries";
 import { withBase, resolveMediaUrl } from "@/lib/site";
-import { toggleAnnouncementId } from "@/lib/content-store";
+import { toggleAnnouncementId, getAnnouncementIds } from "@/lib/content-store";
 
 /**
  * Admin studio: password-gated content management for sermons, news, and
@@ -194,16 +194,16 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[hsl(var(--background))]">
-      <header className="border-b border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--foreground))] px-5 py-4 text-white lg:px-10">
-        <div className="mx-auto flex max-w-[1100px] items-center justify-between">
+    <div className="min-h-[100dvh] bg-[hsl(var(--background))] overflow-x-hidden">
+      <header className="border-b border-[hsl(var(--foreground)/.1)] bg-[hsl(var(--foreground))] px-4 py-3.5 text-white sm:px-6 lg:px-10">
+        <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-3">
           <div>
             <p className="mono-label text-[9px] text-[hsl(var(--accent))]">
               MFMCF FUNAAB
             </p>
-            <p className="display-font text-2xl leading-none">Admin studio</p>
+            <p className="display-font text-xl sm:text-2xl leading-none">Admin studio</p>
           </div>
-          <div className="flex items-center gap-4 text-xs font-bold">
+          <div className="flex items-center gap-3 text-xs font-bold">
             <Link
               href="/"
               className="flex items-center gap-1.5 text-white/70 transition hover:text-white"
@@ -216,22 +216,22 @@ function Admin() {
                 await logout();
                 session.refetch();
               }}
-              className="border border-white/25 px-3 py-2 transition hover:border-white hover:text-white text-white/70"
+              className="border border-white/25 px-2.5 py-1.5 sm:px-3 sm:py-2 transition hover:border-white hover:text-white text-white/70"
             >
               Sign out
             </button>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-[1100px] px-5 py-10 lg:px-10">
-        <div className="flex gap-2 border-b border-[hsl(var(--foreground)/.12)] pb-4">
+      <main className="mx-auto max-w-[1100px] px-3.5 py-6 sm:px-6 sm:py-10 lg:px-10">
+        <div className="flex flex-wrap gap-2 border-b border-[hsl(var(--foreground)/.12)] pb-4">
           {(["sermons", "news", "gallery"] as const).map((key) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`px-4 py-2 text-xs font-bold capitalize transition ${tab === key
-                  ? "bg-[hsl(var(--primary))] text-white"
+              className={`px-3.5 py-2 sm:px-4 sm:py-2 text-xs font-bold capitalize transition ${tab === key
+                  ? "bg-[hsl(var(--primary))] text-white shadow-sm"
                   : "border border-[hsl(var(--foreground)/.15)] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
                 }`}
             >
@@ -400,13 +400,13 @@ function SermonsAdmin() {
   }
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+    <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1fr]">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate();
         }}
-        className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-6 sm:p-8"
+        className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-4 sm:p-6 lg:p-8"
       >
         <Eyebrow>{editing !== null && editing >= 0 ? "Edit sermon" : "Add a sermon"}</Eyebrow>
         <div className="mt-6 space-y-5">
@@ -520,30 +520,34 @@ function SermonsAdmin() {
           {sermons.map((sermon) => (
             <div
               key={sermon.slug}
-              className="flex items-center gap-4 border-t border-[hsl(var(--foreground)/.12)] py-4"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[hsl(var(--foreground)/.12)] py-4"
             >
-              <div className="size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground)/.2)] bg-[hsl(var(--secondary))]">
-                <ThumbnailImage
-                  src={sermon.image}
-                  alt={sermon.title}
-                />
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="size-12 sm:size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground)/.2)] bg-[hsl(var(--secondary))]">
+                  <ThumbnailImage
+                    src={sermon.image}
+                    alt={sermon.title}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{sermon.title}</p>
+                  <p className="mono-label mt-0.5 text-[9px] normal-case tracking-normal text-[hsl(var(--muted-foreground))]">
+                    {sermon.date} · {sermon.audio ? "audio live" : "no audio yet"}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{sermon.title}</p>
-                <p className="mono-label mt-1 text-[9px] normal-case tracking-normal text-[hsl(var(--muted-foreground))]">
-                  {sermon.date} · {sermon.audio ? "audio live" : "no audio yet"}
-                </p>
+              <div className="flex flex-wrap items-center gap-2 pl-0 sm:pl-2 shrink-0">
+                <AdminButton variant="ghost" onClick={() => startEdit(sermon.id)}>
+                  Edit
+                </AdminButton>
+                <AdminButton
+                  variant="danger"
+                  onClick={() => remove.mutate(sermon.id)}
+                  disabled={remove.isPending}
+                >
+                  <Trash2 className="size-3.5" />
+                </AdminButton>
               </div>
-              <AdminButton variant="ghost" onClick={() => startEdit(sermon.id)}>
-                Edit
-              </AdminButton>
-              <AdminButton
-                variant="danger"
-                onClick={() => remove.mutate(sermon.id)}
-                disabled={remove.isPending}
-              >
-                <Trash2 className="size-3.5" />
-              </AdminButton>
             </div>
           ))}
         </div>
@@ -568,6 +572,20 @@ function NewsAdmin() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [announcementIds, setAnnouncementIds] = useState<number[]>(() =>
+    typeof window !== "undefined" ? getAnnouncementIds() : [-1, -2]
+  );
+
+  useEffect(() => {
+    const handleUpdate = () => setAnnouncementIds(getAnnouncementIds());
+    window.addEventListener("mfmcf-announcements-changed", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("mfmcf-announcements-changed", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, []);
+
   const invalidate = () => client.invalidateQueries({ queryKey: ["news"] });
   const save = useMutation({
     mutationFn: () => {
@@ -578,9 +596,19 @@ function NewsAdmin() {
       }
       return createNews(input, (p) => setUploadProgress(p));
     },
-    onSuccess: async () => {
+    onSuccess: async (result?: any) => {
       setUploadProgress(null);
       setError(null);
+      const targetId = editing ?? result?.id;
+      if (targetId !== undefined && targetId !== null) {
+        const current = getAnnouncementIds();
+        if (form.isAnnouncement && !current.includes(targetId)) {
+          toggleAnnouncementId(targetId);
+        } else if (!form.isAnnouncement && current.includes(targetId)) {
+          toggleAnnouncementId(targetId);
+        }
+      }
+      setAnnouncementIds(getAnnouncementIds());
       setEditing(null);
       setForm({ title: "", iso: "", tag: "Family", body: "", full: "", isAnnouncement: false });
       setArtwork(null);
@@ -600,16 +628,17 @@ function NewsAdmin() {
     const post = news.find((n) => n.id === id);
     if (!post) return;
     setEditing(id);
+    const isAnnounce = announcementIds.includes(id) || Boolean(post.isAnnouncement);
     setForm({
       title: post.title,
       iso: post.iso,
       tag: post.tag,
       body: post.body,
       full: post.full,
-      isAnnouncement: Boolean(post.isAnnouncement),
+      isAnnouncement: isAnnounce,
     });
     setArtwork(null);
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isLoading) {
@@ -617,13 +646,13 @@ function NewsAdmin() {
   }
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+    <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1fr_1fr]">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate();
         }}
-        className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-6 sm:p-8"
+        className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-4 sm:p-6 lg:p-8"
       >
         <Eyebrow>{editing !== null && editing >= 0 ? "Edit note" : "Write a note"}</Eyebrow>
         <div className="mt-6 space-y-5">
@@ -635,7 +664,7 @@ function NewsAdmin() {
               required
             />
           </Field>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
             <Field label="Date">
               <input
                 type="date"
@@ -705,7 +734,7 @@ function NewsAdmin() {
               label="Uploading announcement note…"
             />
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <AdminButton type="submit" disabled={save.isPending}>
               {save.isPending ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -732,52 +761,60 @@ function NewsAdmin() {
       <div>
         <Eyebrow>Published notes</Eyebrow>
         <div className="mt-5">
-          {news.map((post) => (
-            <div
-              key={post.id}
-              className="flex items-center gap-4 border-t border-[hsl(var(--foreground)/.12)] py-4"
-            >
-              {post.artwork && (
-                <div className="size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground)/.2)] bg-[hsl(var(--secondary))]">
-                  <ThumbnailImage src={post.artwork} alt={post.title} />
+          {news.map((post) => {
+            const isAnnounce = announcementIds.includes(post.id) || Boolean(post.isAnnouncement);
+            return (
+              <div
+                key={post.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[hsl(var(--foreground)/.12)] py-4"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {post.artwork && (
+                    <div className="size-12 sm:size-14 shrink-0 overflow-hidden border border-[hsl(var(--foreground)/.2)] bg-[hsl(var(--secondary))]">
+                      <ThumbnailImage src={post.artwork} alt={post.title} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold">{post.title}</p>
+                    <p className="mono-label mt-0.5 text-[9px] normal-case tracking-normal text-[hsl(var(--muted-foreground))]">
+                      {post.date} · {post.tag}
+                    </p>
+                  </div>
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{post.title}</p>
-                <p className="mono-label mt-1 text-[9px] normal-case tracking-normal text-[hsl(var(--muted-foreground))]">
-                  {post.date} · {post.tag}
-                </p>
+
+                {/* One-click toggle button to add/remove announcement on home screen */}
+                <div className="flex flex-wrap items-center gap-2 pl-0 sm:pl-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      toggleAnnouncementId(post.id);
+                      setAnnouncementIds(getAnnouncementIds());
+                      await invalidate();
+                    }}
+                    title={isAnnounce ? "Remove from home screen announcements" : "Show on home screen announcements"}
+                    className={`shrink-0 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
+                      isAnnounce
+                        ? "border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))]"
+                        : "border border-dashed border-[hsl(var(--foreground)/.35)] text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
+                    }`}
+                  >
+                    {isAnnounce ? "★ Announcement" : "+ Add to Home"}
+                  </button>
+
+                  <AdminButton variant="ghost" onClick={() => startEdit(post.id)}>
+                    Edit
+                  </AdminButton>
+                  <AdminButton
+                    variant="danger"
+                    onClick={() => remove.mutate(post.id)}
+                    disabled={remove.isPending}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </AdminButton>
+                </div>
               </div>
-
-              {/* One-click toggle button to add/remove announcement on home screen */}
-              <button
-                type="button"
-                onClick={async () => {
-                  toggleAnnouncementId(post.id);
-                  await invalidate();
-                }}
-                title={post.isAnnouncement ? "Remove from home screen announcements" : "Show on home screen announcements"}
-                className={`shrink-0 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
-                  post.isAnnouncement
-                    ? "border-2 border-[hsl(var(--foreground))] bg-[hsl(var(--accent))] text-[hsl(var(--foreground))] shadow-[2px_2px_0px_hsl(var(--foreground))]"
-                    : "border border-dashed border-[hsl(var(--foreground)/.35)] text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--primary))] hover:text-[hsl(var(--primary))]"
-                }`}
-              >
-                {post.isAnnouncement ? "★ Announcement" : "+ Add to Home"}
-              </button>
-
-              <AdminButton variant="ghost" onClick={() => startEdit(post.id)}>
-                Edit
-              </AdminButton>
-              <AdminButton
-                variant="danger"
-                onClick={() => remove.mutate(post.id)}
-                disabled={remove.isPending}
-              >
-                <Trash2 className="size-3.5" />
-              </AdminButton>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -895,7 +932,7 @@ function GalleryAdmin() {
           e.preventDefault();
           save.mutate();
         }}
-        className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-6 sm:p-8"
+        className="border border-[hsl(var(--foreground)/.14)] bg-[hsl(var(--card))] p-4 sm:p-6 lg:p-8"
       >
         <Eyebrow>Upload gallery photos</Eyebrow>
         <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
@@ -1014,9 +1051,9 @@ function GalleryAdmin() {
                 aria-label={`Delete ${item.title}`}
                 onClick={() => remove.mutate(item.id)}
                 disabled={remove.isPending}
-                className="absolute right-3 top-3 flex size-8 items-center justify-center border border-red-300 bg-[hsl(var(--background)/.9)] text-red-700 opacity-0 transition group-hover:opacity-100 disabled:opacity-50"
+                className="absolute right-2 top-2 flex size-7 sm:size-8 items-center justify-center border border-red-300 bg-[hsl(var(--background)/.95)] text-red-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition disabled:opacity-50"
               >
-                <Trash2 className="size-4" />
+                <Trash2 className="size-3.5 sm:size-4" />
               </button>
             </div>
           ))}

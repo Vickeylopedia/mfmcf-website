@@ -32,6 +32,7 @@ import {
 } from "@/components/foundation";
 import { getSermon } from "@/lib/sermons";
 import { useSermons, useNews, type SermonView, type NewsView } from "@/lib/queries";
+import { getAnnouncementIds } from "@/lib/content-store";
 import { photos } from "@/lib/site";
 
 const HERO_PHRASES = [
@@ -339,12 +340,25 @@ function Home() {
   const heroCollage = useParallax(72);
   const { sermons } = useSermons();
   const { news } = useNews();
+  const [announcementIds, setAnnouncementIds] = useState<number[]>(() =>
+    typeof window !== "undefined" ? getAnnouncementIds() : [-1, -2]
+  );
+
+  useEffect(() => {
+    const handleUpdate = () => setAnnouncementIds(getAnnouncementIds());
+    window.addEventListener("mfmcf-announcements-changed", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("mfmcf-announcements-changed", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, []);
 
   // News items configured as home screen announcements in admin portal (or fallback to latest)
   const announcementItems = useMemo(() => {
-    const flagged = news.filter((n) => n.isAnnouncement);
+    const flagged = news.filter((n) => announcementIds.includes(n.id) || n.isAnnouncement);
     return flagged.length > 0 ? flagged : news.slice(0, 3);
-  }, [news]);
+  }, [news, announcementIds]);
   return (
     <Shell>
       <section className="home-hero grain relative overflow-hidden bg-[hsl(var(--primary))] px-5 pb-16 pt-28 text-white lg:px-10 lg:pb-24 lg:pt-36">
